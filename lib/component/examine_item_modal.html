@@ -1,0 +1,31 @@
+<form autocomplete="off" onsubmit="return false"
+      class="form-inline scrolling-modal">
+    <div *ngIf="examineText != ''">{{examineText}}</div>
+    <div *ngIf="damage != 0">
+        +{{damage}} damage
+    </div>
+    <div *ngIf="damageUpgrades != '0'">
+        +{{damageUpgrades}}% damage
+    </div>
+    <div *ngIf="accuracy != '0'">
+        +{{accuracy}}% accuracy
+    </div>
+    <div *ngIf="defenseUpgrades != 0">{{defenseUpgrades.toStringAsFixed(2)}}% damage reduction</div>
+    <div *ngIf="evasionBonus != '0'">+{{evasionBonus}}% evasion</div>
+    <div *ngIf="egos.isNotEmpty">
+        <!-- div>brands:</div -->
+        <ul class="no-margin">
+            <li *ngFor="let ego of egos">
+                {{ego}}
+            </li>
+        </ul>
+    </div>
+    <div *ngIf="ingredientFor.isNotEmpty">
+        <div>recipes:</div>
+        <ul class="no-margin">
+            <li *ngFor="let information of craftingInformation">
+                {{information}}
+            </li>
+        </ul>
+    </div>
+</form>

@@ -1,0 +1,190 @@
+<table class="wide">
+    <tr class="wide">
+        <td class="option-section">
+            <div>
+                <div>
+                    stealth:
+                </div>
+                <label class="custom-input">
+                    <select class="form-control input"
+                            [(ngModel)]="stealth">
+                        <option value="on">on</option>
+                        <option value="off">off</option>
+                    </select>
+                </label>
+            </div>
+            <div>
+                <div>
+                    aggressive pets:
+                </div>
+                <label class="custom-input">
+                    <select class="form-control input"
+                            [(ngModel)]="petAggro">
+                        <option value="on">on</option>
+                        <option value="off">off</option>
+                    </select>
+                </label>
+            </div>
+            <div>
+                <div>
+                    show events:
+                </div>
+                <label class="custom-input">
+                    <select class="form-control input"
+                            [(ngModel)]="showEvents">
+                        <option value="on">on</option>
+                        <option value="off">off</option>
+                    </select>
+                </label>
+            </div>
+            <!-- div>
+                <div>
+                    combat evasion:
+                </div>
+                <label class="custom-input">
+                    <select class="form-control input"
+                            [(ngModel)]="showEvasionPercent">
+                        <option value="off">fraction</option>
+                        <option value="on">percentage</option>
+                    </select>
+                </label>
+            </div -->
+            <div>
+                <div>
+                    show FPS:
+                </div>
+                <label class="custom-input">
+                    <select class="form-control input"
+                            [(ngModel)]="showFps">
+                        <option value="on">on</option>
+                        <option value="off">off</option>
+                    </select>
+                </label>
+            </div>
+            <div>
+                <div>
+                    show progress:
+                </div>
+                <label class="custom-input">
+                    <select class="form-control input"
+                            [(ngModel)]="progressDisplay">
+                        <option value="combat">combat</option>
+                        <option value="summoning">summoning</option>
+                        <option value="slay">luck</option>
+                        <option value="fishing">fishing</option>
+                        <option value="mining">mining</option>
+                        <option value="woodcutting">gathering</option>
+                        <option value="cooking">cooking</option>
+                        <option value="crafting">crafting</option>
+                        <option value="metalworking">metalworking</option>
+                        <option value="crime">stealth</option>
+                    </select>
+                </label>
+            </div>
+            <div>
+                <div>
+                    zoom:
+                </div>
+                <div>
+                    <label>
+                        <input type="range"
+                               [(ngModel)]="zoom"
+                               min="1"
+                               max="5"
+                               step="0.1">
+                    </label>
+                </div>
+            </div>
+            <!-- div>
+                <div>
+                    script:
+                </div>
+                <div>
+                    <label>
+                        <input class="form-control"
+                               [(ngModel)]="script">
+                    </label>
+                </div>
+                <button class="btn btn-default"
+                        (click)="run()"
+                        [disabled]="script.isEmpty">
+                    Run
+                </button>
+                <button class="btn btn-default"
+                        (click)="loop()"
+                        [disabled]="script.isEmpty">
+                    Loop
+                </button>
+            </div -->
+        </td>
+        <td class="option-section">
+            <form autocomplete="off" onsubmit="return false">
+                <div>
+                    recovery email:
+                </div>
+                <div>
+                    {{email}}&nbsp;
+                </div>
+                <div>
+                    pending recovery email:
+                </div>
+                <div>
+                    {{pendingEmail}} {{pendingReset}}&nbsp;
+                </div>
+                <div>
+                    <label>
+                        <input class="form-control"
+                               placeholder="new recovery email"
+                               [(ngModel)]="newEmail"
+                               [maxlength]="100">
+                    </label>
+                </div>
+                <button class="btn btn-default"
+                        (click)="updateEmail()"
+                        [disabled]="newEmail.isEmpty">
+                    Change
+                </button>
+            </form>
+            <div>
+                change password:
+            </div>
+            <form autocomplete="off" onsubmit="return false">
+                <div>
+                    <label>
+                        <input class="form-control"
+                               type="password"
+                               placeholder="old password"
+                               [(ngModel)]="oldPassword"
+                               [maxlength]="20">
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        <input class="form-control"
+                               type="password"
+                               placeholder="new password"
+                               [(ngModel)]="newPassword"
+                               [maxlength]="20">
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        <input class="form-control"
+                               type="password"
+                               placeholder="new password"
+                               [(ngModel)]="repeatNewPassword"
+                               [maxlength]="20">
+                    </label>
+                </div>
+                <button class="btn btn-default"
+                        (click)="changePassword()"
+                        [disabled]="oldPassword.isEmpty || newPassword.isEmpty || newPassword != repeatNewPassword">
+                    Change
+                </button>
+                <div>
+                    {{message}}&nbsp;
+                </div>
+            </form>
+        </td>
+    </tr>
+</table>

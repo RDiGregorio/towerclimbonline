@@ -1,0 +1,29 @@
+<form autocomplete="off" onsubmit="return false"
+      class="form-inline">
+    <label>
+        <input id="int-input"
+               class="form-control"
+               [(ngModel)]="input"
+               [maxlength]="100">
+    </label>
+    <button class="btn btn-primary"
+            (click)="handleSubmit()"
+            data-dismiss="modal"
+            [disabled]="disabled">
+        OK
+    </button>
+</form>
+<div>
+    <form>
+        <button type="button"
+                (click)="add(-1)"
+                class="btn btn-default">
+            -1
+        </button>
+        <button type="button"
+                (click)="add(1)"
+                class="btn btn-default">
+            +1
+        </button>
+    </form>
+</div>

@@ -1,0 +1,70 @@
+<div class="panel-body selectable black-background white-text recovery-hint">
+    <p>If you haven't set a recovery email in your game options, you can email towerclimbonline@gmail.com to recover your account.</p>
+</div>
+<form class="panel-body selectable white-with-shadow"
+      autocomplete="off" onsubmit="return false">
+    <div>
+        <label>
+            <input autofocus class="form-control"
+                   placeholder="username"
+                   [(ngModel)]="username"
+                   [maxlength]="20"
+                   [disabled]="sent">
+        </label>
+    </div>
+    <button class="btn btn-default"
+            [disabled]="username.isEmpty || sent"
+            (click)="send()">
+        Send
+    </button>
+    <p>
+        {{sent ? 'email sent' : error ? 'email failed' : ''}}&nbsp;
+    </p>
+    <div>
+        <label>
+            <input class="form-control"
+                   placeholder="recovery code"
+                   [(ngModel)]="code"
+                   [maxlength]="20"
+                   [disabled]="!sent">
+        </label>
+    </div>
+    <div>
+        <label *ngIf="showPassword">
+            <input class="form-control"
+                   placeholder="password"
+                   [(ngModel)]="password"
+                   [disabled]="!sent"
+                   [maxlength]="20">
+        </label>
+        <label *ngIf="!showPassword">
+            <input class="form-control"
+                   type="password"
+                   placeholder="password"
+                   [(ngModel)]="password"
+                   [disabled]="!sent"
+                   [maxlength]="20">
+        </label>
+    </div>
+    <div>
+        <div class="checkbox">
+            <label>
+                <input type="checkbox"
+                       [(ngModel)]="showPassword">
+                show password
+            </label>
+        </div>
+    </div>
+    <button class="btn btn-primary"
+            [disabled]="code.isEmpty || password.isEmpty"
+            (click)="recover()">
+        Recover
+    </button>
+    <button class="btn btn-default"
+            (click)="cancel()">
+        Cancel
+    </button>
+    <p>
+        {{message}}
+    </p>
+</form>

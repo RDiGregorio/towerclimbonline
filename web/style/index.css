@@ -1,0 +1,913 @@
+.arial-black {
+    font-weight: bold;
+    font-family: sans-serif;
+}
+
+.recovery-hint {
+    width: 300px;
+}
+
+.nav-links {
+    color: white;
+    background-color: black;
+}
+
+.nav-button {
+    display: inline-block;
+    color: white;
+    margin: 5px;
+}
+
+.current-nav {
+    color: yellow;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.list-group-item {
+    border: none;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.no-scroll {
+    overflow: hidden;
+}
+
+.no-select {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.fee-text {
+    margin-top: 5px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.no-wrap {
+    white-space: nowrap;
+}
+
+.selectable {
+    -moz-user-select: text;
+    -webkit-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+
+.no-underline:hover {
+    text-decoration: none;
+}
+
+.no-underline:focus {
+    text-decoration: none;
+}
+
+.default-cursor {
+    cursor: default;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.background {
+    height: 100vh;
+    background-color: lightskyblue;
+}
+
+.foreground {
+    height: 100vh;
+}
+
+.terrain {
+    position: fixed;
+    transform-origin: 0 0;
+    pointer-events: none;
+    width: 1600px;
+    height: 1600px;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: pixelated;
+}
+
+.doll {
+    position: fixed;
+    transform-origin: 0 0;
+    cursor: pointer;
+    width: 0;
+    height: 0;
+}
+
+.shadow {
+    text-shadow: 1px 1px black;
+}
+
+.doll-message {
+    position: fixed;
+    color: white;
+    text-shadow: 1px 1px black;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.counters {
+    color: white;
+    text-shadow: 1px 1px black;
+    pointer-events: none;
+    position: fixed;
+    top: 34px;
+}
+
+.white-with-shadow {
+    color: white;
+    text-shadow: 1px 1px black;
+}
+
+.no-events {
+    pointer-events: none;
+}
+
+.doll-health-bar {
+    position: fixed;
+    height: 2px;
+    width: 16px;
+    transform-origin: 0 0;
+    background-color: black;
+    pointer-events: none;
+}
+
+.doll-health-bar-icons {
+    position: fixed;
+    height: 2px;
+    width: 16px;
+    transform-origin: 0 0;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.doll-health-bar-icons div {
+    transform: translateY(2px);
+    font-size: 2px;
+    color: white;
+    text-shadow: 0.1px 0.1px black;
+    position: fixed;
+    height: 2px;
+    width: 16px;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.doll-health-bar div {
+    height: 100%;
+}
+
+.doll-splat {
+    position: fixed;
+    text-shadow: 1px 1px black;
+    pointer-events: none;
+}
+
+.missile div {
+    z-index: 1;
+    position: fixed;
+    transform-origin: 0 0;
+}
+
+.missile img {
+    vertical-align: top;
+}
+
+.level-up {
+    animation: level-up .1s infinite;
+}
+
+.thin-button {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.champion-text {
+    color: rgb(255, 255, 127);
+}
+
+@keyframes level-up {
+    0% {
+        color: magenta;
+    }
+    50% {
+        color: yellow;
+    }
+}
+
+.panel-gutter {
+    width: 15px;
+}
+
+.wide {
+    width: 100%;
+}
+
+.half-wide {
+    width: 50%;
+}
+
+.effect-text {
+    color: rgb(127, 127, 255);
+}
+
+.poison-text {
+    color: rgb(255, 127, 255);
+}
+
+.damage-text {
+    color: rgb(255, 127, 127);
+}
+
+.critical-text {
+    color: rgb(255, 127, 127);
+}
+
+.heal-text {
+    color: rgb(127, 255, 127);
+}
+
+.doll-parts img {
+    position: absolute;
+    pointer-events: none;
+}
+
+.doll-container {
+    position: fixed;
+}
+
+.ripple {
+    position: fixed;
+    pointer-events: none;
+    border: 2px solid;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.glass {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.pixelated {
+    image-rendering: -moz-crisp-edges;
+    image-rendering: pixelated;
+}
+
+.transparent {
+    background-color: rgba(255, 255, 255, 0);
+}
+
+.transparent.disabled {
+    background-color: rgba(255, 255, 255, 0);
+}
+
+.transparent.disabled:hover {
+    background-color: rgba(255, 255, 255, 0);
+}
+
+.modal-header {
+    background-color: #f5f5f5;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.modal-backdrop {
+    background-color: rgba(255, 255, 255, 0);
+}
+
+.modal-sm {
+    width: 300px;
+    margin-top: 30px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.conversation {
+    height: 150px;
+    width: 100vw;
+}
+
+.conversation button {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+}
+
+.console {
+    position: fixed;
+    height: 150px;
+    bottom: 0;
+    margin-bottom: 0;
+    z-index: 2;
+}
+
+.console-alerts {
+    position: fixed;
+    bottom: 150px;
+    margin-bottom: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.console-container {
+    height: 100%;
+    table-layout: fixed;
+}
+
+.fixed-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.fixed-table .image-container {
+    width: 36px;
+}
+
+.fixed-table .text-container {
+    white-space: nowrap;
+}
+
+.console-left {
+    height: 100%;
+}
+
+.console-nav {
+    height: 20px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.console-nav .badge {
+    background-color: rgb(51, 122, 183);
+}
+
+.nav > li > a.console-pill {
+    padding: 0;
+    min-width: 48px;
+    text-align: center;
+}
+
+.console-user-list {
+    height: 94px;
+    overflow-x: hidden;
+}
+
+.console-pill-text {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.pill-close {
+    cursor: pointer;
+}
+
+.console-left-output {
+    height: 94px;
+    overflow-x: hidden;
+}
+
+.console-right-output {
+    height: calc(100% - 20px);
+    overflow-x: hidden;
+}
+
+.console-text {
+    vertical-align: top;
+    word-break: break-word;
+}
+
+.console-right {
+    width: 150px;
+    height: 100%;
+}
+
+.camera-centered {
+    margin-top: -57px;
+}
+
+.action-bar {
+    position: fixed;
+    top: 0;
+    height: 36px;
+    width: 100%;
+    z-index: 2;
+}
+
+.action-container {
+    position: fixed;
+    height: 34px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.action-item {
+    display: inline-block;
+    width: 70px;
+}
+
+.action-amount {
+    position: relative;
+    left: 2px;
+    top: -35px;
+    color: black;
+    text-shadow: 1px 1px white;
+}
+
+.icon-container {
+    text-align: center;
+    width: 36px;
+    margin-top: 3px;
+}
+
+.action-list {
+    height: 150px;
+    overflow: auto;
+    padding: 0;
+}
+
+.small-list {
+    height: 100px;
+}
+
+.action-image {
+    width: 64px;
+    height: 32px;
+    display: block;
+}
+
+.action-image img {
+    display: block;
+    margin-left: 7px;
+    margin-top: 7px;
+}
+
+mark {
+    font-weight: bold;
+    background-color: black;
+    color: white;
+}
+
+.white-text {
+    color: white;
+}
+
+.black-border {
+    border: 1px solid black;
+}
+
+.red-border {
+    border: 1px solid red;
+}
+
+.nav-pad {
+    margin-left: 5px;
+    padding-right: 5px;
+}
+
+.black-background {
+    background-color: black;
+}
+
+.hit-box {
+    margin-left: -8px;
+    margin-top: -8px;
+    width: 32px;
+    height: 32px;
+    position: absolute;
+}
+
+.none-left {
+    border: 1px solid red;
+    box-shadow: 0 0 4px 0 red;
+}
+
+.video-padding {
+    padding: 15px;
+}
+
+.no-margin {
+    margin: 0;
+}
+
+.no-padding {
+    padding: 0;
+}
+
+.corner-menu {
+    position: fixed;
+    right: 0;
+    top: 34px;
+}
+
+.corner-menu-backdrop {
+    pointer-events: none;
+    position: fixed;
+    top: 0;
+    height: 100%;
+    width: 100%;
+}
+
+button.close {
+    outline: none;
+}
+
+.gold-icon {
+    color: gold;
+}
+
+.money-icon {
+    color: gold;
+    font-size: 14px;
+}
+
+.next-level-icon {
+    color: white;
+    font-size: 14px;
+}
+
+.red-text {
+    color: red;
+}
+
+.yellow-text {
+    color: yellow;
+}
+
+.xp-splat {
+    color: rgb(255, 255, 127);
+}
+
+.counter-icon {
+    line-height: 20px;
+    font-size: 20px;
+}
+
+.gray-text {
+    color: gray;
+}
+
+.green-text {
+    color: green;
+}
+
+.blue-text {
+    color: blue;
+}
+
+.silver-icon {
+    color: silver;
+}
+
+.trade-footer {
+    height: 32px;
+}
+
+.trade-footer .gold-controls {
+    display: inline-block;
+    width: 276px;
+}
+
+.trade-items {
+    height: 365px;
+}
+
+.item-options {
+    margin-top: 15px;
+    color: black;
+    height: 28px;
+}
+
+.pvp {
+    color: white;
+}
+
+.confirm-buttons {
+    height: 34px;
+}
+
+.modal-button-container {
+    margin-top: -11px;
+    margin-bottom: 10px;
+    height: 34px;
+}
+
+.unlink {
+    color: rgb(51, 51, 51);
+}
+
+.unlink:hover {
+    color: rgb(51, 51, 51);
+    text-decoration: none;
+}
+
+.login-link img {
+    width: 50px;
+}
+
+.login-link:hover {
+    color: white;
+    text-decoration: none;
+}
+
+.custom-doll {
+    width: 128px;
+    height: 128px;
+    pointer-events: none;
+}
+
+.custom-input {
+    width: 130px;
+}
+
+.custom-doll-background {
+    height: 138px;
+}
+
+.custom-section {
+    display: inline-block;
+    padding: 4px;
+    width: 130px;
+    overflow: hidden;
+    vertical-align: top;
+}
+
+.option-section {
+    width: 50%;
+    vertical-align: top;
+}
+
+.modal-footer-buttons {
+    height: 34px;
+}
+
+.modal-body-buttons {
+    height: 34px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.modal-buttons {
+    margin-top: 15px;
+}
+
+.modal {
+    pointer-events: none;
+}
+
+.modal-content {
+    pointer-events: auto;
+}
+
+.modal-body {
+    max-height: 600px;
+    overflow: auto;
+}
+
+.modal-backdrop.in {
+    pointer-events: none;
+}
+
+.lower-button-margin {
+    margin-bottom: 5px !important;
+}
+
+.equip-buttons {
+    margin-bottom: 10px;
+}
+
+.wide-equip-button {
+    width: 128px;
+    height: 32px;
+    display: block;
+}
+
+.window-body-message {
+    margin-bottom: 10px;
+}
+
+.center-message {
+    text-align: center;
+}
+
+.action-text.yellow-text {
+
+    /* [!important] is needed to override various pseudo-classes. */
+
+    color: yellow !important;
+}
+
+.exchange-left {
+    vertical-align: top;
+    padding-top: 5px;
+}
+
+.exchange-right {
+    vertical-align: top;
+}
+
+.top-align {
+    vertical-align: top;
+}
+
+.action-text {
+    white-space: normal;
+    padding: 0;
+    margin: 0;
+    display: table-cell;
+    vertical-align: middle;
+    font-size: xx-small;
+    overflow: hidden;
+}
+
+.small-text {
+    font-size: xx-small;
+}
+
+.console-icon-button {
+    width: 42px;
+}
+
+.background-image {
+    pointer-events: none;
+    background-size: cover !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    animation-name: fadeInOut;
+    -webkit-animation-name: fadeInOut;
+    animation-timing-function: ease-in-out;
+    -webkit-animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    -webkit-animation-iteration-count: infinite;
+    animation-duration: 80s;
+    -webkit-animation-duration: 80s;
+}
+
+.bg0 {
+    background: url('../screenshot/00.png') no-repeat center center fixed;
+    animation-delay: -10s;
+    -webkit-animation-delay: -10s;
+}
+
+.bg1 {
+    background: url('../screenshot/01.png') no-repeat center center fixed;
+    animation-delay: 0s;
+    -webkit-animation-delay: 0s;
+}
+
+.bg2 {
+    background: url('../screenshot/02.png') no-repeat center center fixed;
+    animation-delay: 10s;
+    -webkit-animation-delay: 10s;
+}
+
+.bg3 {
+    background: url('../screenshot/03.png') no-repeat center center fixed;
+    animation-delay: 20s;
+    -webkit-animation-delay: 20s;
+}
+
+.bg4 {
+    background: url('../screenshot/04.png') no-repeat center center fixed;
+    animation-delay: 30s;
+    -webkit-animation-delay: 30s;
+}
+
+.bg5 {
+    background: url('../screenshot/05.png') no-repeat center center fixed;
+    animation-delay: 40s;
+    -webkit-animation-delay: 40s;
+}
+
+.bg6 {
+    background: url('../screenshot/06.png') no-repeat center center fixed;
+    animation-delay: 50s;
+    -webkit-animation-delay: 50s;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 1;
+    }
+    17% {
+        opacity: 1;
+    }
+    25% {
+        opacity: 0;
+    }
+    92% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@-webkit-keyframes fadeInOut {
+    0% {
+        opacity: 1;
+    }
+    17% {
+        opacity: 1;
+    }
+    25% {
+        opacity: 0;
+    }
+    92% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.login-wrapper {
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+.energy-icon {
+    color: blue;
+    font-size: 14px;
+}
+
+.high-scores {
+    max-height: 200px;
+}
+
+.scrolling-modal {
+    max-height: 300px;
+}
+
+.header-buttons {
+    overflow-x: hidden;
+}
+
+.overflow-scroll {
+    overflow: scroll;
+}
+
+.debug-textarea {
+    width: 100%;
+    height: 100px;
+    resize: none;
+}
+
+.mini-map {
+    z-index: -1;
+    background-size: cover !important;
+    position: fixed;
+    right: 0;
+    margin-top: 7px;
+    margin-right: 5px;
+    width: 100px;
+    height: 100px;
+    border: 1px solid black;
+    background-color: black;
+    pointer-events: auto;
+}
+
+.point {
+    margin-top: -2px;
+    margin-left: -2px;
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    border: 1px solid red;
+    background-color: red;
+    pointer-events: none;
+    border-right-color: black;
+    border-bottom-color: black;
+}
+
+.blink {
+    animation: blinker 1s step-start infinite;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}
+
+.castle-icon {
+    margin-top: -7.5px;
+    margin-left: 7.5px;
+}
+
+.title-offset {
+    margin-left: -5px;
+}

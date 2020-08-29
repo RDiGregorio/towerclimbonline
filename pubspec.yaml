@@ -1,0 +1,25 @@
+name: towerclimbonline
+
+environment:
+  sdk: '>=2.1.0 <3.0.0'
+
+dependencies:
+  angular: any
+  angular_forms: any
+  crypto: any
+  image: any
+  intl: any
+  logging: any
+  mailer: any
+  pathfinding: any
+  piecemeal: any
+  postgresql2: any
+  quiver: any
+  resource: any
+  r_tree: any
+  yaml: any
+
+dev_dependencies:
+  test: any
+  build_runner: any
+  build_web_compilers: any

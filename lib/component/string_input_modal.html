@@ -1,0 +1,14 @@
+<form autocomplete="off" onsubmit="return false"
+      class="form-inline">
+    <label>
+        <input class="form-control"
+               [(ngModel)]="input"
+               [maxlength]="20">
+    </label>
+    <button class="btn btn-primary"
+            (click)="handleSubmit()"
+            data-dismiss="modal"
+            [disabled]="input == null || input.isEmpty">
+        OK
+    </button>
+</form>

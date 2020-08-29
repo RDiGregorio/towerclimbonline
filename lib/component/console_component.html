@@ -1,0 +1,353 @@
+<div id="modal-toggle"
+     class="no-events"
+     data-toggle="modal"
+     data-target="#action-modal">
+</div>
+<div id="input-modal-toggle"
+     class="no-events"
+     data-toggle="modal"
+     data-target="#input-modal">
+</div>
+<div class="panel panel-default console glass">
+    <div *ngIf="conversationMessages.isNotEmpty" class="panel-body conversation">
+        {{conversationMessages[0]}}
+        <button id="conversation-ok"
+                class="btn btn-primary"
+                (click)="conversationChoice()">
+            OK
+        </button>
+    </div>
+    <div *ngIf="conversationMessages.isEmpty && conversationOptions.isNotEmpty">
+        <div class="panel-body conversation">
+            <div *ngFor="let option of conversationOptions">
+                <a class="pointer"
+                   (click)="conversationChoice(option)">
+                    {{option}}
+                </a>
+            </div>
+        </div>
+    </div>
+    <table class="console-container"
+           [hidden]="conversationMessages.isNotEmpty || conversationOptions.isNotEmpty">
+        <tr>
+            <td class="console-left" [ngStyle]="chatStyle">
+                <ul class="nav nav-pills console-nav">
+                    <li class="active"
+                        id="chat-">
+                        <a class="console-pill default-cursor"
+                           data-toggle="pill"
+                           href="#public-output"
+                           (click)="scroll(); unreadPublic = 0">
+                            <span class="console-pill-text no-events">
+                                local
+                                <span *ngIf="unreadPublic != 0"
+                                      class="badge badge-pill">
+                                        {{formatCount(unreadPublic)}}
+                                </span>
+                            </span>
+                        </a>
+                    </li>
+                    <li id="alert-">
+                        <a class="console-pill default-cursor"
+                           data-toggle="pill"
+                           href="#alert-output"
+                           (click)="scroll(); unreadAlerts = 0">
+                            <span class="console-pill-text no-events">
+                                info
+                                <span *ngIf="unreadAlerts != 0"
+                                      class="badge badge-pill">
+                                        {{formatCount(unreadAlerts)}}
+                                </span>
+                            </span>
+                        </a>
+                    </li>
+                    <li *ngIf="channel != ''"
+                        id="group-chat">
+                        <a class="console-pill default-cursor"
+                           data-toggle="pill"
+                           href="#group-chat-output"
+                           (click)="scroll(); unreadChannel = 0">
+                            <span class="console-pill-text no-events">
+                                {{channel}}
+                                <span *ngIf="unreadChannel != 0"
+                                      class="badge badge-pill">
+                                        {{formatCount(unreadChannel)}}
+                                </span>
+                            </span>
+                            <span class="console-pill-text pill-close"
+                                  (click)="leaveChannel()">
+                                &times;
+                            </span>
+                        </a>
+                    </li>
+                    <li *ngFor="let contact of privateMessages.keys"
+                        id="chat-{{contact}}">
+                        <a class="console-pill default-cursor"
+                           data-toggle="pill"
+                           href="#private-{{contact}}"
+                           (click)="scroll(); resetUnreadPrivate(contact)">
+                            <span class="console-pill-text no-events">
+                                {{contact}}
+                                <span *ngIf="getUnreadPrivate(contact) != 0"
+                                      class="badge badge-pill">
+                                        {{formatCount(getUnreadPrivate(contact))}}
+                                </span>
+                            </span>
+                            <span class="console-pill-text pill-close"
+                                  (click)="closeChat(contact)">
+                                &times;
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+                <div class="console-left-output tab-content selectable">
+                    <div id="alert-output"
+                         class="tab-pane">
+                        <table *ngFor="let map of alerts"
+                               [class]="map['classes']">
+                            <tr *ngIf="!ignore.contains(map['from']) && map['type'] != 'trade'">
+                                <td>
+                                    <span class="console-text bold">
+                                        {{map['timestamp']}}
+                                    </span>
+                                    <span class="console-text bold"
+                                          *ngIf="map.containsKey('from')">
+                                        {{map['from']}}
+                                    </span>
+                                    <span class="console-text">
+                                        {{map['value']}}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr *ngIf="map['type'] == 'trade'">
+                                <td class="console-text">
+                                    <span class="console-text bold">
+                                        {{map['timestamp']}}
+                                    </span>
+                                    <a class="pointer"
+                                       (click)="trade(map['doll'])">
+                                        trade with {{map['from']}}
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div id="public-output"
+                         class="tab-pane active">
+                        <table *ngFor="let map of output"
+                               [class]="map['classes']">
+                            <tr *ngIf="!ignore.contains(map['from']) && map['type'] != 'trade'">
+                                <td>
+                                    <span class="console-text bold">
+                                        {{map['timestamp']}}
+                                    </span>
+                                    <span class="console-text bold"
+                                          *ngIf="map.containsKey('from')">
+                                        {{map['from']}}
+                                    </span>
+                                    <span class="console-text">
+                                        {{map['value']}}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr *ngIf="map['type'] == 'trade'">
+                                <td class="console-text">
+                                    <span class="console-text bold">
+                                        {{map['timestamp']}}
+                                    </span>
+                                    <a class="pointer"
+                                       (click)="trade(map['doll'])">
+                                        trade with {{map['from']}}
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div id="group-chat-output"
+                         class="tab-pane">
+                        <table *ngFor="let map of channelMessages"
+                               [class]="map['classes']">
+                            <tr *ngIf="!ignore.contains(map['from'])">
+                                <td>
+                                    <span class="console-text bold">
+                                        {{map['timestamp']}}
+                                    </span>
+                                    <span class="console-text bold"
+                                          *ngIf="map.containsKey('from')">
+                                        {{map['from']}}
+                                    </span>
+                                    <span class="console-text">
+                                        {{map['value']}}
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div *ngFor="let contact of privateMessages.keys" id="private-{{contact}}"
+                         class="tab-pane">
+                        <table *ngFor="let map of privateMessages[contact]"
+                               [class]="map['classes']">
+                            <tr>
+                                <td>
+                                    <span class="console-text bold">
+                                        {{map['timestamp']}}
+                                    </span>
+                                    <span class="console-text bold"
+                                          *ngIf="map.containsKey('from')">
+                                        {{map['from']}}
+                                    </span>
+                                    <span class="console-text">
+                                        {{map['value']}}
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <form (submit)="handleSubmit()" onsubmit="return false">
+                    <input class="form-control"
+                           [(ngModel)]="input"
+                           [maxlength]="1000">
+                </form>
+            </td>
+            <td class="console-right selectable">
+                <ul class="nav nav-pills console-nav">
+                    <li class="active">
+                        <a class="console-pill default-cursor"
+                           data-toggle="pill"
+                           href="#contacts">
+                            <span class="console-pill-text">
+                                <i class="fa fa-user"></i>
+                            </span>
+                        </a>
+                    </li>
+                    <!-- li>
+                        <a class="console-pill default-cursor"
+                           data-toggle="pill"
+                           href="#ignore">
+                            <span class="console-pill-text default-cursor">
+                                <i class="fa fa-ban"></i>
+                            </span>
+                        </a>
+                    </li -->
+                    <li>
+                        <a class="console-pill default-cursor"
+                           data-toggle="pill"
+                           href="#channel">
+                            <span class="console-pill-text">
+                                <i class="fa fa-users"></i>
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+                <div class="console-right-output tab-content">
+                    <div id="contacts"
+                         class="tab-pane active">
+                        <div class="console-user-list">
+                            <div *ngIf="onlineContacts.isNotEmpty"
+                                 class="bold">
+                                online
+                            </div>
+                            <div *ngFor="let contact of onlineContacts">
+                                <a class="pointer"
+                                   (click)="openChat(contact); showChat(contact)">
+                                    {{contact}}
+                                </a>
+                            </div>
+                            <div *ngIf="offlineContacts.isNotEmpty"
+                                 class="bold">
+                                offline
+                            </div>
+                            <div *ngFor="let contact of offlineContacts">
+                                <a class="pointer"
+                                   (click)="openChat(contact); showChat(contact)">
+                                    {{contact}}
+                                </a>
+                            </div>
+                        </div>
+                        <div class="pull-right">
+                            <button (click)="handleClick('add contact')"
+                                    data-toggle="modal"
+                                    data-target="#input-modal"
+                                    class="btn btn-default console-icon-button">
+                                <i class="fa fa-user-plus text-success"></i>
+                            </button>
+                            <button (click)="handleClick('remove contact')"
+                                    data-toggle="modal"
+                                    data-target="#input-modal"
+                                    class="btn btn-default console-icon-button">
+                                <i class="fa fa-user-times text-danger"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="ignore"
+                         class="tab-pane">
+                        <div class="console-user-list">
+                            <div *ngFor="let user of ignore">
+                                {{user}}
+                            </div>
+                        </div>
+                        <div class="pull-right">
+                            <button (click)="handleClick('add ignore')"
+                                    data-toggle="modal"
+                                    data-target="#input-modal"
+                                    class="btn btn-default console-icon-button">
+                                <i class="fa fa-user-plus text-success"></i>
+                            </button>
+                            <button (click)="handleClick('remove ignore')"
+                                    data-toggle="modal"
+                                    data-target="#input-modal"
+                                    class="btn btn-default console-icon-button">
+                                <i class="fa fa-user-times text-danger"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="channel"
+                         class="tab-pane">
+                        <div class="console-user-list">
+                            <div *ngIf="channel != ''">
+                                <div *ngFor="let user of sortedChannelUsers">
+                                    <i *ngIf="isOwner(user)" class="fa fa-star gold-icon"></i>
+                                    <i *ngIf="isMod(user)" class="fa fa-star silver-icon"></i>
+                                    {{user}}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pull-right"
+                             *ngIf="channel == ''">
+                            <button (click)="handleClick('join channel')"
+                                    data-toggle="modal"
+                                    data-target="#input-modal"
+                                    class="btn btn-default console-icon-button">
+                                <i class="fa fa-sign-in-alt text-primary"></i>
+                            </button>
+                            <button (click)="handleClick('create channel')"
+                                    data-toggle="modal"
+                                    data-target="#input-modal"
+                                    class="btn btn-default console-icon-button">
+                                <i class="fa fa-star gold-icon"></i>
+                            </button>
+                        </div>
+                        <div class="pull-right"
+                             *ngIf="channel != ''">
+                            <button (click)="handleClick('kick user')"
+                                    [disabled]="!isMod() && !isOwner()"
+                                    data-toggle="modal"
+                                    data-target="#input-modal"
+                                    class="btn btn-default console-icon-button">
+                                <i class="fa fa-ban text-danger"></i>
+                            </button>
+                            <button (click)="handleClick('channel options')"
+                                    [disabled]="!isOwner()"
+                                    data-toggle="modal"
+                                    data-target="#action-modal"
+                                    class="btn btn-default console-icon-button">
+                                <i class="fa fa-cog text-primary"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>

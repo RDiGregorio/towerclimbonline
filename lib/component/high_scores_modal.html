@@ -1,0 +1,111 @@
+<div class="selectable">
+    <div class="panel-body">
+        <button class="btn btn-default"
+                (click)="view('scores')"
+                [disabled]="current == 'scores'">
+            Total
+        </button>
+        <button class="btn btn-default"
+                (click)="view('combat')"
+                [disabled]="current == 'combat'">
+            Combat
+        </button>
+        <button class="btn btn-default"
+                (click)="view('summoning')"
+                [disabled]="current == 'summoning'">
+            Summoning
+        </button>
+        <button class="btn btn-default"
+                (click)="view('slaying')"
+                [disabled]="current == 'slaying'">
+            Luck
+        </button>
+        <button class="btn btn-default"
+                (click)="view('fishing')"
+                [disabled]="current == 'fishing'">
+            Fishing
+        </button>
+        <button class="btn btn-default"
+                (click)="view('mining')"
+                [disabled]="current == 'mining'">
+            Mining
+        </button>
+        <button class="btn btn-default"
+                (click)="view('woodcutting')"
+                [disabled]="current == 'woodcutting'">
+            Gathering
+        </button>
+        <button class="btn btn-default"
+                (click)="view('cooking')"
+                [disabled]="current == 'cooking'">
+            Cooking
+        </button>
+        <button class="btn btn-default"
+                (click)="view('crafting')"
+                [disabled]="current == 'crafting'">
+            Crafting
+        </button>
+        <button class="btn btn-default"
+                (click)="view('metalworking')"
+                [disabled]="current == 'metalworking'">
+            Metalworking
+        </button>
+        <button class="btn btn-default"
+                (click)="view('crime')"
+                [disabled]="current == 'crime'">
+            Stealth
+        </button>
+        <button class="btn btn-default"
+                (click)="view('money')"
+                [disabled]="current == 'money'">
+            Wealth
+        </button>
+        <button class="btn btn-default"
+                (click)="view('floor')"
+                [disabled]="current == 'floor'">
+            Floor
+        </button>
+        <div class="high-scores">
+            <table class="table selectable">
+                <thead>
+                <tr class="bold">
+                    <td>
+                        Rank
+                    </td>
+                    <td>
+                        Player
+                    </td>
+                    <!-- td *ngIf="current != 'scores' && current != 'money' && current != 'floor'">
+                        Level
+                    </td -->
+                    <td *ngIf="current != 'money'  && current != 'floor'">
+                        Experience
+                    </td>
+                    <td *ngIf="current == 'money'">
+                        Ξ
+                    </td>
+                    <td *ngIf="current == 'floor'">
+                        Floor
+                    </td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let score of scores; let i = index">
+                    <td>
+                        {{format(i + 1)}}
+                    </td>
+                    <td>
+                        {{score[0]}}
+                    </td>
+                    <!-- td *ngIf="current != 'scores' && current != 'money' && current != 'floor'">
+                        {{level(score[1])}}
+                    </td -->
+                    <td>
+                        {{format(score[1])}}
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

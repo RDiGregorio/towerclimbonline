@@ -1,0 +1,22 @@
+<form autocomplete="off" onsubmit="return false"
+      class="form-inline">
+    <label>
+        <input id="int-input"
+               class="form-control"
+               [(ngModel)]="input"
+               [maxlength]="100">
+    </label>
+    <button class="btn btn-primary"
+            (click)="handleSubmit()"
+            data-dismiss="modal"
+            [disabled]="disabled">
+        OK
+    </button>
+    <div class="checkbox">
+        <label>
+            <input type="checkbox"
+                   [(ngModel)]="procGen">
+                procedurally generated
+        </label>
+    </div>
+</form>

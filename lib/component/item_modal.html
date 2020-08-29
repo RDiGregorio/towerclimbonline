@@ -1,0 +1,242 @@
+<div class="window-body-message">
+    <table class="wide">
+        <tr>
+            <td class="half-wide">
+                <div>
+                    food threshold: {{autoHeal}}
+                </div>
+                <div class="small-text">
+                    automatically eat action bar food
+                </div>
+                <form autocomplete="off" onsubmit="return false">
+                    <button class="btn btn-default"
+                            (click)="setAutoHeal()">
+                        Enable
+                    </button>
+                    <button class="btn btn-default"
+                            (click)="disableAutoHeal()">
+                        Disable
+                    </button>
+                </form>
+            </td>
+            <td class="panel-gutter"></td>
+            <td class="top-align">
+                <div>
+                    <div>
+                        automatically drink potions:
+                    </div>
+                    <div class="small-text">
+                        automatically drink action bar potions
+                    </div>
+                    <label class="custom-input">
+                        <select class="form-control input"
+                                [(ngModel)]="autoPotion">
+                            <option value="on">on</option>
+                            <option value="off">off</option>
+                        </select>
+                    </label>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+<div class="equip-buttons">
+    <button class="lower-button-margin btn {{filter == 'weapons' ? 'btn-primary' : 'btn-default'}} wide-equip-button action-text center-message"
+            (click)="updateFilter('weapons')" [innerHTML]="weaponDisplay ?? 'weapons'">
+    </button>
+    <button class="lower-button-margin btn {{filter == 'body' ? 'btn-primary' : 'btn-default'}} wide-equip-button action-text center-message"
+            (click)="updateFilter('body')">
+        {{buttonText('body')}}
+    </button>
+    <button class="lower-button-margin btn {{filter == 'head' ? 'btn-primary' : 'btn-default'}} wide-equip-button action-text center-message"
+            (click)="updateFilter('head')">
+        {{buttonText('head')}}
+    </button>
+    <button class="lower-button-margin btn {{filter == 'back' ? 'btn-primary' : 'btn-default'}} wide-equip-button action-text center-message"
+            (click)="updateFilter('back')">
+        {{buttonText('back')}}
+    </button>
+    <button class="lower-button-margin btn {{filter == 'feet' ? 'btn-primary' : 'btn-default'}} wide-equip-button action-text center-message"
+            (click)="updateFilter('feet')">
+        {{buttonText('feet')}}
+    </button>
+    <button class="lower-button-margin btn {{filter == 'hands' ? 'btn-primary' : 'btn-default'}} wide-equip-button action-text center-message"
+            (click)="updateFilter('hands')">
+        {{buttonText('hands')}}
+    </button>
+    <button class="lower-button-margin btn {{filter == 'neck' ? 'btn-primary' : 'btn-default'}} wide-equip-button action-text center-message"
+            (click)="updateFilter('neck')">
+        {{buttonText('neck')}}
+    </button>
+    <button class="lower-button-margin btn {{filter == 'accessory' ? 'btn-primary' : 'btn-default'}} wide-equip-button action-text center-message"
+            (click)="updateFilter('accessory')">
+        {{buttonText('accessory')}}
+    </button>
+    <!-- hidden to make the modal smaller -->
+    <!-- button class="lower-button-margin btn {{filter == 'food' ? 'btn-primary' : 'btn-default'}} wide-equip-button action-text center-message"
+            (click)="updateFilter('food')">
+        {{buttonText('food')}}
+    </button>
+    <button class="lower-button-margin btn {{filter == 'potion' ? 'btn-primary' : 'btn-default'}} wide-equip-button action-text center-message"
+            (click)="updateFilter('potion')">
+        {{buttonText('potions')}}
+    </button>
+    <button class="lower-button-margin btn {{filter == 'scroll' ? 'btn-primary' : 'btn-default'}} wide-equip-button action-text center-message"
+            (click)="updateFilter('scroll')">
+        {{buttonText('scrolls')}}
+    </button>
+    <button class="lower-button-margin btn {{filter == 'other' ? 'btn-primary' : 'btn-default'}} wide-equip-button action-text center-message"
+            (click)="updateFilter('other')">
+        {{buttonText('other')}}
+    </button -->
+</div>
+<table class="wide">
+    <tr>
+        <td>
+            <div class="panel panel-default transparent no-margin">
+                <div class="panel-heading header-buttons">
+                    <span>Items</span>
+                    <span class="pull-right">
+                        <button
+                                class="btn btn-default thin-button {{mode == 'use' ? 'btn-primary' : 'btn-default'}}"
+                                (click)="toggleMode('use')">
+                            Use
+                        </button>
+                        <button
+                                class="btn btn-default thin-button {{mode != 'use' ? 'btn-primary' : 'btn-default'}}"
+                                (click)="toggleMode('examine')">
+                            Examine
+                        </button>
+                    </span>
+                </div>
+                <div class="panel-body action-list list-group small-list">
+                    <a class="list-group-item list-group-item-action {{itemClasses(item)}} default-cursor"
+                       *ngFor="let item of displayedItems"
+                       (click)="handleItemClick(item)">
+                        <table class="fixed-table">
+                            <tr class="{{doubleEquipped(item.id) ? 'yellow-text' : ''}}">
+                                <td class="text-container">
+                                    <span>
+                                        {{itemName(item)}}
+                                    </span>
+                                    <span *ngIf="doubleEquipped(item.id)">
+                                        (dual wielded)
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr class="{{doubleEquipped(item.id) ? 'yellow-text' : ''}}">
+                                <td class="text-container small-text">
+                                    <span>
+                                        {{itemDescription(item)}}&nbsp;
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+                    </a>
+                    <table class="fixed-table"></table>
+                </div>
+            </div>
+        </td>
+        <td class="panel-gutter"></td>
+        <td class="top-align">
+            <div class="panel panel-default transparent no-margin">
+                <div class="panel-heading">
+                    Information
+                </div>
+                <div class="panel-body action-list list-group small-list">
+                    <div class="list-group-item list-group-item-action transparent default-cursor">
+                        <table class="fixed-table">
+                            <tr>
+                                <td class="text-container">
+                                    <div *ngIf="primaryEgos.length > 0">
+                                        weapon effects:
+                                    </div>
+                                    <div *ngIf="leftDamageBonus != 0">
+                                        +{{leftDamageBonus}} damage
+                                    </div>
+                                    <div *ngIf="leftDamageUpgrades != '0'">
+                                        +{{leftDamageUpgrades}}% damage
+                                    </div>
+                                    <div *ngIf="leftAccuracyBonus != '0'">
+                                        +{{leftAccuracyBonus}}% accuracy
+                                    </div>
+                                    <ul class="no-margin">
+                                        <li *ngFor="let ego of primaryEgos">
+                                            {{ego}}
+                                        </li>
+                                    </ul>
+                                    <div *ngIf="secondaryWeapon != null">
+                                        <div *ngIf="rightDamageBonus != 0">
+                                            +{{rightDamageBonus}} damage (second attack)
+                                        </div>
+                                        <span *ngIf="rightDamageUpgrades != '0'">
+                                            +{{rightDamageUpgrades}}% damage (second attack)
+                                        </span>
+                                        <div *ngIf="rightAccuracyBonus != '0'">
+                                            +{{rightAccuracyBonus}}% accuracy (second attack)
+                                        </div>
+                                        <div *ngIf="secondaryEgos.length > 0">
+                                            weapon effects (secondary attack):
+                                        </div>
+                                        <ul class="no-margin">
+                                            <li *ngFor="let ego of secondaryEgos">
+                                                {{ego}}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div *ngIf="defensiveEgos.length > 0">
+                                        armor effects:
+                                    </div>
+                                    <span *ngIf="defenseUpgrades != 0">
+                                        {{defenseUpgrades.toStringAsFixed(2)}}% damage reduction
+                                    </span>
+                                    <div *ngIf="evasionBonus != '0'">
+                                        +{{evasionBonus}}% evasion
+                                    </div>
+                                    <ul class="no-margin">
+                                        <li *ngFor="let ego of defensiveEgos">
+                                            {{ego}}
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+<div class="modal-footer-buttons modal-buttons">
+    <div class="pull-left">
+        <label>
+            <input autofocus class="form-control"
+                   placeholder="search"
+                   [(ngModel)]="searchInput"
+                   [maxlength]="100">
+        </label>
+    </div>
+    <div class="pull-right">
+        <table>
+            <tr>
+                <td>
+                    loadout&nbsp;
+                </td>
+                <td>
+                    <select class="form-control input" [(ngModel)]="loadout">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

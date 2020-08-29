@@ -1,0 +1,52 @@
+<div class="panel panel-default transparent">
+    <div class="panel-heading">
+        Owners
+    </div>
+    <div class="panel-body console-user-list">
+        <div *ngFor="let owner of channelOwners">
+            {{owner}}
+        </div>
+    </div>
+</div>
+<div class="modal-body-buttons">
+    <div class="pull-right">
+        <button (click)="addChannelOwner()"
+                data-toggle="modal"
+                data-target="#input-modal"
+                class="btn btn-default">
+            Add
+        </button>
+        <button (click)="removeChannelOwner()"
+                data-toggle="modal"
+                data-target="#input-modal"
+                class="btn btn-default">
+            Remove
+        </button>
+    </div>
+</div>
+<div class="panel panel-default transparent">
+    <div class="panel-heading">
+        Moderators
+    </div>
+    <div class="panel-body console-user-list">
+        <div *ngFor="let mod of channelMods">
+            {{mod}}
+        </div>
+    </div>
+</div>
+<div class="modal-footer-buttons modal-buttons">
+    <div class="pull-right">
+        <button (click)="addChannelMod()"
+                data-toggle="modal"
+                data-target="#input-modal"
+                class="btn btn-default">
+            Add
+        </button>
+        <button (click)="removeChannelMod()"
+                data-toggle="modal"
+                data-target="#input-modal"
+                class="btn btn-default">
+            Remove
+        </button>
+    </div>
+</div>

@@ -1,0 +1,53 @@
+table {
+    border-collapse: collapse;
+    padding: 0;
+    margin: 0;
+    vertical-align: top;
+}
+
+tr {
+    padding: 0;
+    margin: 0;
+    vertical-align: top;
+}
+
+td {
+    padding: 0;
+    margin: 0;
+    vertical-align: top;
+}
+
+.editor-input {
+    width: 100%;
+}
+
+.editor-panel {
+    height: 57px;
+    width: 200px;
+}
+
+.black-border {
+    border: 1px solid black;
+}
+
+.editor-grid {
+    background-color: black;
+    cursor: default;
+    color: white;
+}
+
+.editor-grid-cell {
+    color: white;
+    text-shadow: 1px 1px black;
+    width: 16px;
+    height: 16px;
+}
+
+.editor-grid-cell:hover {
+    border: 1px solid white;
+}
+
+.cell-text {
+    pointer-events: none;
+    user-select: none;
+}

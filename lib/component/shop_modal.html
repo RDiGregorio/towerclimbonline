@@ -1,0 +1,58 @@
+<div class="panel panel-default transparent">
+    <div class="panel-heading">
+        Buy
+    </div>
+    <div class="panel-body action-list list-group">
+        <a class="list-group-item list-group-item-action transparent default-cursor"
+           *ngFor="let item of sortedShopItems"
+           (click)="buyItem(item)">
+            <table class="fixed-table">
+                <tr>
+                    <td class="text-container">
+                        {{itemName(item)}}
+                    </td>
+                    <td>
+                        <span class="pull-right">
+                            {{formatBuyingPrice(item)}}
+                        </span>
+                    </td>
+                </tr>
+            </table>
+        </a>
+        <table class="fixed-table"></table>
+    </div>
+</div>
+<div class="panel panel-default transparent no-margin">
+    <div class="panel-heading">
+        Sell
+    </div>
+    <div class="panel-body action-list list-group">
+        <a class="list-group-item list-group-item-action transparent default-cursor"
+           *ngFor="let item of displayedItems"
+           (click)="sellItem(item)">
+            <table class="fixed-table">
+                <tr>
+                    <td class="text-container">
+                        {{itemName(item)}}
+                    </td>
+                    <td>
+                        <span class="pull-right">
+                            {{formatSellingPrice(item)}}
+                        </span>
+                    </td>
+                </tr>
+            </table>
+        </a>
+        <table class="fixed-table"></table>
+    </div>
+</div>
+<div class="modal-footer-buttons modal-buttons">
+    <div class="pull-left">
+        <label>
+            <input autofocus class="form-control"
+                   placeholder="search"
+                   [(ngModel)]="searchInput"
+                   [maxlength]="100">
+        </label>
+    </div>
+</div>

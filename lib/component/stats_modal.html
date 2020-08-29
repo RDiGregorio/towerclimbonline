@@ -1,0 +1,403 @@
+<div class="window-body-message">
+    <div>
+        <button type="button"
+                class="btn btn-default"
+                (click)="track()">
+            Track experience rate
+        </button>
+        <span *ngIf="tracker != null">{{experiencePerHour}} experience per hour</span>
+    </div>
+    <div class="red-text bold">
+        Defeating enemies rewards experience in the skill you are practicing.
+    </div>
+    <div>
+        practice:
+    </div>
+    <label class="custom-input">
+        <select class="form-control input"
+                [(ngModel)]="xpMode">
+            <option value="default">combat</option>
+            <option value="summoning">summoning</option>
+            <option value="slaying">luck</option>
+        </select>
+    </label>
+</div>
+<table class="wide">
+    <tr>
+        <td>
+            <div class="panel panel-default transparent no-margin">
+                <div class="panel-heading header-buttons">
+                    Attributes
+                    <div class="pull-right">
+                        <button class="btn btn-default thin-button"
+                                (click)="resetStats()">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-body action-list list-group">
+                    <div class="list-group-item list-group-item-action transparent default-cursor">
+                        <table class="fixed-table">
+                            <tr>
+                                <td class="text-container">
+                                    <div>
+                                        <a class="pointer"
+                                           (click)="gainStat('agility')">
+                                            agility: {{displayNumber(sheet.agility)}}
+                                        </a>
+                                    </div>
+                                    <div class="small-text">
+                                        +1 evasion each
+                                    </div>
+                                    <div class="small-text">
+                                        +{{formatStatBuff(agilityBuffs)}}% agility
+                                    </div>
+                                    <div class="small-text">
+                                        drink agility potions higher than +{{displayNumber(agilityBuffs)}} to increase
+                                    </div>
+                                    <div>
+                                        <a class="pointer"
+                                           (click)="gainStat('dexterity')">
+                                            dexterity: {{displayNumber(sheet.dexterity)}}
+                                        </a>
+                                    </div>
+                                    <div class="small-text">
+                                        +1 accuracy each
+                                    </div>
+                                    <div class="small-text">
+                                        +1 ballistic damage each
+                                    </div>
+                                    <div class="small-text">
+                                        +{{formatStatBuff(dexterityBuffs)}}% dexterity
+                                    </div>
+                                    <div class="small-text">
+                                        drink dexterity potions higher than +{{displayNumber(dexterityBuffs)}} to
+                                        increase
+                                    </div>
+                                    <div>
+                                        <a class="pointer"
+                                           (click)="gainStat('intelligence')">
+                                            intelligence: {{displayNumber(sheet.intelligence)}}
+                                        </a>
+                                    </div>
+                                    <div class="small-text">
+                                        +1 magic damage each
+                                    </div>
+                                    <div class="small-text">
+                                        +{{formatStatBuff(intelligenceBuffs)}}% intelligence
+                                    </div>
+                                    <div class="small-text">
+                                        drink intelligence potions higher than +{{displayNumber(intelligenceBuffs)}} to
+                                        increase
+                                    </div>
+                                    <div>
+                                        <a class="pointer"
+                                           (click)="gainStat('strength')">
+                                            strength: {{displayNumber(sheet.strength)}}
+                                        </a>
+                                    </div>
+                                    <div class="small-text">
+                                        +1 melee damage each
+                                    </div>
+                                    <div class="small-text">
+                                        +{{formatStatBuff(strengthBuffs)}}% strength
+                                    </div>
+                                    <div class="small-text">
+                                        drink strength potions higher than +{{displayNumber(strengthBuffs)}} to increase
+                                    </div>
+                                    <div>
+                                        <a class="pointer"
+                                           (click)="gainStat('vitality')">
+                                            vitality: {{displayNumber(sheet.vitality)}}
+                                        </a>
+                                    </div>
+                                    <div class="small-text">
+                                        +10 health each
+                                    </div>
+                                    <div class="small-text">
+                                        +{{formatStatBuff(healthBuffs)}}% vitality
+                                    </div>
+                                    <div class="small-text">
+                                        eat food higher than +{{displayNumber(healthBuffs)}} to increase
+                                    </div>
+                                    <div>
+                                        unused: {{displayNumber(sheet.unspentPoints)}}
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-container">
+                                    <div>
+                                        god: {{god}}
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </td>
+        <td class="panel-gutter"></td>
+        <td>
+            <div class="panel panel-default transparent no-margin">
+                <div class="panel-heading">
+                    Skills
+                </div>
+                <div class="panel-body action-list list-group overflow-scroll">
+                    <div class="list-group-item list-group-item-action transparent default-cursor">
+                        <table class="fixed-table">
+                            <tr>
+                                <td class="text-container">
+                                    <div>
+                                        combat:
+                                        {{displayNumber(sheet.combat.internalLevel)}}{{displayAscensions(sheet.combat)}}
+                                        <button *ngIf="isMaxLevel(sheet.combat)" class="btn btn-default thin-button"
+                                                (click)="ascend(sheet.combat)">
+                                            Ascend
+                                        </button>
+                                    </div>
+                                    <div>
+                                        {{displayExperience(sheet.combat)}}
+                                    </div>
+                                    <div class="small-text">
+                                        increases attributes
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-container">
+                                    <div>
+                                        summoning:
+                                        {{displayNumber(sheet.summoning.internalLevel)}}{{displayAscensions(sheet.summoning)}}
+                                        <button *ngIf="isMaxLevel(sheet.summoning)" class="btn btn-default thin-button"
+                                                (click)="ascend(sheet.summoning)">
+                                            Ascend
+                                        </button>
+                                    </div>
+                                    <div>
+                                        {{displayExperience(sheet.summoning)}}
+                                    </div>
+                                    <div class="small-text">
+                                        allows charming higher level pets
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-container">
+                                    <div>
+                                        luck:
+                                        {{displayNumber(sheet.slaying.internalLevel)}}{{displayAscensions(sheet.slaying)}}
+                                        <button *ngIf="isMaxLevel(sheet.slaying)" class="btn btn-default thin-button"
+                                                (click)="ascend(sheet.slaying)">
+                                            Ascend
+                                        </button>
+                                    </div>
+                                    <div>
+                                        {{displayExperience(sheet.slaying)}}
+                                    </div>
+                                    <div class="small-text">
+                                        increases dropped item amounts and upgrades
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-container">
+                                    <div>
+                                        fishing:
+                                        {{displayNumber(sheet.fishing.internalLevel)}}{{displayAscensions(sheet.fishing)}}
+                                        <button *ngIf="isMaxLevel(sheet.fishing)" class="btn btn-default thin-button"
+                                                (click)="ascend(sheet.fishing)">
+                                            Ascend
+                                        </button>
+                                    </div>
+                                    <div>
+                                        {{displayExperience(sheet.fishing)}}
+                                    </div>
+                                    <div class="small-text">
+                                        increases resources from fishing
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-container">
+                                    <div>
+                                        mining:
+                                        {{displayNumber(sheet.mining.internalLevel)}}{{displayAscensions(sheet.mining)}}
+                                        <button *ngIf="isMaxLevel(sheet.mining)" class="btn btn-default thin-button"
+                                                (click)="ascend(sheet.mining)">
+                                            Ascend
+                                        </button>
+                                    </div>
+                                    <div>
+                                        {{displayExperience(sheet.mining)}}
+                                    </div>
+                                    <div class="small-text">
+                                        increases resources from mining
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-container">
+                                    <div>
+                                        gathering:
+                                        {{displayNumber(sheet.woodcutting.internalLevel)}}{{displayAscensions(sheet.woodcutting)}}
+                                        <button *ngIf="isMaxLevel(sheet.woodcutting)"
+                                                class="btn btn-default thin-button"
+                                                (click)="ascend(sheet.woodcutting)">
+                                            Ascend
+                                        </button>
+                                    </div>
+                                    <div>
+                                        {{displayExperience(sheet.woodcutting)}}
+                                    </div>
+                                    <div class="small-text">
+                                        increases resources from gathering
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-container">
+                                    <div>
+                                        cooking:
+                                        {{displayNumber(sheet.cooking.internalLevel)}}{{displayAscensions(sheet.cooking)}}
+                                        <button *ngIf="isMaxLevel(sheet.cooking)" class="btn btn-default thin-button"
+                                                (click)="ascend(sheet.cooking)">
+                                            Ascend
+                                        </button>
+                                    </div>
+                                    <div>
+                                        {{displayExperience(sheet.cooking)}}
+                                    </div>
+                                    <div class="small-text">
+                                        improves upgrades from upgrading food and potions
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-container">
+                                    <div>
+                                        metalworking:
+                                        {{displayNumber(sheet.metalworking.internalLevel)}}{{displayAscensions(sheet.metalworking)}}
+                                        <button *ngIf="isMaxLevel(sheet.metalworking)"
+                                                class="btn btn-default thin-button"
+                                                (click)="ascend(sheet.metalworking)">
+                                            Ascend
+                                        </button>
+                                    </div>
+                                    <div>
+                                        {{displayExperience(sheet.metalworking)}}
+                                    </div>
+                                    <div class="small-text">
+                                        improves upgrades from upgrading metal items
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-container">
+                                    <div>
+                                        crafting:
+                                        {{displayNumber(sheet.crafting.internalLevel)}}{{displayAscensions(sheet.crafting)}}
+                                        <button *ngIf="isMaxLevel(sheet.crafting)" class="btn btn-default thin-button"
+                                                (click)="ascend(sheet.crafting)">
+                                            Ascend
+                                        </button>
+                                    </div>
+                                    <div>
+                                        {{displayExperience(sheet.crafting)}}
+                                    </div>
+                                    <div class="small-text">
+                                        improves upgrades from upgrading other items
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-container">
+                                    <div>
+                                        stealth:
+                                        {{displayNumber(sheet.crime.internalLevel)}}{{displayAscensions(sheet.crime)}}
+                                        <button *ngIf="isMaxLevel(sheet.crime)" class="btn btn-default thin-button"
+                                                (click)="ascend(sheet.crime)">
+                                            Ascend
+                                        </button>
+                                    </div>
+                                    <div>
+                                        {{displayExperience(sheet.crime)}}
+                                    </div>
+                                    <div class="small-text">
+                                        improves pickpocketing and chest rewards
+                                    </div>
+                                    <div class="small-text">
+                                        prevents enemies from attacking you
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-container">
+                                    <div>
+                                        total experience: {{displayTotalExperience(sheet.totalExperienceText)}}
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+<div class="modal-footer-buttons modal-buttons">
+    <form class="pull-left" onsubmit="return false">
+        <div class="btn-group">
+            <button type="button"
+                    (click)="step = -1"
+                    class="btn {{step == -1 ? 'btn-primary' : 'btn-default'}}">
+                -1
+            </button>
+            <button type="button"
+                    (click)="step = 1"
+                    class="btn {{step == 1 ? 'btn-primary' : 'btn-default'}}">
+                +1
+            </button>
+            <button type="button"
+                    (click)="step = 10"
+                    class="btn {{step == 10 ? 'btn-primary' : 'btn-default'}}">
+                +10
+            </button>
+            <button type="button"
+                    (click)="step = 100"
+                    class="btn {{step == 100 ? 'btn-primary' : 'btn-default'}}">
+                +100
+            </button>
+            <button type="button"
+                    (click)="step = 1000"
+                    class="btn {{step == 1000 ? 'btn-primary' : 'btn-default'}}">
+                +1K
+            </button>
+            <button type="button"
+                    (click)="step = 10000"
+                    class="btn {{step == 10000 ? 'btn-primary' : 'btn-default'}}">
+                +10K
+            </button>
+            <button type="button"
+                    (click)="step = 100000"
+                    class="btn {{step == 100000 ? 'btn-primary' : 'btn-default'}}">
+                +100K
+            </button>
+            <button type="button"
+                    (click)="step = 1000000"
+                    class="btn {{step == 1000000 ? 'btn-primary' : 'btn-default'}}">
+                +1M
+            </button>
+            <button type="button"
+                    (click)="step = 10000000"
+                    class="btn {{step == 10000000 ? 'btn-primary' : 'btn-default'}}">
+                +10M
+            </button>
+            <button type="button"
+                    (click)="step = 100000000"
+                    class="btn {{step == 100000000 ? 'btn-primary' : 'btn-default'}}">
+                +100M
+            </button>
+        </div>
+    </form>
+</div>

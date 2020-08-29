@@ -1,0 +1,81 @@
+<!-- div class="panel-body selectable black-background white-text recovery-hint">
+    <p>Tower Climb Online is getting new art! There will be a mix of old and new art until everything is complete.</p>
+</div -->
+<div class="h1 bold shadow">
+    <img class="castle-icon" src="transparent_icon.png">
+    <span class="title-offset">
+        <span class="red-text">Tower Climb</span>
+        <span class="white-text">Online</span>
+    </span>
+</div>
+<form class="panel-body selectable white-with-shadow" onsubmit="return false" autocomplete="off">
+    <div>
+        <label>
+            <input autofocus class="form-control"
+                   placeholder="username"
+                   [(ngModel)]="username"
+                   [maxlength]="20">
+        </label>
+    </div>
+    <div>
+        <div class="checkbox">
+            <label>
+                <input type="checkbox"
+                       [(ngModel)]="newAccount">
+                new account
+            </label>
+        </div>
+    </div>
+    <div>
+        <label *ngIf="showPassword">
+            <input class="form-control"
+                   placeholder="password"
+                   [(ngModel)]="password"
+                   [maxlength]="20">
+        </label>
+        <label *ngIf="!showPassword">
+            <input class="form-control"
+                   type="password"
+                   placeholder="password"
+                   [(ngModel)]="password"
+                   [maxlength]="20">
+        </label>
+    </div>
+    <div>
+        <div class="checkbox">
+            <label>
+                <input type="checkbox"
+                       [(ngModel)]="showPassword">
+                show password
+            </label>
+        </div>
+    </div>
+    <button class="btn btn-primary"
+            [disabled]="!ready || username.isEmpty || password.isEmpty || loginDisabled"
+            (click)="login()">
+        Login
+    </button>
+    <button class="btn btn-default"
+            [disabled]="!ready || loginDisabled"
+            (click)="recovery()">
+        Recover
+    </button>
+    <p class="no-margin">
+        {{message}}
+    </p>
+    <p *ngIf="ready" class="no-margin">
+        {{players}}
+    </p>
+    <div>
+        <a class="pointer login-link" (click)="link('https://discord.gg/fy9TTf9')">
+            <img src="image/icon/discord.png">
+        </a>
+        <a class="pointer login-link"
+           (click)="link('https://play.google.com/store/apps/details?id=io.cordova.towerclimbonline')">
+            <img src="image/icon/play.png">
+        </a>
+        <a class="pointer login-link" (click)="link('https://github.com/RDiGregorio/towerclimbonline')">
+            <img src="image/icon/github.png">
+        </a>
+    </div>
+</form>

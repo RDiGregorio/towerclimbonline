@@ -1,0 +1,122 @@
+<p class="red-text bold">
+    There's a chance of destroying an item while attempting to upgrade it.
+</p>
+<div class="equip-buttons">
+    <button [class]="action == 'craft' ? 'btn btn-primary' : 'btn btn-default'" (click)="setAction('craft')">
+        Crafting
+    </button>
+    <button [class]="action == 'upgrade' ? 'btn btn-primary' : 'btn btn-default'" (click)="setAction('upgrade')">
+        Upgrading
+    </button>
+</div>
+<p>
+    <span *ngIf="crafted != null && craftedAmount > 0">You gain: {{crafted}}.</span>&nbsp;
+</p>
+<table class="wide" *ngIf="action == 'craft'">
+    <tr>
+        <td>
+            <div class="panel panel-default transparent no-margin">
+                <div class="panel-heading">
+                    Items
+                    <span *ngIf="loading">(loading...)</span>
+                </div>
+                <div class="panel-body action-list list-group">
+                    <a class="list-group-item list-group-item-action transparent default-cursor {{selected == option ? 'active' : ''}}"
+                       *ngFor="let option of filteredOptions"
+                       (click)="addCraft(option)">
+                        <table class="fixed-table">
+                            <tr>
+                                <td class="text-container">
+                                    {{formatOption(option)}}
+                                </td>
+                            </tr>
+                        </table>
+                    </a>
+                    <table class="fixed-table"></table>
+                </div>
+            </div>
+        </td>
+        <td class="panel-gutter"></td>
+        <td>
+            <div class="panel panel-default transparent no-margin">
+                <div class="panel-heading">
+                    Ingredients
+                </div>
+                <div class="panel-body action-list list-group">
+                    <a class="list-group-item list-group-item-action transparent default-cursor"
+                       *ngFor="let ingredient of ingredients">
+                        <table class="fixed-table">
+                            <tr>
+                                <td class="text-container">
+                                    {{ingredient}}
+                                </td>
+                            </tr>
+                            <tr class="small-text">
+                                × {{ingredientAmount(ingredient)}}
+                            </tr>
+                        </table>
+                    </a>
+                    <table class="fixed-table"></table>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+<table class="wide" *ngIf="action == 'upgrade'">
+    <tr>
+        <td>
+            <div class="panel panel-default transparent no-margin">
+                <div class="panel-heading">
+                    Ingredients
+                    <span *ngIf="loading">(loading...)</span>
+                </div>
+                <div class="panel-body action-list list-group">
+                    <a class="list-group-item list-group-item-action transparent default-cursor {{selected == option ? 'active' : ''}}"
+                       *ngFor="let option of filteredOptions"
+                       (click)="addCraft(option)">
+                        <table class="fixed-table">
+                            <tr>
+                                <td class="text-container">
+                                    {{formatOption(option)}}
+                                </td>
+                            </tr>
+                            <tr class="small-text">
+                                <span *ngIf="selected == option">× {{ingredientAmount(formatOption(option))}}</span>
+                            </tr>
+                        </table>
+                    </a>
+                    <table class="fixed-table"></table>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+<div class="modal-footer-buttons modal-buttons">
+    <div class="pull-left">
+        <label>
+            <input autofocus class="form-control"
+                   placeholder="search"
+                   [(ngModel)]="searchInput"
+                   [maxlength]="100">
+        </label>
+    </div>
+    <div class="pull-right">
+        <button class="btn btn-default"
+                [disabled]="ingredients.isEmpty"
+                (click)="askAmount()">
+            {{action == 'craft' ? 'Craft' : 'Upgrade'}}
+        </button>
+        <button class="btn btn-default"
+                *ngIf="action == 'craft'"
+                [disabled]="ingredients.isEmpty"
+                (click)="craftAll()">
+            {{action == 'craft' ? 'Craft' : 'Upgrade'}} all
+        </button>
+        <button *ngIf="action != 'craft'"
+                [disabled]="ingredients.isEmpty"
+                class="btn btn-default"
+                (click)="maxUpgrade()">
+            Max upgrade
+        </button>
+    </div>
+</div>

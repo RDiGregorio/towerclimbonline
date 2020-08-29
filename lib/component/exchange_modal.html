@@ -1,0 +1,81 @@
+<table class="wide">
+    <tr>
+        <td class="exchange-left">
+            <form autocomplete="off" onsubmit="return false"
+                  class="form-inline">
+                <label>
+                    <input
+                            class="form-control"
+                            placeholder="item"
+                            [(ngModel)]="item"
+                            [maxlength]="100">
+                </label>
+                <label>
+                    <input
+                            class="form-control"
+                            placeholder="price"
+                            [(ngModel)]="price"
+                            [maxlength]="100">
+                </label>
+                <label>
+                    <input
+                            class="form-control"
+                            placeholder="amount"
+                            [(ngModel)]="amount"
+                            [maxlength]="100">
+                </label>
+                <div>
+                    <button class="btn btn-default lower-button-margin"
+                            [disabled]="disabled(price) || disabled(amount) || item.isEmpty"
+                            (click)="buy()">
+                        Buy
+                    </button>
+                    <button class="btn btn-default lower-button-margin"
+                            [disabled]="disabled(price) || disabled(amount) || item.isEmpty"
+                            (click)="sell()">
+                        Sell
+                    </button>
+                </div>
+                <div>
+                    <button class="btn btn-default lower-button-margin"
+                            (click)="browseBuy()">
+                        Buying offers
+                    </button>
+                    <button class="btn btn-default lower-button-margin"
+                            (click)="browseSell()">
+                        Selling offers
+                    </button>
+                </div>
+            </form>
+            <table class="fixed-table"></table>
+        </td>
+        <td class="panel-gutter"></td>
+        <td class="exchange-right">
+            <div class="panel panel-default transparent no-margin">
+                <div class="panel-heading">
+                    Your offers
+                </div>
+                <div class="panel-body action-list list-group">
+                    <a *ngFor="let offer of buyOffers"
+                       class="list-group-item list-group-item-action default-cursor"
+                       (click)="close(offer)">
+                        {{formatOffer(offer)}}
+                    </a>
+                    <a *ngFor="let offer of sellOffers"
+                       class="list-group-item list-group-item-action default-cursor"
+                       (click)="close(offer)">
+                        {{formatOffer(offer)}}
+                    </a>
+                    <table class="fixed-table"></table>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+<div *ngIf="exchangeBrowser.isNotEmpty"
+     class="panel-body action-list list-group no-margin transparent">
+    <div *ngFor="let offer of exchangeBrowser"
+         class="list-group-item list-group-item-action default-cursor transparent">
+        {{formatBrowsingOffer(offer)}}
+    </div>
+</div>

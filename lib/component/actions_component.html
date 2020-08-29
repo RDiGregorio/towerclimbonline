@@ -1,0 +1,135 @@
+<div class="panel panel-default action-bar glass default-cursor">
+    <div class="action-container">
+        <span class="pull-left icon-container"
+              [ngStyle]="eraserStyle"
+              (click)="handleEraserClick()">
+            <i class="fa fa-times-circle fa-2x"></i>
+        </span>
+        <span class="pull-right icon-container"
+              (click)="handleShowMenu()">
+            <i class="fa fa-bars fa-2x"></i>
+        </span>
+        <span *ngFor="let action of actions; let i = index"
+              (click)="handleActionClick(action, i)"
+              [attr.data-toggle]="dataToggle(action)"
+              [attr.data-target]="dataTarget(action)"
+              class="action-item">
+            <span class="btn {{actionClasses(action)}} action-image action-text center-message">
+                {{displayText(action)}}
+            </span>
+        </span>
+    </div>
+    <div class="counters">
+        <div>
+            &nbsp;
+            <i class="fa fa-heart red-text"></i>
+            {{format(hp)}} / {{format(maxHp)}}
+            <span [ngStyle]="goldStyle">
+                {{formatGold(gold)}}
+            </span>
+            <i class="fa fa-arrow-up next-level-icon"></i>
+            <span>
+                {{progress}}%
+            </span>
+            <span *ngIf="floor > 0"
+                  class="arial-black">
+                F{{floor}}
+            </span>
+            <span class="pvp arial-black" [hidden]="!canPvP">
+                PvP
+            </span>
+            <span *ngIf="showFps">
+                {{fps}}&nbsp;FPS
+            </span>
+            <mini-map-component></mini-map-component>
+        </div>
+        <div *ngIf="restartTime != ''">
+            &nbsp;
+            <span class="black-background">
+                {{restartTime}}
+            </span>
+        </div>
+        <div *ngIf="foodEaten > 0">
+            &nbsp;
+            <span *ngIf="foodEaten > 0">
+                {{foodEaten * 5}}% full
+            </span>
+        </div>
+        <div *ngIf="buffs.isNotEmpty">
+            <div *ngFor="let buff of buffs">
+                &nbsp;
+                <span>
+                    {{buff}}
+                </span>
+            </div>
+        </div>
+        <div *ngIf="remainingTimeBonus > 0">
+            &nbsp;
+            <span>
+                time bonus ({{remainingTimeBonusSeconds}} seconds)
+            </span>
+        </div>
+    </div>
+    <div class="corner-menu-backdrop"
+         [hidden]="!showMenu"
+         (click)="showMenu = false"></div>
+    <div class="corner-menu"
+         [hidden]="!showMenu">
+        <ul class="dropdown-menu collapse in pull-right glass">
+            <li>
+                <a (click)="handleMenuClick('items')"
+                   data-toggle="modal"
+                   data-target="#action-modal">
+                    Items
+                </a>
+            </li>
+            <li>
+                <a (click)="handleMenuClick('crafting')"
+                   data-toggle="modal"
+                   data-target="#action-modal">
+                    Crafting
+                </a>
+            </li>
+            <li>
+                <a (click)="handleMenuClick('exchange')"
+                   data-toggle="modal"
+                   data-target="#action-modal">
+                    Exchange
+                </a>
+            </li>
+            <li>
+                <a (click)="handleMenuClick('stats')"
+                   data-toggle="modal"
+                   data-target="#action-modal">
+                    Stats
+                </a>
+            </li>
+            <li>
+                <a (click)="handleMenuClick('scores')"
+                   data-toggle="modal"
+                   data-target="#action-modal">
+                    Leaderboards
+                </a>
+            </li>
+            <li>
+                <a (click)="handleMenuClick('customize')"
+                   data-toggle="modal"
+                   data-target="#action-modal">
+                    Looks
+                </a>
+            </li>
+            <li>
+                <a (click)="handleMenuClick('options')"
+                   data-toggle="modal"
+                   data-target="#action-modal">
+                    Options
+                </a>
+            </li>
+            <li>
+                <a (click)="handleMenuClick('logout')">
+                    Logout
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>

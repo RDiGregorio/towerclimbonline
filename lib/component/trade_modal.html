@@ -1,0 +1,106 @@
+<table class="wide">
+    <tr>
+        <td>
+            <div class="panel panel-default transparent no-margin">
+                <div class="panel-heading">
+                    Items
+                </div>
+                <div class="panel-body action-list list-group trade-items">
+                    <a class="list-group-item list-group-item-action default-cursor {{itemClasses}} transparent"
+                       *ngFor="let item of sortedItems"
+                       (click)="addTradeItem(item)">
+                        <table class="fixed-table">
+                            <tr>
+                                <td class="text-container">
+                                    {{itemName(item)}}
+                                </td>
+                            </tr>
+                        </table>
+                    </a>
+                    <table class="fixed-table"></table>
+                </div>
+            </div>
+            <div>
+                {{formatGold(gold)}}
+            </div>
+        </td>
+        <td class="panel-gutter"></td>
+        <td>
+            <div class="panel {{youFinalizedTrade ? 'panel-success' : 'panel-default'}} transparent no-margin">
+                <div class="panel-heading">
+                    Your offer
+                </div>
+                <div class="panel-body action-list list-group">
+                    <a class="list-group-item list-group-item-action default-cursor {{itemClasses}} transparent"
+                       *ngFor="let item of yourTradeOffer.values"
+                       (click)="removeTradeItem(item)">
+                        <table class="fixed-table">
+                            <tr>
+                                <td class="text-container">
+                                    {{itemName(item)}}
+                                </td>
+                            </tr>
+                        </table>
+                    </a>
+                    <table class="fixed-table"></table>
+                </div>
+            </div>
+            <div>
+                {{yourTradeGold}}
+            </div>
+            <div class="panel {{theyFinalizedTrade ? 'panel-success' : 'panel-default'}} transparent no-margin">
+                <div class="panel-heading">
+                    Their offer
+                </div>
+                <div class="panel-body action-list list-group">
+                    <a class="list-group-item list-group-item-action disabled transparent default-cursor"
+                       *ngFor="let item of theirTradeOffer.values">
+                        <table class="fixed-table">
+                            <tr>
+                                <td class="text-container">
+                                    {{itemName(item)}}
+                                </td>
+                            </tr>
+                        </table>
+                    </a>
+                    <table class="fixed-table"></table>
+                </div>
+            </div>
+            <div>
+                {{theirTradeGold}}
+            </div>
+        </td>
+    </tr>
+</table>
+<div class="trade-footer">
+    <span class="pull-left">
+        <label>
+            <input autofocus class="form-control"
+                   placeholder="search"
+                   [(ngModel)]="searchInput"
+                   [maxlength]="100">
+        </label>
+    </span>
+    <span class="pull-right">
+        <button class="btn btn-default"
+                [disabled]="youFinalizedTrade && theyFinalizedTrade"
+                (click)="addTradeGold()">
+            + Ξ
+        </button>
+        <button class="btn btn-default"
+                [disabled]="youFinalizedTrade && theyFinalizedTrade"
+                (click)="removeTradeGold()">
+            - Ξ
+        </button>
+        <button class="btn btn-default"
+                [disabled]="youFinalizedTrade"
+                (click)="finalize()">
+            Finalize
+        </button>
+        <button class="btn btn-primary"
+                [disabled]="!theyFinalizedTrade || !youFinalizedTrade || accepted"
+                (click)="complete()">
+            Complete
+        </button>
+    </span>
+</div>

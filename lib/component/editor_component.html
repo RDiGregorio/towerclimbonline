@@ -1,0 +1,90 @@
+<table>
+    <tr>
+        <td>
+            <div class="editor-section editor-panel">
+                <div [hidden]="mode != 'default'">
+                    <button (click)="generate()">
+                        New
+                    </button>
+                    <button (click)="mode = 'input'">
+                        Load
+                    </button>
+                    <button (click)="mode = 'output'">
+                        Save
+                    </button>
+                    <button (click)="regen()">
+                        Regen
+                    </button>
+                </div>
+                <div [hidden]="mode == 'default'">
+                    <div>
+                        <input [(ngModel)]="text"
+                               class="editor-input">
+                    </div>
+                    <br>
+                    <div>
+                        <button (click)="handleSubmit()">
+                            OK
+                        </button>
+                        <button (click)="mode = 'default'">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <br>
+                flags
+                <br>
+                <input [(ngModel)]="flags"
+                       class="editor-input">
+            </div>
+            <form>
+                <br>
+                <input type="checkbox"
+                       [(ngModel)]="fill">
+                fill
+                <br>
+            </form>
+            <div class="editor-section">
+                <div>
+                    object
+                    <input class="editor-input"
+                           [(ngModel)]="object">
+                </div>
+                <div>
+                    fg color
+                    <input class="editor-input"
+                           [(ngModel)]="fgColor">
+                </div>
+                <div>
+                    bg color
+                    <input class="editor-input"
+                           [(ngModel)]="bgColor">
+                </div>
+                <br>
+                <div>
+                    ({{mouseX}}, {{mouseY}})
+                </div>
+            </div>
+        </td>
+        <td>
+            <div class="editor-grid">
+                <table>
+                    <tr *ngFor="let cell of cells; let y = index">
+                        <td *ngFor="let cell of cells; let x = index">
+                            <div class="editor-grid-cell black-border"
+                                 (click)="handleClick(x, y)"
+                                 (contextmenu)="$event.preventDefault(); handleRightClick(x, y)">
+                                <div class="cell-text"
+                                     [ngStyle]="cellStyle(x, y)"
+                                     [innerText]="cellText(x, y)">
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </td>
+    </tr>
+</table>

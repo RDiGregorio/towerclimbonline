@@ -1,0 +1,97 @@
+<div class="login-wrapper panel-body selectable"
+     *ngIf="view == 'end'">
+    <p>
+        Your session has ended.
+    </p>
+    <button class="btn btn-primary"
+            (click)="reload(true)">
+        Restart session
+    </button>
+    <button class="btn btn-default"
+            (click)="reload(false)">
+        New session
+    </button>
+</div>
+<div class="login-wrapper"
+     *ngIf="view == 'login'">
+    <login-component></login-component>
+</div>
+<div class="login-wrapper"
+     *ngIf="view == 'recovery'">
+    <recovery-component></recovery-component>
+</div>
+<div *ngIf="view == 'login' || view == 'recovery'">
+    <div class="background-image bg6"></div>
+    <div class="background-image bg5"></div>
+    <div class="background-image bg4"></div>
+    <div class="background-image bg3"></div>
+    <div class="background-image bg2"></div>
+    <div class="background-image bg1"></div>
+    <div class="background-image bg0"></div>
+</div>
+<div *ngIf="view == 'game'">
+    <camera-component class="default-cursor"></camera-component>
+    <console-component></console-component>
+    <actions-component></actions-component>
+    <div id="action-modal"
+         class="modal default-cursor"
+         data-keyboard="false"
+         data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content glass">
+                <div class="modal-header">
+                    <button type="button"
+                            class="close"
+                            data-dismiss="modal"
+                            (click)="handleClose()">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">
+                        {{modalTitle}}
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <ability-modal *ngIf="modal == 'abilities'"></ability-modal>
+                    <action-modal *ngIf="modal == 'actions'"></action-modal>
+                    <crafting-modal *ngIf="modal == 'crafting'"></crafting-modal>
+                    <customize-modal *ngIf="modal == 'customize'"></customize-modal>
+                    <item-modal *ngIf="modal == 'items'"></item-modal>
+                    <option-modal *ngIf="modal == 'options'"></option-modal>
+                    <channel-modal *ngIf="modal == 'channel options'"></channel-modal>
+                    <shop-modal *ngIf="modal == 'shop'"></shop-modal>
+                    <stats-modal *ngIf="modal == 'stats'"></stats-modal>
+                    <trade-modal *ngIf="modal == 'trade'"></trade-modal>
+                    <exchange-modal *ngIf="modal == 'exchange'"></exchange-modal>
+                    <scores-modal *ngIf="modal == 'scores'"></scores-modal>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="input-modal"
+         class="modal default-cursor"
+         data-keyboard="false"
+         data-backdrop="static">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content glass">
+                <div class="modal-header">
+                    <button type="button"
+                            class="close"
+                            data-dismiss="modal">
+                        &times;
+                    </button>
+                    <h4 class="modal-title">
+                        {{inputModalTitle}}
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <string-input-modal *ngIf="inputModalType == 'string'"></string-input-modal>
+                    <int-input-modal *ngIf="inputModalType == 'int'"></int-input-modal>
+                    <floor-input-modal *ngIf="inputModalType == 'teleport'"></floor-input-modal>
+                    <confirm-modal *ngIf="inputModalType == 'confirm'"></confirm-modal>
+                    <examine-item-modal *ngIf="inputModalType == 'examine'"></examine-item-modal>
+                    <text-modal *ngIf="inputModalType == 'text'"></text-modal>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

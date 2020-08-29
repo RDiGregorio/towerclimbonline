@@ -1,0 +1,160 @@
+<div class="background"
+     [ngStyle]="backgroundStyle"
+     (mousewheel)="handleMouseWheel($event)"
+     (wheel)="handleMouseWheel($event)"
+     (click)="handleClick($event); $event.preventDefault()"
+     (touchstart)="handlePointerDown($event)"
+     (touchend)="handlePointerUp($event)"
+     (touchmove)="handlePointerMove($event)">
+</div>
+<div *ngFor="let path of terrain">
+    <img class="terrain camera-centered"
+         *ngIf="!brokenImage(path)"
+         src="{{nocache(path)}}"
+         [ngStyle]="terrainStyles[path]">
+</div>
+<div *ngFor="let path of terrain">
+    <img class="terrain camera-centered"
+         *ngIf="!brokenImage(path, '_foreground')"
+         src="{{nocache(path, '_foreground')}}"
+         [ngStyle]="foregroundTerrainStyles[path]">
+</div>
+<div class="doll-container">
+    <div *ngFor="let doll of dolls"
+         class="doll camera-centered"
+         [ngStyle]="doll.style">
+        <div class="hit-box"
+             (click)="handleClick($event, doll); $event.preventDefault()"
+             (mousewheel)="handleMouseWheel($event)"
+             (wheel)="handleMouseWheel($event)"
+             (touchstart)="handlePointerDown($event)"
+             (touchend)="handlePointerUp($event)"
+             (touchmove)="handlePointerMove($event)"
+             [ngStyle]="doll.hitBoxStyle">
+        </div>
+        <div class="doll-parts">
+            <img *ngIf="hasShadow(doll)"
+                 [hidden]="doll.hidden"
+                 [ngStyle]="shadowStyle(doll)"
+                 draggable="false"
+                 width="16"
+                 height="16"
+                 src="image/effect/shadow.png">
+            <img *ngIf="doll.customization == null"
+                 [hidden]="doll.hidden"
+                 [src]="displayImage(doll)"
+                 width="{{dollSize(doll)}}"
+                 height="{{dollSize(doll)}}"
+                 [ngStyle]="dollStyle(doll)"
+                 draggable="false">
+        </div>
+        <div *ngIf="doll.customization != null"
+             [hidden]="doll.hidden"
+             class="doll-parts">
+            <img draggable="false"
+                 width="{{dollSize(doll)}}"
+                 height="{{dollSize(doll)}}"
+                 [src]="doll.customization.getImage('back')"
+                 [ngStyle]="doll.customization.back.style">
+            <img draggable="false"
+                 width="{{dollSize(doll)}}"
+                 height="{{dollSize(doll)}}"
+                 [src]="doll.customization.getImage('base')"
+                 [ngStyle]="doll.customization.base.style">
+            <img draggable="false"
+                 width="{{dollSize(doll)}}"
+                 height="{{dollSize(doll)}}"
+                 [src]="doll.customization.getImage('ears')"
+                 [ngStyle]="doll.customization.base.style">
+            <img draggable="false"
+                 width="{{dollSize(doll)}}"
+                 height="{{dollSize(doll)}}"
+                 [src]="doll.customization.getImage('shoes')"
+                 [ngStyle]="doll.customization.shoes.style">
+            <img draggable="false"
+                 width="{{dollSize(doll)}}"
+                 height="{{dollSize(doll)}}"
+                 [src]="doll.customization.getImage('bottom')"
+                 [ngStyle]="doll.customization.bottom.style">
+            <img draggable="false"
+                 width="{{dollSize(doll)}}"
+                 height="{{dollSize(doll)}}"
+                 [src]="doll.customization.getImage('top')"
+                 [ngStyle]="doll.customization.top.style">
+            <img draggable="false"
+                 width="{{dollSize(doll)}}"
+                 height="{{dollSize(doll)}}"
+                 [src]="doll.customization.getImage('hair')"
+                 [ngStyle]="doll.customization.hair.style">
+            <img draggable="false"
+                 width="{{dollSize(doll)}}"
+                 height="{{dollSize(doll)}}"
+                 [src]="doll.customization.getImage('face')"
+                 [ngStyle]="doll.customization.face.style">
+            <img draggable="false"
+                 width="{{dollSize(doll)}}"
+                 height="{{dollSize(doll)}}"
+                 [src]="doll.customization.getImage('eyes')"
+                 [ngStyle]="doll.customization.eyes.style">
+        </div>
+        <div *ngIf="goodResource(doll)"
+             class="doll-parts">
+            <img draggable="false"
+                 width="{{dollSize(doll)}}"
+                 height="{{dollSize(doll)}}"
+                 [ngStyle]="dollStyle(doll)"
+                 src="image/effect/sparkles.gif">
+        </div>
+    </div>
+</div>
+<div *ngFor="let missile of missiles"
+     class="missile no-events">
+    <div class="camera-centered"
+         [ngStyle]="missile.outerStyle">
+        <img [src]="missile.image"
+             width="16"
+             height="16"
+             [ngStyle]="missile.innerStyle"
+             draggable="false">
+    </div>
+</div>
+<div *ngFor="let doll of dolls">
+    <div [ngStyle]="doll.healthBarStyle"
+         [hidden]="doll.health == doll.maxHealth || doll.dead"
+         class="camera-centered doll-health-bar">
+        <div [ngStyle]="doll.innerHealthBarStyle"></div>
+    </div>
+    <div class="camera-centered doll-health-bar-icons"
+         [ngStyle]="healthBarIconStyle(doll)">
+        <div>
+        {{displayBuffs(doll)}}
+        </div>
+    </div>
+</div>
+<div *ngFor="let doll of dolls">
+    <div *ngFor="let splat of doll.splats"
+         [id]="'splat-' + splat.id"
+         [ngStyle]="splat.style"
+         class="camera-centered doll-splat {{splat.classes}} arial-black">
+        {{formatSplat(splat.text)}}
+    </div>
+</div>
+<div *ngFor="let doll of dolls"
+     [id]="'message-' + doll.id"
+     class="doll-message camera-centered"
+     [ngStyle]="doll.messageStyle">
+    <div class="center-message"
+         [ngStyle]="displayNameStyle(doll)"
+         [hidden]="doll.hideMessage">
+        {{doll.message}}
+    </div>
+    <div class="center-message">
+        <div [hidden]="hideDisplayName(doll)"
+             [ngStyle]="displayNameStyle(doll)">
+            {{doll.displayName}}
+        </div>
+    </div>
+</div>
+<div class="ripple camera-centered"
+     [ngStyle]="rippleStyle">
+</div>

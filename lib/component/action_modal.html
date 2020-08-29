@@ -1,0 +1,62 @@
+<table class="wide">
+    <tr>
+        <td class="modal-col">
+            <div class="panel panel-default transparent no-margin">
+                <div class="panel-heading">
+                    Items
+                </div>
+                <div class="panel-body action-list list-group">
+                    <a class="list-group-item list-group-item-action {{itemClasses(item)}} default-cursor"
+                       *ngFor="let item of sortedItems"
+                       (click)="handleItemClick(item)">
+                        <table class="fixed-table">
+                            <tr class="{{doubleEquipped(item.id) ? 'yellow-text' : ''}}">
+                                <td class="text-container">
+                                    <span>
+                                        {{itemName(item)}}
+                                    </span>
+                                    <span *ngIf="doubleEquipped(item.id)">
+                                        (dual wielded)
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+                    </a>
+                    <table class="fixed-table"></table>
+                </div>
+            </div>
+        </td>
+        <td class="panel-gutter"></td>
+        <td class="modal-col">
+            <div class="panel panel-default transparent no-margin">
+                <div class="panel-heading">
+                    Abilities
+                </div>
+                <div class="panel-body action-list list-group">
+                    <a class="list-group-item list-group-item-action transparent default-cursor"
+                       *ngFor="let ability of sortedAbilities"
+                       (click)="handleAbilityClick(ability)">
+                        <table class="fixed-table">
+                            <tr>
+                                <td class="text-container">
+                                    {{abilityName(ability)}}
+                                </td>
+                            </tr>
+                        </table>
+                    </a>
+                    <table class="fixed-table"></table>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+<div class="modal-footer-buttons modal-buttons">
+    <div class="pull-left">
+        <label>
+            <input autofocus class="form-control"
+                   placeholder="search"
+                   [(ngModel)]="searchInput"
+                   [maxlength]="100">
+        </label>
+    </div>
+</div>

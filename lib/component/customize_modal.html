@@ -1,0 +1,352 @@
+<div class="scrolling-modal">
+    <div class="custom-section">
+        <div class="doll-parts">
+            <img class="custom-doll"
+                 [src]="doll.customization.getImage('back')"
+                 [ngStyle]="doll.customization.back.style">
+            <img class="custom-doll"
+                 [src]="doll.customization.getImage('base')"
+                 [ngStyle]="doll.customization.base.style">
+            <img class="custom-doll"
+                 [src]="doll.customization.getImage('ears')"
+                 [ngStyle]="doll.customization.base.style">
+            <img class="custom-doll"
+                 [src]="doll.customization.getImage('shoes')"
+                 [ngStyle]="doll.customization.shoes.style">
+            <img class="custom-doll"
+                 [src]="doll.customization.getImage('bottom')"
+                 [ngStyle]="doll.customization.bottom.style">
+            <img class="custom-doll"
+                 [src]="doll.customization.getImage('top')"
+                 [ngStyle]="doll.customization.top.style">
+            <img class="custom-doll"
+                 [src]="doll.customization.getImage('hair')"
+                 [ngStyle]="doll.customization.hair.style">
+            <img class="custom-doll"
+                 [src]="doll.customization.getImage('face')"
+                 [ngStyle]="doll.customization.face.style">
+            <img class="custom-doll"
+                 [src]="doll.customization.getImage('eyes')"
+                 [ngStyle]="doll.customization.eyes.style">
+        </div>
+        <div class="custom-doll-background"></div>
+    </div>
+    <div class="custom-section">
+        <div>gender</div>
+        <label class="custom-input">
+            <select class="form-control input-sm"
+                    [(ngModel)]="doll.customization.gender">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+        </label>
+        <div>skin hue</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.base.hue"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+        <div>skin saturation</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.base.saturation"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+        <div>skin brightness</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.base.lightness"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+        <div>skin contrast</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.base.contrast"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+    </div>
+    <div class="custom-section">
+        <div>hair type</div>
+        <label class="custom-input">
+            <select class="form-control input-sm"
+                    [(ngModel)]="doll.customization.hairType">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option *ngIf="male" value="4">4</option>
+            </select>
+        </label>
+        <div>hair hue</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.hairHue"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+        <div>hair saturation</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.hairSaturation"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+        <div>hair brightness</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.hairLightness"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+        <div>hair contrast</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.hairContrast"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+    </div>
+    <div class="custom-section">
+        <div>eye type</div>
+        <label class="custom-input">
+            <select class="form-control input-sm"
+                    [(ngModel)]="doll.customization.eyes.type">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>
+        </label>
+        <div>eye hue</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.eyes.hue"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+        <div>eye saturation</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.eyes.saturation"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+        <div>eye brightness</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.eyes.lightness"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+        <div>eye contrast</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.eyes.contrast"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+    </div>
+    <div class="custom-section">
+        <div>face type</div>
+        <label class="custom-input">
+            <select class="form-control input-sm"
+                    [(ngModel)]="doll.customization.face.type">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>
+        </label>
+        <div>face hue</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.face.hue"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+        <div>face saturation</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.face.saturation"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+        <div>face brightness</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.face.lightness"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+        <div>face contrast</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.face.contrast"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+    </div>
+    <div class="custom-section">
+        <div>top type</div>
+        <label class="custom-input">
+            <select class="form-control input-sm"
+                    [(ngModel)]="doll.customization.top.type">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+            </select>
+        </label>
+        <div>top hue</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.top.hue"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+        <div>top saturation</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.top.saturation"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+        <div>top brightness</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.top.lightness"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+        <div>top contrast</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.top.contrast"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+    </div>
+    <div class="custom-section">
+        <div>bottom type</div>
+        <label class="custom-input">
+            <select class="form-control input-sm"
+                    [(ngModel)]="doll.customization.bottom.type">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+            </select>
+        </label>
+        <div>bottom hue</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.bottom.hue"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+        <div>bottom saturation</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.bottom.saturation"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+        <div>bottom brightness</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.bottom.lightness"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+        <div>bottom contrast</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.bottom.contrast"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+    </div>
+    <div class="custom-section">
+        <div>shoe type</div>
+        <label class="custom-input">
+            <select class="form-control input-sm"
+                    [(ngModel)]="doll.customization.shoes.type">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+            </select>
+        </label>
+        <div>shoe hue</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.shoes.hue"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+        <div>shoe saturation</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.shoes.saturation"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+        <div>shoe brightness</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.shoes.lightness"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+        <div>shoe contrast</div>
+        <label>
+            <input type="range"
+                   [(ngModel)]="doll.customization.shoes.contrast"
+                   min="0"
+                   max="360"
+                   step="1">
+        </label>
+    </div>
+    <div *ngIf="debug">
+        <textarea type="text"
+                  class="debug-textarea"
+                  [(ngModel)]="debugText">
+        </textarea>
+    </div>
+    <div class="modal-footer-buttons">
+        <div class="pull-right">
+            <button class="btn btn-default"
+                    (click)="doll.customization.reset()">
+                Reset
+            </button>
+        </div>
+    </div>
+</div>
