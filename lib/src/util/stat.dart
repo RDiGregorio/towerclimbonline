@@ -35,7 +35,7 @@ class Stat extends OnlineObject {
   int get _level => min(internal['lvl'] ?? 1, maxLevel);
 
   bool ascend() {
-    if (level < maxLevel) return false;
+    if (_level < maxLevel) return false;
     ascensions++;
     return true;
   }

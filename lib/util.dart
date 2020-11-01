@@ -95,7 +95,7 @@ final Map<String, Point<int>> entrances = {};
 final int maxFinite = double.maxFinite.floor();
 final String missingItemName = '????';
 
-RegExp numberPattern = RegExp(r'^\d+[kmgtpe]?$'),
+RegExp numberPattern = RegExp(r'^\d+[kmgtpezyx]?$'),
     _upgradePattern = RegExp(r'^\+\d+'),
     _splitDigits = RegExp(r'\d{3}'),
     _trailingComma = RegExp(r',$');
@@ -135,9 +135,15 @@ Item get secretRare {
   // God items are not included as possible secret rare types.
 
   String info = randomValue(randomValue([
-    // Weapons (energy weapon types, with smg and katana added).
-
+    // Weapons:
     [
+      // Crafted from wood:
+
+      'bow',
+      'book',
+
+      // Crafted from iron or gold:
+
       'scythe',
       'dagger',
       'sword',
@@ -147,8 +153,12 @@ Item get secretRare {
       'rifle',
       'shotgun',
       'scepter',
+
+      // Other:
+
       'smg',
-      'katana'
+      'katana',
+      'demon whip'
     ],
 
     // Helmets.
@@ -160,8 +170,8 @@ Item get secretRare {
     [
       'cosmic dragon armor',
       'shadow dragon armor',
-      'distortion robe',
-      'starlight robe'
+      'aegis armor',
+      'distortion robe'
     ],
 
     // Cloaks.
@@ -170,19 +180,13 @@ Item get secretRare {
       'cosmic dragon cloak',
       'shadow dragon cloak',
       'distortion cloak',
-      'starlight cloak',
       'angel wings',
       'demon wings'
     ],
 
     // Boots.
 
-    [
-      'jordans',
-      'evasion boots',
-      'power boots',
-      'accuracy boots',
-    ],
+    ['evasion boots', 'power boots', 'accuracy boots'],
 
     // Gloves.
 
@@ -196,6 +200,7 @@ Item get secretRare {
 
     [
       'wooden charm',
+      'golden charm',
       'power amulet',
       'accuracy amulet',
       'evasion amulet',
@@ -208,12 +213,12 @@ Item get secretRare {
 
     // Rings.
 
-    ['meteorite ring', 'super resist ring']
+    ['meteorite ring', 'super resist ring', 'burst ring']
   ]));
 
   List<int> egos = [];
   int egoCount;
-  Item item = Item(info);
+  Item item = Item.fromDisplayText(info);
 
   if (item.info.slot == #weapon) {
     egoCount = 3;
@@ -221,7 +226,6 @@ Item get secretRare {
     egos.addAll([
       // Elements.
 
-      Ego.rainbow,
       Ego.blood,
       Ego.energy,
 
@@ -289,6 +293,7 @@ Item get secretRare {
     ].where((ego) => !item.egos.contains(ego)));
   else if (item.info.slot == #ring)
     egos.addAll([
+      Ego.wrath,
       Ego.burst,
 
       // Universal armor egos.
@@ -310,7 +315,7 @@ Item get secretRare {
     ].where((ego) => !item.egos.contains(ego)));
 
   if (egos.isNotEmpty)
-    return Item(info, 1, List.from((egos..shuffle()).take(egoCount ?? 1)));
+    return item.copyWithEgos(List.from((egos..shuffle()).take(egoCount ?? 1)));
 
   return item;
 }
@@ -439,9 +444,10 @@ int calculateDamage(Doll doll, [Item weapon]) {
   return result;
 }
 
-int calculateDropBonus(Stat stat, int multiplier) {
+int calculateDropBonus(Stat stat, int amount) {
+  if (amount < 2) return 0;
   var bonusPerUpgrade = stat.level ~/ 20 + 1;
-  return bonusPerUpgrade * multiplier.bitLength;
+  return bonusPerUpgrade * (amount.bitLength - 1);
 }
 
 int calculateEvasion(Doll doll) => (doll.agility +
@@ -570,11 +576,19 @@ bool equalElements(Iterable<dynamic> first, Iterable<dynamic> second) =>
 
 bool examine(Doll source, Doll target, bool showLocation) {
   if (target != null) {
+    if (target.resource) {
+      var messages = [];
+      messages.add('name: resource');
+      messages.add('level: ${formatNumber(target.level)}');
+      source.informationPrompt(messages.join('<br>'));
+      return false;
+    }
+
     var id = target.infoName ?? target.internal['display'] ?? '',
         level = formatNumber(target.level),
         agi = formatNumber(target.agility),
         dex = formatNumber(target.dexterity),
-        int = formatNumber(target.intelligence),
+        intel = formatNumber(target.intelligence),
         str = formatNumber(target.strength),
         vit = formatNumber(target.vitality);
 
@@ -591,15 +605,23 @@ bool examine(Doll source, Doll target, bool showLocation) {
     abilityDisplay = abilityDisplay.substring(1, abilityDisplay.length - 1);
     var health = target?.maxHealth ?? 0, messages = [];
 
+    String formatWalkingCoolDown(int walkingCoolDown) {
+      if (walkingCoolDown == 200) return 'fast';
+      if (walkingCoolDown == 400) return 'normal';
+      if (walkingCoolDown == 600) return 'slow';
+      return null;
+    }
+
     messages
       ..add('name: $id')
       ..add('level: $level')
-      ..add('health: ${formatNumber(health)}');
+      ..add('health: ${formatNumber(health)}')
+      ..add('speed: ${formatWalkingCoolDown(target.walkingCoolDown)}');
 
     if (targetAccount == null) messages.add('+$level% damage');
 
     messages
-      ..add('attributes: $agi agi, $dex dex, $int int, $str str, $vit vit');
+      ..add('attributes: $agi agi, $dex dex, $intel int, $str str, $vit vit');
 
     if (targetAccount != null)
       messages.add('skills: ${formatNumber(targetAccount.sheet.combat.level)} combat, ' +
@@ -613,12 +635,23 @@ bool examine(Doll source, Doll target, bool showLocation) {
           '${formatNumber(targetAccount.sheet.crafting.level)} crafting, ' +
           '${formatNumber(targetAccount.sheet.crime.level)} stealth');
 
-    if (gear.isNotEmpty) messages.add('equipment: $gear');
-
     if (targetAccount?.god != null)
       messages.add('god: ${godName(targetAccount?.god)}');
 
     if (abilityDisplay.isNotEmpty) messages.add('abilities: $abilityDisplay');
+
+    if (gear.isNotEmpty) messages.add('equipment: $gear');
+
+    if (targetAccount == null) {
+      var drops = target?.info?.loot?.text ?? '';
+
+      if (target.dropsSecretRare) {
+        if (drops != '') drops += ', ';
+        drops += 'secret rare (0.10%)';
+      }
+
+      if (drops != '') messages.add('drops: $drops');
+    }
 
     if (showLocation)
       messages.add(
@@ -654,7 +687,25 @@ String formatCurrency(dynamic amount, [bool prefix = true]) {
   var suffix = '';
   amount = big(amount);
 
-  if (amount >= big(quintillion) * big(1000)) {
+  if (amount >= big(quintillion) * big(trillion)) {
+    amount ~/= big(quintillion) * big(billion);
+
+    // An unofficial continuation of the pattern.
+
+    suffix = 'X';
+  } else if (amount >= big(quintillion) * big(billion)) {
+    amount ~/= big(quintillion) * big(million);
+
+    // Yotta.
+
+    suffix = 'Y';
+  } else if (amount >= big(quintillion) * big(million)) {
+    amount ~/= big(quintillion) * big(1000);
+
+    // Zetta.
+
+    suffix = 'Z';
+  } else if (amount >= big(quintillion) * big(1000)) {
     amount ~/= big(quintillion);
 
     // Exa.
@@ -835,6 +886,9 @@ BigInt parseBigInteger(String integer) {
   var negative = integer.startsWith('-');
   if (negative) integer = integer.substring(1);
   if (!integer.contains(numberPattern)) return null;
+  integer = integer.replaceFirst('x', '000y');
+  integer = integer.replaceFirst('y', '000z');
+  integer = integer.replaceFirst('z', '000e');
   integer = integer.replaceFirst('e', '000p');
   integer = integer.replaceFirst('p', '000t');
   integer = integer.replaceFirst('t', '000g');
@@ -907,6 +961,11 @@ int random([int max = maxInt]) {
   return _random.nextInt(max);
 }
 
+BigInt randomBigDivideByTwo(BigInt value) {
+  if (value.isEven || randomBool) return value >> 1;
+  return (value >> 1) + BigInt.one;
+}
+
 /// Returns [count] random digits.
 
 String randomDigits(int count) {
@@ -961,6 +1020,13 @@ dynamic randomValue(List<dynamic> list) =>
     list == null || list.isEmpty ? null : list[random(list.length)];
 
 List<Point<int>> ray(Point<int> start, Point<int> end) {
+  // Points are sorted so rays from [start] to [end] are identical to rays from
+  // [end] to [start].
+
+  var sortedPoints = sortPoints([start, end]);
+  start = sortedPoints[0];
+  end = sortedPoints[1];
+
   // todo: might be able to use getLine from path-finding library
 
   var dx = (end.x - start.x).abs(),
@@ -1131,6 +1197,12 @@ Map<dynamic, dynamic> sortMap(Map<dynamic, dynamic> map,
   return result;
 }
 
+List<Point<int>> sortPoints(List<Point<int>> points) =>
+    List<Point<int>>.from(points)
+      ..sort((first, second) => first.x == second.x
+          ? first.y.compareTo(second.y)
+          : first.x.compareTo(second.x));
+
 int stageToFloor(String stage) {
   if (stage == null ||
       stage.startsWith('tutorial') ||
@@ -1177,9 +1249,9 @@ int triangleNumber(int value) {
   return (value * value + value) ~/ 2;
 }
 
-Future<dynamic> until(bool function()) async {
+Future<dynamic> until(bool function(), [int delay]) async {
   await Future.doWhile(() => Future.delayed(
-      const Duration(milliseconds: ServerGlobals.tickDelay),
+      Duration(milliseconds: delay ?? ServerGlobals.tickDelay),
       () => !function()));
 
   return null;

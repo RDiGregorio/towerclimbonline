@@ -12,6 +12,32 @@ class DropTable {
     return result;
   }
 
+  String get text {
+    var result = <String>[];
+
+    String format(dynamic item, [num rate]) {
+      var result = item.displayText;
+
+      if (rate != null)
+        result += ' (${formatNumberWithPrecision(rate * 100)}%)';
+
+      return result;
+    }
+
+    _always.forEach((function) => result.add(format(function(), 1)));
+
+    _uncommon.forEach((function) =>
+        result.add(format(function(), 1 / 10 / _uncommon.length)));
+
+    _rare.forEach(
+        (function) => result.add(format(function(), 1 / 100 / _rare.length)));
+
+    _random.forEach(
+        (function) => result.add(format(function(), 1 / _random.length)));
+
+    return result.join(', ');
+  }
+
   List<Item> get drops {
     var result = <Item>[];
 
@@ -21,12 +47,10 @@ class DropTable {
     }
 
     _always.forEach((function) => result.add(function()));
-    var value = randomDouble;
-
     // Uncommon drops are at 10% and rare drops are at 1%.
 
-    if (value < 0.1) add(_uncommon);
-    if (value < 0.01) add(_rare);
+    if (randomDouble < 0.1) add(_uncommon);
+    if (randomDouble < 0.01) add(_rare);
 
     // An item from the random items is always dropped.
 

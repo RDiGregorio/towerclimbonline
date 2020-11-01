@@ -2,7 +2,7 @@
      [ngStyle]="backgroundStyle"
      (mousewheel)="handleMouseWheel($event)"
      (wheel)="handleMouseWheel($event)"
-     (click)="handleClick($event); $event.preventDefault()"
+     (click)="handleClick($event)"
      (touchstart)="handlePointerDown($event)"
      (touchend)="handlePointerUp($event)"
      (touchmove)="handlePointerMove($event)">
@@ -13,18 +13,12 @@
          src="{{nocache(path)}}"
          [ngStyle]="terrainStyles[path]">
 </div>
-<div *ngFor="let path of terrain">
-    <img class="terrain camera-centered"
-         *ngIf="!brokenImage(path, '_foreground')"
-         src="{{nocache(path, '_foreground')}}"
-         [ngStyle]="foregroundTerrainStyles[path]">
-</div>
-<div class="doll-container">
+<div class="fixed">
     <div *ngFor="let doll of dolls"
          class="doll camera-centered"
          [ngStyle]="doll.style">
         <div class="hit-box"
-             (click)="handleClick($event, doll); $event.preventDefault()"
+             (click)="handleClick($event, doll)"
              (mousewheel)="handleMouseWheel($event)"
              (wheel)="handleMouseWheel($event)"
              (touchstart)="handlePointerDown($event)"
@@ -107,7 +101,7 @@
         </div>
     </div>
 </div>
-<div *ngFor="let missile of missiles"
+<div *ngFor="let missile of visibleMissiles"
      class="missile no-events">
     <div class="camera-centered"
          [ngStyle]="missile.outerStyle">
@@ -116,6 +110,14 @@
              height="16"
              [ngStyle]="missile.innerStyle"
              draggable="false">
+    </div>
+</div>
+<div class="fixed">
+    <div *ngFor="let path of terrain">
+        <img class="terrain camera-centered"
+             *ngIf="!brokenImage(path, '_foreground')"
+             src="{{nocache(path, '_foreground')}}"
+             [ngStyle]="foregroundTerrainStyles[path]">
     </div>
 </div>
 <div *ngFor="let doll of dolls">
@@ -127,7 +129,7 @@
     <div class="camera-centered doll-health-bar-icons"
          [ngStyle]="healthBarIconStyle(doll)">
         <div>
-        {{displayBuffs(doll)}}
+            {{displayBuffs(doll)}}
         </div>
     </div>
 </div>

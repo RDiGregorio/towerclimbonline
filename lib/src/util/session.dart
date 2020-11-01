@@ -96,12 +96,22 @@ class Session extends OnlineObject {
 
       account
         ..sheet.stats.forEach((stat) {
-          var subscription;
+          // var subscription;
+          // subscription =
 
-          subscription = stat.internal.getEvents(type: 'level up').listen(
-              (event) => account.sessions.contains(this)
-                  ? account.doll.splat('level up!', 'level-up')
-                  : subscription.cancel());
+          stat.internal.getEvents(type: 'level up').listen((event) {
+            if (account.sessions.contains(this)) {
+              account
+                ..doll.splat('level up!', 'level-up')
+                ..alert('You level up!');
+
+              // FIXME: this was causing only the first level up message to be
+              //  shown per session. However, without it, the subscription is
+              //  never canceled, and causes a small memory leak.
+
+              // subscription.cancel();
+            }
+          });
         })
         ..sheet.stats.forEach((stat) {
           var subscription;
@@ -117,9 +127,7 @@ class Session extends OnlineObject {
         Future.delayed(
             Duration(seconds: 1), () => joinChannel(account.channel));
       else
-        // The default channel is cc.
-
-        Future.delayed(Duration(seconds: 1), () => joinChannel('cc'));
+        Future.delayed(Duration(seconds: 1), () => joinChannel('global'));
 
       // Handles offline messages.
 
@@ -141,7 +149,7 @@ class Session extends OnlineObject {
 
       if (account.newbie) {
         if (account.channel == null)
-          Future.delayed(Duration(seconds: 1), () => joinChannel('cc'));
+          Future.delayed(Duration(seconds: 1), () => joinChannel('global'));
 
         setAction('teleport', 0);
         setAction('explore', 1);
@@ -366,7 +374,7 @@ class Session extends OnlineObject {
     }
 
     if (_validTradeState && !(youFinalizedTrade && theyFinalizedTrade))
-      account.addTradeItem(itemId, parseInteger(amount));
+      account.addTradeItem(itemId, parseBigInteger(amount));
   }
 
   void adminCommand(String command, String password) {
@@ -489,7 +497,7 @@ class Session extends OnlineObject {
           return;
         }
 
-        account.lootItem(item);
+        account.lootItem(item..amount = maxFinite);
         return;
       }
     }
@@ -608,9 +616,9 @@ class Session extends OnlineObject {
 
   /// Crafts an item.
 
-  void craft(String key, num amount) {
-    amount ??= double.maxFinite;
-    account.craftItem(key, amount.floor());
+  void craft(String key, dynamic amount) {
+    if (amount != null) amount = parseBigInteger(amount);
+    account.craftItem(key, amount);
   }
 
   Future<bool> createChannel(String channel) async {
@@ -982,15 +990,17 @@ class Session extends OnlineObject {
     return result;
   }
 
-  void maxUpgrade(String text, [num amount = 1]) {
-    amount = max(1, amount.floor());
+  void maxUpgrade(String text, [String input]) {
+    BigInt targetAmount =
+        BigIntUtil.max(BigInt.one, parseBigInteger(input ?? '1'));
+
     text = Item.fromDisplayText(text).comparisonText;
 
     Item itemWithLowestBonus(Iterable<Item> stacks) => stacks
         .reduce((first, second) => second.bonus < first.bonus ? second : first);
 
     bool upgradeItemWithLowestBonus(Iterable<Item> ingredients,
-        [int remainingAmount]) {
+        [BigInt remainingAmount]) {
       if (ingredients.isEmpty) return false;
       var item = itemWithLowestBonus(ingredients);
       if (!item.canUpgrade) return false;
@@ -1001,39 +1011,41 @@ class Session extends OnlineObject {
         // At this point, the remaining amount is less than 2 times the target
         // amount.
 
-        adjustedAmount = min(item.amount, remainingAmount - amount);
+        adjustedAmount =
+            BigIntUtil.min(item.getAmount(), remainingAmount - targetAmount);
       }
 
       upgrade(setBonus(item.displayTextWithoutAmount, item.bonus + 1),
-          adjustedAmount ?? item.amount);
+          adjustedAmount ?? item.getAmount());
 
       return true;
     }
 
-    int countIngredients(Iterable<Item> ingredients) => ingredients
-        .fold<BigInt>(
-            BigInt.zero, (BigInt total, Item item) => total + item.getAmount())
-        .toInt();
+    BigInt countIngredients(Iterable<Item> ingredients) =>
+        ingredients.fold<BigInt>(
+            BigInt.zero, (BigInt total, Item item) => total + item.getAmount());
 
     List<Item> matches() => List<Item>.from(items.items.values
         .where((item) => item.comparisonText == text && item.amount > 0));
 
-    // Prevents hanging by using [until].
+    // Prevents hanging by using [until]. No delay is used because otherwise
+    // players would just rapidly click to avoid the delay.
 
     until(() {
       List<Item> ingredients = matches();
 
-      return countIngredients(ingredients) < amount * 2 ||
+      return countIngredients(ingredients) < targetAmount * BigInt.two ||
           !upgradeItemWithLowestBonus(ingredients);
-    }).then((result) => until(() {
-          // Upgrades leftovers.
+    }, 0)
+        .then((result) => until(() {
+              // Upgrades leftovers.
 
-          List<Item> ingredients = matches();
-          int remainingAmount = countIngredients(ingredients);
+              List<Item> ingredients = matches();
+              BigInt remainingAmount = countIngredients(ingredients);
 
-          return remainingAmount < amount + 1 ||
-              !upgradeItemWithLowestBonus(ingredients, remainingAmount);
-        }));
+              return remainingAmount < targetAmount + BigInt.one ||
+                  !upgradeItemWithLowestBonus(ingredients, remainingAmount);
+            }, 0));
   }
 
   Future<bool> messageChannel(String string) async {
@@ -1197,7 +1209,7 @@ class Session extends OnlineObject {
 
   void removeTradeItem(String itemId, String amount) {
     if (_validTradeState && !youFinalizedTrade && !theyFinalizedTrade)
-      account.removeTradeItem(itemId, parseInteger(amount));
+      account.removeTradeItem(itemId, parseBigInteger(amount));
   }
 
   void repeatUpgrade() {
@@ -1230,8 +1242,8 @@ class Session extends OnlineObject {
         account.interactionStage != account.doll.stage ||
         account.interactionType != #shop) return;
 
-    int amount = max<int>(0, parseInteger(count));
-    if (amount > 0) account.sellItem(itemId, amount);
+    BigInt amount = BigIntUtil.max(BigInt.zero, parseBigInteger(count));
+    if (amount > BigInt.zero) account.sellItem(itemId, amount);
   }
 
   Future<bool> sendRecoveryEmail(String username) async {
@@ -1311,10 +1323,6 @@ class Session extends OnlineObject {
   void teleport(num floor, [bool procedural = false]) {
     if (account.doll.dead) return;
 
-    // There are overflow errors above [maxFloor].
-
-    floor = min(floor.floor(), maxFloor);
-
     if (floor > account.highestFloor) {
       alert(alerts[#notUnlocked]);
       if (!Config.debug) floor = account.highestFloor;
@@ -1341,6 +1349,10 @@ class Session extends OnlineObject {
       if (stage != null) {
         var entrance = entrances[stage?.id];
         if (stageName == 'dungeon0') entrance = Point(116, 118);
+
+        // A player can die while waiting for a floor to generate.
+
+        if (account.doll.dead) return;
 
         if (entrance != null) {
           account.doll.jump(stage, entrance);
@@ -1391,8 +1403,10 @@ class Session extends OnlineObject {
         replaceMap(
             importantDolls,
             account.doll.stage.dolls.values.fold({}, (map, doll) {
-              if (doll.player || doll.boss && !doll.summoned && !doll.temporary)
-                map[doll.id] = doll;
+              if (doll.player ||
+                  doll.boss && !doll.summoned && !doll.temporary ||
+                  doll.altar ||
+                  doll.shop) map[doll.id] = doll;
 
               return map;
             }));
@@ -1456,8 +1470,7 @@ class Session extends OnlineObject {
 
   /// Upgrades an item.
 
-  void upgrade(String key, num amount) =>
-      account.upgradeItem(key, amount.floor());
+  void upgrade(String key, dynamic amount) => account.upgradeItem(key, amount);
 
   /// [ability] is used when the user's doll is ready unless another ability is
   /// used instead.
@@ -1578,10 +1591,52 @@ class Session extends OnlineObject {
             ..bonus = item.bonus)));
 
     _applyPatch(
-        'remove resist potions',
+        'remove resist potions patch',
         () => List<Item>.from(account.items.items.values.where(
                 (item) => item.potion && item.infoName.contains('resist')))
             .forEach(account.items.deleteItem));
+
+    _applyPatch('global channel patch', () async {
+      if (account.channel == 'cc') {
+        await leaveChannel();
+        joinChannel('global');
+      }
+    });
+
+    _applyPatch('item amount patch', () async {
+      var list = List<Item>.from(
+          account.items.items.values.where((item) => item.amount <= 0));
+
+      list.forEach(account.items.deleteItem);
+    });
+
+    _applyPatch('berserk burst ring patch', () async {
+      var list = List<Item>.from(account.items.items.values
+          .where((item) => item.comparisonText == 'berserk burst ring'));
+
+      list.forEach((item) {
+        account.items.deleteItem(item);
+        var copy = Item.fromDisplayText(item.comparisonText);
+        copy.bonus = item.bonus;
+        copy.amount = item.amount;
+        account.lootItem(copy);
+      });
+    });
+
+    _applyPatch(
+        'remove necklace patch',
+        () => List<Item>.from(account.items.items.values
+                .where((item) => item.infoName == 'necklace'))
+            .forEach(account.items.deleteItem));
+
+    _applyPatch(
+        'fix katana patch',
+        () => List<Item>.from(account.items.items.values
+            .where((item) => item.infoName == 'autumn katana'))
+          ..forEach(account.items.deleteItem)
+          ..forEach((item) => account.lootItem(Item('katana', 1, [Ego.electric])
+            ..amount = item.amount
+            ..bonus = item.bonus)));
   }
 
   Future<dynamic> _scores(String key) =>

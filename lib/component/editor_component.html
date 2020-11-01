@@ -75,7 +75,7 @@
                         <td *ngFor="let cell of cells; let x = index">
                             <div class="editor-grid-cell black-border"
                                  (click)="handleClick(x, y)"
-                                 (contextmenu)="$event.preventDefault(); handleRightClick(x, y)">
+                                 (contextmenu)="handleRightClick($event, x, y)">
                                 <div class="cell-text"
                                      [ngStyle]="cellStyle(x, y)"
                                      [innerText]="cellText(x, y)">

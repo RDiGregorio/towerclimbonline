@@ -92,8 +92,12 @@ class Item extends OnlineObject {
     if (infoName == 'level up potion') return false;
     if (potion) return true;
 
-    return const ['nuclear reactor', 'philosopher\'s stone', 'puzzle box']
-        .contains(infoName);
+    return const [
+      'nuclear reactor',
+      'philosopher\'s stone',
+      'puzzle box',
+      'particle accelerator'
+    ].contains(infoName);
   }
 
   /// Returns the display text without the bonus or amount.
@@ -189,7 +193,7 @@ class Item extends OnlineObject {
     if (food) return 'heals ${healingAmount.toStringAsFixed(2)}% health';
 
     if (thrown)
-      return 'deals damage (using your intelligence) ' +
+      return 'deals damage ' +
           'with +1% damage and accuracy for each of your combat levels';
 
     if (infoName == 'agility potion') return '+50% agility';
@@ -208,8 +212,13 @@ class Item extends OnlineObject {
       return 'converts 1 uranium to $energy energy';
     }
 
+    if (infoName == 'particle accelerator') {
+      var energy = formatNumberWithPrecision(1 + bonus / 100);
+      return 'converts 1 energy and 1 gold to $energy antimatter';
+    }
+
     if (infoName == 'nuclear bomb')
-      return 'kills all enemies except for bosses, players, and pets.';
+      return 'kills all targets in range without reward except for bosses, players, and pets';
 
     return null;
   }
@@ -229,13 +238,47 @@ class Item extends OnlineObject {
         return item.displayTextWithoutAmount;
       }));
 
+  String get missile {
+    var result = null, egoSet = Set<int>.from(egos);
+    if (!egoSet.contains(Ego.magic)) return null;
+
+    Set<int> colors = Set.from([
+          Ego.fire,
+          Ego.ice,
+          Ego.electric,
+          Ego.gravity,
+          Ego.acid,
+          Ego.poison
+        ]),
+        intersection = Set.from(egoSet.where(colors.contains));
+
+    if (intersection.length > 1) return result;
+    if (intersection.contains(Ego.fire)) return 'image/missile/red_bolt.png';
+    if (intersection.contains(Ego.ice)) return 'image/missile/cyan_bolt.png';
+    if (intersection.contains(Ego.acid)) return 'image/missile/brown_bolt.png';
+
+    if (intersection.contains(Ego.electric))
+      return 'image/missile/yellow_bolt.png';
+
+    if (intersection.contains(Ego.gravity))
+      return 'image/missile/black_bolt.png';
+
+    if (intersection.contains(Ego.poison))
+      return 'image/missile/green_bolt.png';
+
+    return result;
+  }
+
   bool get potion => displayTextWithoutAmount.contains('potion');
 
   int get price => _basePrice;
 
   bool get scroll => displayTextWithoutAmount.contains('scroll');
 
-  int get sellingPrice => price ~/ 2;
+  int get sellingPrice {
+    if (!tradable) return 0;
+    return price ~/ 2;
+  }
 
   Map<String, String> get style => const {};
 
@@ -253,9 +296,10 @@ class Item extends OnlineObject {
 
   bool get tool => [Ego.mining, Ego.fishing, Ego.gathering].any(egos.contains);
 
-  bool get tradable => !const [
-        // There currently are no untradeable items.
-      ].contains(infoName);
+  bool get tradable {
+    if (infoName == 'antimatter' || egos.contains(Ego.antimatter)) return false;
+    return true;
+  }
 
   bool get twoHanded => egos.contains(Ego.twoHanded);
 
@@ -265,6 +309,17 @@ class Item extends OnlineObject {
 
   void addAmount(dynamic amount) {
     setAmount(big(internal['amount']) + big(amount));
+  }
+
+  Item copyWithEgos(Iterable<int> egos) {
+    var result = copy;
+    result.internal['egos'] ??= [];
+
+    egos.forEach((ego) {
+      if (!result.egos.contains(ego)) result.internal['egos'].add(ego);
+    });
+
+    return result;
   }
 
   /// Returns a [BigInt].

@@ -161,28 +161,39 @@ class ActionsComponent {
 
   List<String> get pendingActions => ClientGlobals.session.pendingActions;
 
-  int get progress {
-    try {
-      var sheet = ClientGlobals.session?.sheet;
-      if (sheet == null) return 0;
-      var level = sheet.internal[progressDisplay ?? 'combat'];
+  String get progress {
+    num percent = 0;
+    var sheet = ClientGlobals.session?.sheet;
+    if (sheet == null) return formatNumberWithPrecision(0);
+    Stat stat = sheet.internal[progressDisplay ?? 'combat'];
 
-      return small(level == null
-          ? BigInt.zero
-          : (level.experience - level.previousLevelExperience) *
-              BigInt.from(100) ~/
-              (level.nextLevelExperience - level.previousLevelExperience));
+    try {
+      percent = stat == null
+          ? 0
+          : (stat.experience - stat.previousLevelExperience) *
+              BigInt.from(100) /
+              (stat.nextLevelExperience - stat.previousLevelExperience);
     } catch (error) {
       // Caused by very large numbers.
-
-      return 0;
     }
+
+    String formatStat(String key) {
+      // Some stats have been renamed.
+
+      if (key == 'slay') return 'luck';
+      if (key == 'woodcutting') return 'gathering';
+      if (key == 'crime') return 'stealth';
+      return key ?? '';
+    }
+
+    return '${formatNumber(stat?.level ?? 0)} ${formatStat(progressDisplay)}' +
+        ' (${formatNumberWithPrecision(percent)}%)';
   }
 
   String get progressDisplay {
     var map = ClientGlobals.session?.options;
     if (map == null) return null;
-    return map['progress'];
+    return map['progress'] ?? 'combat';
   }
 
   int get remainingTimeBonus =>

@@ -73,7 +73,8 @@ class EditorComponent {
         : cells[mouseX = x][mouseY = y] = list;
   }
 
-  void handleRightClick(int x, int y) {
+  void handleRightClick(MouseEvent event, int x, int y) {
+    event.preventDefault();
     object = _cell(mouseX = x, mouseY = y)[0];
     fgColor = _cell(x, y)[1];
     bgColor = _cell(x, y)[2];

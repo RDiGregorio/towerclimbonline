@@ -290,13 +290,13 @@ class Account extends OnlineObject {
       DateTime.now().isAfter(DateTime.fromMillisecondsSinceEpoch(lastEmailReset)
           .add(Config.emailResetDelay));
 
-  void addTradeItem(String itemId, int amount) {
+  void addTradeItem(String itemId, BigInt amount) {
     if (tradeTarget == null) return;
     var item = items.getItem(itemId);
     if (item == null) return;
     finalizeTrade(false);
     tradeTarget.finalizeTrade(false);
-    amount = max(0, amount.floor());
+    amount = BigIntUtil.max(BigInt.zero, amount);
     _moveItem(items, _tradeOffer, item, amount, true);
   }
 
@@ -332,16 +332,12 @@ class Account extends OnlineObject {
   }
 
   bool canLoot(Doll target) {
-    // If a player attacks a monster, dies, returns to the stage, and another
-    // player kills the monster, loot is still rewarded to the first player.
-    // However, if the player is dead or not on the stage when the monster dies,
-    // they don't get rewarded.
-
     if (doll == null ||
         target == null ||
         doll.dead ||
-        doll.spawning ||
         recentKills.containsKey(doll.id)) return false;
+
+    // Players can only loot targets that can target them.
 
     if (!target.canAreaEffect(doll)) return false;
     return doll.stage == target.stage;
@@ -363,8 +359,9 @@ class Account extends OnlineObject {
     // Bonus floors are treated as floor 100.
 
     if (floor <= 0) floor = 100;
-    var item, extraItem, amount = 1, experienceMultiplier = 10;
+    var item, extraItem, experienceMultiplier = 10;
     Stat skill;
+    num amount = 1;
 
     bool hasCorrectTool() {
       var tool = doll?.primaryWeapon;
@@ -403,7 +400,7 @@ class Account extends OnlineObject {
 
     int adjustedLevel() => skill.level + gatheringBonus();
 
-    int calculateAmount() => max(1, adjustedLevel() ~/ 20);
+    num calculateAmount() => 1 + adjustedLevel() / 20;
 
     switch (type) {
       case 'tree':
@@ -492,16 +489,18 @@ class Account extends OnlineObject {
 
         recentChests[source.id] = true;
 
-        var food = ['grain', 'milk', 'vegetable', 'meat', 'fish', 'herb'],
+        // The food rewards are pizza ingredients and herbs.
+
+        var food = ['grain', 'milk', 'vegetable', 'herb'],
             gems = ['ruby', 'emerald', 'sapphire', 'diamond', 'onyx'],
             scrolls = [
-          // Acid and poison are not scroll types because they are potion types.
+              // Acid and poison are not scroll types because they are potion types.
 
-          'fire scroll',
-          'ice scroll',
-          'electric scroll',
-          'gravity scroll'
-        ],
+              'fire scroll',
+              'ice scroll',
+              'electric scroll',
+              'gravity scroll'
+            ],
             items = List.from([food, gems, scrolls].expand((list) => list));
 
         // Creates 3 to 5 stacks.
@@ -515,20 +514,22 @@ class Account extends OnlineObject {
           // Thieving gloves only boost pickpocketing, but stealth boosting
           // items still boost chests.
 
-          map[key] += 1 + random(doll.stealth);
+          map[key] += 1 + (doll.stealth);
         }
 
-        var total = 0;
+        BigInt total = BigInt.zero;
 
         map.forEach((key, value) {
-          value += value * floorToExperience(floor) ~/ 1000;
-          total += value;
-          lootResource(Item(key, value));
+          BigInt amount =
+              big(value) + big(value) * big(floorToExperience(floor) ~/ 1000);
+
+          total += amount;
+          lootResource(Item(key)..setAmount(amount));
         });
 
         // Crystal thieving gloves only boost pickpocketing experience.
 
-        gainExperience(total * experienceMultiplier, 'crime');
+        gainExperience(total * big(experienceMultiplier), 'crime');
         return true;
 
       case 'dummy':
@@ -553,12 +554,13 @@ class Account extends OnlineObject {
       // experience.
 
       if (hasCorrectTool() && hasCrystalTool) experienceMultiplier *= 2;
-      amount += amount * floorToExperience(floor) ~/ 1000;
+      amount += amount * floorToExperience(floor) / 1000;
 
       // Good resources give double.
 
       var goodResource = source.goodResource(this);
       if (goodResource) amount *= 2;
+      amount = amount.floor();
 
       // *** After this point in the code, [amount] should not change! ***
 
@@ -573,10 +575,11 @@ class Account extends OnlineObject {
 
         if (extraLoot.canUpgrade) {
           var extraLootMultiplier =
-              skill.level + skill.level * floorToExperience(floor) ~/ 1000;
+              skill.level + skill.level * floorToExperience(floor) / 1000;
 
           if (goodResource) extraLootMultiplier *= 2;
-          extraLoot.bonus = calculateDropBonus(skill, extraLootMultiplier);
+          extraLoot.bonus =
+              calculateDropBonus(skill, extraLootMultiplier.floor());
         } else
           extraLoot.amount = amount;
 
@@ -674,9 +677,9 @@ class Account extends OnlineObject {
       ..['conv opts'] = List.from(conversationOptions ?? const []));
   }
 
-  void craftItem(String key, int amount, [bool upgrade = false]) {
-    amount = amount.floor();
-    if (key == null || amount < 1) return;
+  void craftItem(String key, dynamic input, [bool upgrade = false]) {
+    BigInt amount = big(input ?? 1);
+    if (key == null || amount < BigInt.one) return;
     var targetItem = Item.fromDisplayText(key);
 
     var ingredientItems = upgrade
@@ -688,15 +691,21 @@ class Account extends OnlineObject {
 
     if (ingredientItems.isEmpty || ingredientItems.contains(null)) return;
 
-    amount = ingredientItems.fold(
-        amount, (result, ingredient) => min(result, ingredient.amount));
+    // If the input is null, then the player is crafting all.
 
-    if (amount < 1) return;
+    amount = ingredientItems.fold(input == null ? null : amount,
+        (result, ingredient) {
+      if (result == null) return ingredient.getAmount();
+      return BigIntUtil.min(result, ingredient.getAmount());
+    });
+
+    if (amount < BigInt.one) return;
 
     skill() {
       // Biology and chemistry are use cooking.
 
-      if (targetItem?.infoName == 'philosopher\'s stone' ||
+      if (targetItem?.food == true ||
+          targetItem?.infoName == 'philosopher\'s stone' ||
           ingredientItems.any(
               (item) => item.food || item.potion || item.infoName == 'herb'))
         return 'cooking';
@@ -742,9 +751,9 @@ class Account extends OnlineObject {
       });
 
       var temp = amount;
-      amount = randomDivide(amount, 2);
+      amount = randomBigDivideByTwo(amount);
       if (temp != amount) alert('You accidentally destroy some of your items.');
-      if (amount < 1) return;
+      if (amount < BigInt.one) return;
     }
 
     void loot(Item item) {
@@ -758,7 +767,7 @@ class Account extends OnlineObject {
 
     if (upgrade && upgradedIngredient != null && bonus > 0) {
       var crafted = upgradedIngredient.copy
-        ..amount = amount
+        ..setAmount(amount)
         ..bonus = bonus;
 
       sessions.forEach((session) => session.crafted = crafted.copy);
@@ -766,7 +775,7 @@ class Account extends OnlineObject {
       return;
     }
 
-    loot(Item.fromDisplayText(key)..amount = amount);
+    loot(Item.fromDisplayText(key)..setAmount(amount));
   }
 
   void exchangeBuy(Exchange exchange, String key, int price, int amount) {
@@ -881,8 +890,11 @@ class Account extends OnlineObject {
     items.addItem(item);
   }
 
-  void lootResource(Item item) =>
-      lootItem(item.copy..amount *= timeBonusMultiplier);
+  void lootResource(Item item) {
+    var copy = item.copy;
+    copy.setAmount(copy.getAmount() * big(timeBonusMultiplier));
+    lootItem(copy);
+  }
 
   void openTrade(Account target) {
     tradeTarget = target;
@@ -931,24 +943,27 @@ class Account extends OnlineObject {
   void preventLogout(bool value) =>
       sessions.forEach((session) => session.preventLogout = value);
 
-  void removeTradeItem(String itemId, int amount) {
+  void removeTradeItem(String itemId, BigInt amount) {
     if (tradeTarget == null) return;
     var item = _tradeOffer.getItem(itemId);
     if (item == null) return;
     finalizeTrade(false);
     tradeTarget.finalizeTrade(false);
-    amount = max(0, amount.floor());
+    amount = BigIntUtil.max(BigInt.zero, amount);
     _removeItem(_tradeOffer, item, amount);
   }
 
-  void sellItem(String itemId, int amount) {
+  void sellItem(String itemId, BigInt amount) {
     var item = items.getItem(itemId);
     if (item == null) return;
-    amount = max(0, amount.floor());
-    _removeItem(items, item, amount = min(item.amount, amount));
-    var gold = big(item.sellingPrice) * big(amount);
-    money += gold;
-    alert('You gain: ${formatCurrency(gold)}.');
+    amount = BigIntUtil.max(BigInt.zero, amount);
+    _removeItem(items, item, amount = BigIntUtil.min(item.getAmount(), amount));
+    var gold = big(item.sellingPrice) * amount;
+
+    if (gold > BigInt.zero) {
+      money += gold;
+      alert('You gain: ${formatCurrency(gold)}.');
+    }
   }
 
   void setFlag(String key, bool value) {
@@ -995,25 +1010,26 @@ class Account extends OnlineObject {
     internal['last seen'] = now;
   }
 
-  void upgradeItem(String key, int amount) => craftItem(key, amount, true);
+  void upgradeItem(String key, dynamic amount) => craftItem(key, amount, true);
 
   String _gainMessage(Item item) => 'You gain: ${item.displayText}.';
 
   void _moveItem(
-      ItemContainer source, ItemContainer target, Item item, int amount,
+      ItemContainer source, ItemContainer target, Item item, BigInt amount,
       [bool copy = false]) {
-    amount = min(item.amount, amount.floor());
+    amount = BigIntUtil.min(item.getAmount(), amount);
 
     copy
-        ? amount =
-            min(amount, source.count(item.text) - target.count(item.text))
+        ? amount = BigIntUtil.min(
+            amount, source.bigCount(item.text) - target.bigCount(item.text))
         : source.removeItem(item.id, amount);
 
     target.addItem(item.copy..amount = 1, amount);
   }
 
-  void _removeItem(ItemContainer source, Item item, int amount) =>
-      source.removeItem(item.id, min(amount.floor(), item.amount));
+  void _removeItem(ItemContainer source, Item item, dynamic amount) {
+    source.removeItem(item.id, BigIntUtil.min(big(amount), item.getAmount()));
+  }
 
   void _updateHour() {
     var hours = hoursSinceEpoch;

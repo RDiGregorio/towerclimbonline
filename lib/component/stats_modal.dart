@@ -43,10 +43,14 @@ class StatsModal {
   String displayAscensions(Stat stat) =>
       stat.ascensions < 1 ? '' : ' × ${stat.ascensions + 1}';
 
-  String displayExperience(Stat stat) => stat.internalLevel < Stat.maxLevel
-      ? '${formatCurrency(stat.experienceText, false)} /' +
-          ' ${formatCurrency(stat.nextLevelExperienceText, false)}'
-      : formatCurrency(stat.experienceText, false);
+  String displayExperience(Stat stat) {
+    var result = stat.internalLevel < Stat.maxLevel
+        ? '${formatCurrency(stat.experienceText, false)}' +
+            ' / ${formatCurrency(stat.nextLevelExperienceText, false)}'
+        : formatCurrency(stat.experienceText, false);
+
+    return '$result experience';
+  }
 
   String displayNumber(int value) => formatNumber(value);
 
@@ -64,6 +68,22 @@ class StatsModal {
   }
 
   bool isMaxLevel(Stat stat) => stat.internalLevel >= Stat.maxLevel;
+
+  String progress(Stat stat) {
+    num percent = 0;
+
+    try {
+      percent = stat == null
+          ? 0
+          : (stat.experience - stat.previousLevelExperience) *
+              BigInt.from(100) /
+              (stat.nextLevelExperience - stat.previousLevelExperience);
+    } catch (error) {
+      // Caused by very large numbers.
+    }
+
+    return formatNumberWithPrecision(percent);
+  }
 
   void resetStats() {
     ClientGlobals.session.remote(#resetStats, const []);

@@ -84,8 +84,7 @@ class CraftingModal implements OnDestroy {
 
   void askAmount() {
     showInputModal('Amount (${formatOption(selected)})', 'craft item', (input) {
-      ClientGlobals.session
-          .remote(_remoteAction, [selected, parseInteger(input)]);
+      ClientGlobals.session.remote(_remoteAction, [selected, input]);
 
       selected = null;
       ingredients = const [];
@@ -99,6 +98,7 @@ class CraftingModal implements OnDestroy {
       ClientGlobals.session.remote(_remoteAction, [selected, null]);
       selected = null;
       ingredients = const [];
+      //_changeDetectorRef.markForCheck();
     }
   }
 
@@ -121,11 +121,12 @@ class CraftingModal implements OnDestroy {
     Future(() {
       _changeDetectorRef.markForCheck();
 
-      return _amountsCache[ingredient] = formatNumber(ClientGlobals
-              .session.items
-              .getItemByDisplayText(ingredient)
-              ?.amount ??
-          0);
+      return _amountsCache[ingredient] = formatCurrency(
+          ClientGlobals.session.items
+                  .getItemByDisplayText(ingredient)
+                  ?.amount ??
+              0,
+          false);
     });
 
     return _amountsCache[ingredient];
@@ -143,8 +144,7 @@ class CraftingModal implements OnDestroy {
     var text = Item.fromDisplayText(selected).comparisonText;
 
     showInputModal('Remaining amount ($text)', 'craft item', (input) {
-      ClientGlobals.session
-          .remote(#maxUpgrade, [selected, parseInteger(input)]);
+      ClientGlobals.session.remote(#maxUpgrade, [selected, input]);
 
       selected = null;
       ingredients = const [];

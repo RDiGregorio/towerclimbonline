@@ -81,6 +81,8 @@ class Crafting {
       add('$ego rifle', ['rifle', '$ego potion']);
       add('$ego shotgun', ['shotgun', '$ego potion']);
       add('$ego demon whip', ['demon whip', '$ego potion']);
+      add('$ego antimatter cannon', ['antimatter cannon', '$ego potion']);
+      add('$ego wrath', ['wrath', '$ego potion']);
 
       // Crystal weapons.
 
@@ -124,6 +126,8 @@ class Crafting {
       add('$ego rifle', ['rifle', '$ego scroll']);
       add('$ego shotgun', ['shotgun', '$ego scroll']);
       add('$ego demon whip', ['demon whip', '$ego scroll']);
+      add('$ego antimatter cannon', ['antimatter cannon', '$ego scroll']);
+      add('$ego wrath', ['wrath', '$ego scroll']);
 
       // Crystal weapons.
 
@@ -169,7 +173,7 @@ class Crafting {
 
     // Amulets.
 
-    add('necklace', const ['gold']);
+    add('golden charm', const ['gold']);
     add('power amulet', const ['ruby', 'gold']);
     add('evasion amulet', const ['sapphire', 'gold']);
     add('accuracy amulet', const ['diamond', 'gold']);
@@ -197,17 +201,21 @@ class Crafting {
     add('storm dragon armor', const ['storm dragon scales']);
     add('poison dragon armor', const ['poison dragon scales']);
     add('shadow dragon armor', const ['shadow dragon scales']);
+    add('blessed dragon armor', const ['blessed dragon scales']);
     add('void dragon armor', const ['void dragon scales']);
     add('acid dragon armor', const ['acid dragon scales']);
     add('cosmic dragon armor', const ['cosmic dragon scales']);
+    add('stardust dragon armor', const ['stardust dragon scales']);
     add('fire dragon cloak', const ['fire dragon scales']);
     add('ice dragon cloak', const ['ice dragon scales']);
     add('storm dragon cloak', const ['storm dragon scales']);
     add('poison dragon cloak', const ['poison dragon scales']);
     add('shadow dragon cloak', const ['shadow dragon scales']);
+    add('blessed dragon cloak', const ['blessed dragon scales']);
     add('void dragon cloak', const ['void dragon scales']);
     add('acid dragon cloak', const ['acid dragon scales']);
     add('cosmic dragon cloak', const ['cosmic dragon scales']);
+    add('stardust dragon cloak', const ['stardust dragon scales']);
 
     // Wood.
 
@@ -245,7 +253,13 @@ class Crafting {
     // Leather.
 
     add('boots', const ['hide']);
+    add('power boots', const ['ruby', 'hide']);
+    add('evasion boots', const ['sapphire', 'hide']);
+    add('accuracy boots', const ['diamond', 'hide']);
     add('thieving gloves', const ['hide']);
+    add('power gloves', const ['ruby', 'hide']);
+    add('evasion gloves', const ['sapphire', 'hide']);
+    add('accuracy gloves', const ['diamond', 'hide']);
     add('cloak', const ['hide']);
     add('leather armor', const ['hide']);
 
@@ -277,9 +291,11 @@ class Crafting {
     add('angel wings', const ['white feathers']);
     add('demon wings', const ['black feathers']);
 
-    // Tentacles.
+    // Special.
 
     add('demon whip', const ['tentacle']);
+    add('wrath', const ['meteorite', 'tentacle']);
+    add('rainbow undecimber', const ['rainbow diamond', 'unicorn horn']);
     add('philosopher\'s stone', const ['blood potion']);
 
     // Cooking (1 ingredient).
@@ -359,6 +375,11 @@ class Crafting {
       'electric scroll',
       'gravity scroll'
     ]);
+
+    // Antimatter.
+
+    add('particle accelerator', ['annihilation scroll', 'iron']);
+    add('antimatter cannon', ['antimatter', 'iron']);
   }
 
   /// Used client side.

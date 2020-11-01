@@ -237,11 +237,11 @@
 }
 
 .doll-parts img {
-    position: absolute;
+    position: fixed;
     pointer-events: none;
 }
 
-.doll-container {
+.fixed {
     position: fixed;
 }
 

@@ -220,11 +220,10 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
               var petRequirement = target?.petRequirement ?? 0;
 
               if (petRequirement > source.modifiedSummoningLevel) {
-                source.informationPrompt(
-                    'You need a total summoning level of ' +
-                        formatNumber(petRequirement) +
-                        ' to do that. Your total summoning level is ' +
-                        '${formatNumber(source.modifiedSummoningLevel)}.');
+                source.informationPrompt('You need a summoning level of ' +
+                    formatNumber(petRequirement) +
+                    ' to do that. Your summoning level is ' +
+                    '${formatNumber(source.modifiedSummoningLevel)}.');
 
                 source
                   ..targetDoll = null
@@ -343,6 +342,18 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
     return true;
   }));
 
+  registerAbility('burst energy attack', Ability(use: (source) {
+    if (source.targetDoll == null) return false;
+
+    for (var i = 0; i < 3; i++)
+      source.targetDoll.effects.add(Effect(source,
+          damage: calculateDamage(source, source.primaryWeapon),
+          accuracy: calculateAccuracy(source, source.primaryWeapon),
+          egos: const [Ego.burst, Ego.energy]));
+
+    return true;
+  }));
+
   registerAbility('fire burst attack', Ability(use: (source) {
     if (source.targetDoll == null) return false;
 
@@ -387,6 +398,8 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
 
             source.search(10, 10).where(source.canAreaEffect).forEach(
                 (target) => target.effects.add(Effect(source,
+                    delay:
+                        source.fireAoe(target, 'image/missile/white_bolt.png'),
                     damage: calculateDamage(source, source.primaryWeapon),
                     accuracy: calculateAccuracy(source, source.primaryWeapon),
                     egos: const [Ego.all, Ego.magic])));
@@ -406,6 +419,8 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
             for (int i = 0; i < 3; i++)
               source.search(10, 10).where(source.canAreaEffect).forEach(
                   (target) => target.effects.add(Effect(source,
+                      delay: source.fireAoe(
+                          target, 'image/missile/white_bolt.png'),
                       damage: calculateDamage(source, source.primaryWeapon),
                       accuracy: calculateAccuracy(source, source.primaryWeapon),
                       egos: const [Ego.all, Ego.burst, Ego.magic])));
@@ -414,7 +429,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
           }));
 
   registerAbility(
-      'ultima',
+      'supernova',
       Ability(
           range: 5,
           use: (Doll source) {
@@ -427,6 +442,8 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
                   (target) => target.effects
                           .add(
                               Effect(source,
+                                  delay: source.fireAoe(
+                                      target, 'image/missile/white_bolt.png'),
                                   damage: calculateDamage(
                                       source, source.primaryWeapon),
                                   accuracy: calculateAccuracy(
@@ -452,6 +469,8 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
                 (target) => target.effects
                         .add(
                             Effect(source,
+                                delay: source.fireAoe(target,
+                                    'image/missile/black_bolt.png'),
                                 damage: calculateDamage(
                                     source, source.primaryWeapon),
                                 accuracy: calculateAccuracy(
@@ -495,8 +514,8 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
   registerBolt('gravity bolt', 'image/missile/black_bolt.png',
       const [Ego.magic, Ego.gravity]);
 
-  registerBolt('acid bolt', 'image/missile/yellow_bolt.png',
-      const [Ego.magic, Ego.acid]);
+  registerBolt(
+      'acid bolt', 'image/missile/brown_bolt.png', const [Ego.magic, Ego.acid]);
 
   registerBolt('poison bolt', 'image/missile/green_bolt.png',
       const [Ego.magic, Ego.poison]);
@@ -587,32 +606,6 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
           range: 5,
           use: (source) => throwAbility(source, 'image/missile/black_bolt.png',
               [Ego.magic, Ego.gravity])));
-
-  registerAbility(
-      'nuclear bomb',
-      Ability(
-          combat: false,
-          use: (Doll source) {
-            if (source.targetDoll == null) return false;
-
-            source
-                .search(ServerGlobals.sight * 2, ServerGlobals.sight * 2)
-                .where(source.account.canViewDoll)
-                .where((doll) =>
-                    !doll.summoned &&
-                    !doll.boss &&
-                    doll.account == null &&
-                    doll.info?.interaction == null)
-                .forEach((target) {
-              source.account.recentKills[target.id] = true;
-
-              target
-                ..killWithNoReward()
-                ..splat('no reward', 'effect-text');
-            });
-
-            return true;
-          }));
 
   registerAbility(
       'kill',

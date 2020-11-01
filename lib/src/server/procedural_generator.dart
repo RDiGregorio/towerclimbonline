@@ -75,7 +75,9 @@ class ProceduralGenerator {
       if (i == 0) {
         // high floors have a 1/3 chance gods or ascended enemies as a boss.
 
-        if (floor >= 50 && random(3) == 0)
+        if (floor + 1 >= Session.maxFloor) {
+          doll = 'enryu';
+        } else if (floor >= 50 && random(3) == 0)
           doll = randomValue([
             // Gods.
 
@@ -90,6 +92,7 @@ class ProceduralGenerator {
             'ascended hero',
             'ascended gunslinger',
             'ascended wizard',
+            'ascended harambe',
             'popped collar chad',
             'stacy'
           ]);
@@ -114,7 +117,11 @@ class ProceduralGenerator {
       else if (i <= 16 && theme.resources.isNotEmpty)
         doll = randomValue(theme.resources);
       else
-        doll = randomValue(theme.dolls);
+        // A special doll appears about once every 12 floors.
+
+        doll = random(1000) == 0
+            ? randomValue(['wanderer'])
+            : randomValue(theme.dolls);
 
       if (traversable.isEmpty) continue;
       Point<int> point = traversable.removeAt(random(traversable.length));

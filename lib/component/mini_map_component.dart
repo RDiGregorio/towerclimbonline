@@ -8,8 +8,17 @@ import 'package:towerclimbonline/util.dart';
 @Component(
     selector: 'mini-map-component',
     directives: [coreDirectives, formDirectives],
-    templateUrl: 'mini_map_component.html')
+    templateUrl: 'mini_map_component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush)
 class MiniMapComponent {
+  final ChangeDetectorRef _changeDetectorRef;
+
+  MiniMapComponent(this._changeDetectorRef) {
+    // TODO: use a better performing way to check for changes.
+
+    animationLoop(() => _changeDetectorRef.markForCheck());
+  }
+
   Iterable<dynamic> get dolls =>
       (ClientGlobals.session?.importantDolls ?? {}).values.where((doll) =>
           !doll.dead &&
@@ -23,7 +32,10 @@ class MiniMapComponent {
     if (location == null) return null;
     var result = ClientGlobals.session.terrainSections[sectionKey(location)];
     if (result == null) return null;
-    return 'url("../$result")';
+
+    // The cache is cleared when the browser is refreshed.
+
+    return 'url("../$result?nocache=${ClientGlobals.start}")';
   }
 
   Map<String, String> pointStyle(Doll doll) {
@@ -33,6 +45,13 @@ class MiniMapComponent {
 
     if (doll?.player == true) {
       var color = 'white';
+      result['background-color'] = color;
+      result['border-left-color'] = color;
+      result['border-top-color'] = color;
+    }
+
+    if (doll?.altar == true || doll?.shop == true) {
+      var color = 'yellow';
       result['background-color'] = color;
       result['border-left-color'] = color;
       result['border-top-color'] = color;

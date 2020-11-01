@@ -5,27 +5,9 @@ class Theme {
       floor: 'brown',
       wall: 'gray',
       water: 'blue',
-      dolls: const [
-        'rat',
-        'kobold',
-        'yak',
-        'bat',
-        'spider',
-        'yaktaur',
-        'wolf'
-      ],
-      bosses: const [
-        'leucrocotta',
-        'phoenix',
-        'djinn',
-        'gunslinger',
-        'apis'
-      ],
-      resources: const [
-        'fish',
-        'tree',
-        'rock'
-      ]);
+      dolls: const ['rat', 'kobold', 'yak', 'bat', 'spider', 'yaktaur', 'wolf'],
+      bosses: const ['leucrocotta', 'phoenix', 'djinn', 'gunslinger', 'apis'],
+      resources: const ['fish', 'tree', 'rock']);
 
   static Theme haunted =
       Theme(floor: 'maroon', wall: 'brown', water: 'blue', dolls: const [
@@ -37,7 +19,7 @@ class Theme {
     'scorpion',
     'shadow'
   ], bosses: const [
-    'tesla',
+    'shadow dragon',
     'wiglaf',
     'pestilence',
     'royal mummy',
@@ -90,7 +72,7 @@ class Theme {
         'ancient one',
         'storm dragon',
         'kraken',
-        'prototype 221'
+        'giant death robot'
       ],
       resources: const [
         'shellfish',
@@ -131,8 +113,7 @@ class Theme {
     'storm turtle',
     'ice turtle'
   ], bosses: const [
-    'shadow dragon',
-    'chad',
+    'blessed dragon',
     'gatekeeper',
     'dark star',
     'cosmic turtle',
@@ -181,7 +162,7 @@ class Theme {
     'leech',
     'ice naga',
     'fire naga',
-    'acid mantis',
+    'acid wasp',
     'ghost moth'
   ], bosses: const [
     'mothra',

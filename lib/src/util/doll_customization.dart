@@ -22,6 +22,7 @@ class DollCustomization extends OnlineObject {
 
   void set gender(String value) {
     if (hairType == '4') hairType = '0';
+    if (top.type == '3') top.type = '0';
     internal['gender'] = value;
   }
 

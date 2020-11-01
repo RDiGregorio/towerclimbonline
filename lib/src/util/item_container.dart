@@ -11,9 +11,9 @@ class ItemContainer extends OnlineObject {
 
   /// The amount added is [item.amount * amountMultiplier].
 
-  void addItem(Item item, [int amountMultiplier = 1]) {
+  void addItem(Item item, [dynamic amountMultiplier = 1]) {
     var text = item.text, stack = items[text];
-    var newAmount = item.getAmount() * BigInt.from(amountMultiplier);
+    var newAmount = item.getAmount() * big(amountMultiplier);
 
     if (stack == null) {
       item.setAmount(newAmount);
@@ -23,6 +23,8 @@ class ItemContainer extends OnlineObject {
 
     stack.addAmount(newAmount);
   }
+
+  BigInt bigCount(String text) => items[text]?.getAmount() ?? BigInt.zero;
 
   bool containsAll(ItemContainer container) =>
       container.items.values.every((item) => count(item.text) >= item.amount);
@@ -55,10 +57,11 @@ class ItemContainer extends OnlineObject {
   void removeAll(ItemContainer container) => container.items.values
       .forEach((item) => removeItem(item.text, item.amount));
 
-  bool removeItem(String text, [int amount = 1]) {
-    if (amount < 1) return false;
+  bool removeItem(String text, [dynamic amount = 1]) {
+    amount = big(amount);
+    if (amount < BigInt.one) return false;
     var item = getItem(text);
-    if (item == null || item.amount < amount) return false;
+    if (item == null || item.getAmount() < amount) return false;
     item.removeAmount(amount);
     if (item.amount <= 0) internal['items'].remove(item.text);
     return true;

@@ -32,9 +32,6 @@ class ConsoleComponent {
   final ChangeDetectorRef _changeDetectorRef;
 
   ConsoleComponent(this._changeDetectorRef) {
-    ClientGlobals.session.alert(
-        'Join the channel "cc" for help or to talk with the developers.');
-
     ClientGlobals.session.alert('Type "/commands" for a list of commands.');
 
     ClientGlobals.session.remote(
@@ -224,6 +221,31 @@ class ConsoleComponent {
   List<dynamic> get sortedChannelUsers => List.from(channelUsers)..sort();
 
   String get timestamp => _timestamp(DateTime.now());
+
+  void clickAlerts() {
+    scroll();
+    unreadAlerts = 0;
+  }
+
+  void clickChannel() {
+    scroll();
+    unreadChannel = 0;
+  }
+
+  void clickContact(String contact) {
+    openChat(contact);
+    showChat(contact);
+  }
+
+  void clickPrivate(String contact) {
+    scroll();
+    resetUnreadPrivate(contact);
+  }
+
+  void clickPublic() {
+    scroll();
+    unreadPublic = 0;
+  }
 
   void closeChat(String user) {
     privateMessages.remove(user);

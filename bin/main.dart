@@ -22,10 +22,8 @@ import 'package:towerclimbonline/util.dart';
 // TODO: use the tick clock for all delays (including death/summoning delays)
 // *****************************************************************************
 // TODO: second action bar row
-// TODO: ascended harambe
 // TODO: have exchange offers fill if a higher tier +x item is for sale
 //**********************************************************************
-// TODO: privacy policy was lost in Dart 2 migration (for Play store)
 // FIXME: can move while shopping, breaking interface
 //**********************************************************************
 // TODO: add barricades and prayer skill
@@ -35,17 +33,16 @@ import 'package:towerclimbonline/util.dart';
 // TODO: shoreline logic (is this needed? walls would still be jagged...)
 // FIXME: trading with someone with a modal open is buggy
 // TODO: proc gen shops
-// TODO: give AOE abilities overlays
 // TODO: eventually remove all usages of the "small" function
 // TODO: big ints for item amounts, food threshold
 // TODO: add a "guard" mode for pets
 // FIXME: charming a human changes the human's looks
 // TODO: dead trees
-// FIXME: monsters don't retaliate when attacking after updates
-// FIXME: shooting up 2 right 1, can't be shot back?
+// FIXME: standing on a rat (or any doll with a margin) causes buggy shadows
 //**********************************************************************
-// TODO: pearl dragon (resist evil)
-// TODO: phoenix boss (phoenix feather drop)
+// TODO: randomly replace some altars with runes (can't be traded).
+// TODO: make puzzle box teleport you to a floor based on its upgrades
+// TODO: handle database errors better
 
 void main() {
   Logger.root
@@ -59,14 +56,14 @@ void main() {
 }
 
 Future<dynamic> _main() async {
+  Logger.root.info('starting server');
+
   // Makes sure the port is available.
 
   await runZoned(
       () => ServerSocket.bind(InternetAddress.anyIPv6, Config.port)
           .then((server) => server.close()),
       onError: (error, trace) => exit(0));
-
-  Logger.root.info('* * * * * starting server * * * * *');
 
   // Renews certificates.
 
@@ -249,7 +246,14 @@ Future<dynamic> _main() async {
 
               if (Config.debug) {
                 account.lootItem(Item('level up potion', maxFinite));
-                account.lootItem(Item('fish', maxFinite));
+
+                for (int i = 0; i < 10; i++)
+                  account.lootItem(
+                      Item('fish')..setAmount(big(maxFinite) * big(10)));
+
+                account.lootItem(Item('fast potion', maxFinite));
+                account.lootItem(Item('nuclear bomb', maxFinite));
+                account.lootItem(Item('puzzle box', maxFinite));
 
                 // Elyvilon is not found in the temple.
 

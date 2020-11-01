@@ -37,7 +37,7 @@
                         <a class="console-pill default-cursor"
                            data-toggle="pill"
                            href="#public-output"
-                           (click)="scroll(); unreadPublic = 0">
+                           (click)="clickPublic()">
                             <span class="console-pill-text no-events">
                                 local
                                 <span *ngIf="unreadPublic != 0"
@@ -51,7 +51,7 @@
                         <a class="console-pill default-cursor"
                            data-toggle="pill"
                            href="#alert-output"
-                           (click)="scroll(); unreadAlerts = 0">
+                           (click)="clickAlerts()">
                             <span class="console-pill-text no-events">
                                 info
                                 <span *ngIf="unreadAlerts != 0"
@@ -66,7 +66,7 @@
                         <a class="console-pill default-cursor"
                            data-toggle="pill"
                            href="#group-chat-output"
-                           (click)="scroll(); unreadChannel = 0">
+                           (click)="clickChannel()">
                             <span class="console-pill-text no-events">
                                 {{channel}}
                                 <span *ngIf="unreadChannel != 0"
@@ -85,7 +85,7 @@
                         <a class="console-pill default-cursor"
                            data-toggle="pill"
                            href="#private-{{contact}}"
-                           (click)="scroll(); resetUnreadPrivate(contact)">
+                           (click)="clickPrivate(contact)">
                             <span class="console-pill-text no-events">
                                 {{contact}}
                                 <span *ngIf="getUnreadPrivate(contact) != 0"
@@ -250,7 +250,7 @@
                             </div>
                             <div *ngFor="let contact of onlineContacts">
                                 <a class="pointer"
-                                   (click)="openChat(contact); showChat(contact)">
+                                   (click)="clickContact(contact)">
                                     {{contact}}
                                 </a>
                             </div>
@@ -260,7 +260,7 @@
                             </div>
                             <div *ngFor="let contact of offlineContacts">
                                 <a class="pointer"
-                                   (click)="openChat(contact); showChat(contact)">
+                                   (click)="clickContact(contact)">
                                     {{contact}}
                                 </a>
                             </div>

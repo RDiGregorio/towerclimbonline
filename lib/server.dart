@@ -205,7 +205,6 @@ Future<Map<Point<int>, int>> newCollisionMap(
 
       dolls++;
       if (spawn == 'chest') chests++;
-
       stage.addDoll(doll, Point<int>(point.x + offset.x, point.y + offset.y));
     }
 

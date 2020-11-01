@@ -16,105 +16,6 @@ import 'package:towerclimbonline/util.dart';
     templateUrl: 'camera_component.html',
     changeDetection: ChangeDetectionStrategy.OnPush)
 class CameraComponent {
-  static const _newArt = [
-    // Altars and fish are not included because they use small sprites.
-
-    'newbie shop',
-    'herb',
-    'soldier',
-    'rock',
-    'gold',
-    'uranium',
-    'stardust rock',
-    'tentacles',
-    'leucrocotta',
-    'shadow dragon',
-    'tree',
-    'magic tree',
-    'stardust tree',
-    'yak',
-    'cosmic dragon',
-    'rat',
-    'human',
-    'dummy',
-    'wolf',
-    'unicorn',
-    'black unicorn',
-    'kirin',
-    'spider',
-    'bat',
-    'kobold',
-    'puppy',
-    'kitten',
-    'dithmenos',
-    'fire dragon',
-    'ice dragon',
-    'storm dragon',
-    'poison dragon',
-    'acid dragon',
-    'void dragon',
-    'skeleton',
-    'skeleton warrior',
-    'creeper',
-    'whisper',
-    'shadow',
-    'demon cat',
-    'ereshkigal',
-    'death',
-    'pestilence',
-    'famine',
-    'war',
-    'trog',
-    'scorpion',
-    'kobold lord',
-    'rhino',
-    'raven',
-    'royal mummy',
-    'turtle',
-    'fire turtle',
-    'ice turtle',
-    'storm turtle',
-    'cosmic turtle',
-    'lich king',
-    'mecha dragon',
-    'yaktaur',
-    'earth elemental',
-    'ice elemental',
-    'fire elemental',
-    'ice fiend',
-    'spider demon',
-    'temporal vortex',
-    'entropy weaver',
-    'whirlpool',
-    'eye',
-    'demon eye',
-    'cyclops',
-    'lion',
-    'ape',
-    'apis',
-    'sea cow',
-    'sacred cow',
-    'lucifer',
-    'star',
-    'dark star',
-    'infinity star',
-    'makhleb',
-    'crab',
-    'king crab',
-    'gozag',
-    'fallen angel',
-    'void mage',
-    'wizard shop',
-    'ascended wizard',
-    'fire elephant',
-    'monolith',
-    'lugonu',
-    'stacy',
-    'elyvilon',
-    'ascended hero',
-    'phoenix'
-  ];
-
   final Set<String> terrain = Set();
 
   final Map<String, Map<String, String>> terrainStyles = {},
@@ -125,7 +26,6 @@ class CameraComponent {
   final Set<Missile> missiles = Set();
   final Queue<int> _fps = Queue();
   Set<Doll> _dolls = Set();
-
   Set<String> _loadedImages = Set(), _brokenImages = Set();
 
   int _lastClickTime = 0,
@@ -135,17 +35,13 @@ class CameraComponent {
       _nocache = 0;
 
   Point<int> _pointer;
-
   Point<num> _rippleLocation = const Point(0, 0);
   num _zoom;
   final ChangeDetectorRef _changeDetectorRef;
 
   CameraComponent(this._changeDetectorRef) {
     if (ClientGlobals.session?.internal == null) return;
-
-    animationLoop(() {
-      _changeDetectorRef.markForCheck();
-    });
+    animationLoop(() => _changeDetectorRef.markForCheck());
 
     ClientGlobals.session.internal
       ..getEvents(type: 'jump').forEach((event) {
@@ -174,6 +70,13 @@ class CameraComponent {
 
         if (source != null && target != null)
           missiles.add(Missile(event.data['image'], source, target));
+      })
+      ..getEvents(type: 'aoe').forEach((event) {
+        var source = ClientGlobals.session.view[event.data['source']],
+            target = ClientGlobals.session.view[event.data['target']];
+
+        if (source != null && target != null)
+          missiles.add(Missile(event.data['image'], source, target, true));
       });
 
     animationLoop(() {
@@ -237,8 +140,13 @@ class CameraComponent {
         ..retainWhere(ClientGlobals.session.view.values.contains)
         ..addAll(List<Doll>.from(ClientGlobals.session.view.values))
         ..forEach((doll) {
+          if (!doll.internal.containsKey('frames')) doll.internal['frames'] = 0;
+          if (doll.internal['frames'] < 2) doll.internal['frames']++;
+
           var spriteLocation = _clientPoint(doll.sprite.location),
               index = spriteLocation.y - doll.sprite.bounds.height,
+
+              // FIXME: zIndex can still be negative.
 
               // Sorts sprites by their y axis and prevents a negative z-index.
 
@@ -252,29 +160,33 @@ class CameraComponent {
             ..['transform'] = 'scale($zoom, $zoom)'
             ..['z-index'] = '$zIndex';
 
-          // FIXME: remove this once all the pixel art is replaced
-
-          bool pixelated() {
-            if (doll.infoName?.endsWith('altar') == true ||
-                doll.image?.endsWith('stairs.png') == true) return false;
-
-            if (['gravestone', 'chest'].contains(doll.infoName)) return false;
-            if (doll.player || _newArt.contains(doll.infoName)) return false;
-            return true;
-          }
-
-          if (pixelated()) doll.style['image-rendering'] = 'pixelated';
-
           num hitBox = 1 / min(2, zoom);
           doll.hitBoxStyle['transform'] = 'scale($hitBox, $hitBox)';
 
-          if (doll.dead)
-            doll.style
-              ..['pointer-events'] = 'none'
-              ..['opacity'] = '0'
-              ..['transition'] = 'opacity 1s ease';
-          else {
-            doll.style.remove('transition');
+          if (doll.dead) {
+            // Tracking frames prevents a doll from performing a death animation
+            // if a player logs in near a dead doll.
+
+            if (doll.internal['frames'] < 2) doll.style['display'] = 'none';
+
+            // CSS transitions are not used for opacity because they cause
+            // rendering issues with layers above the transitioning layer.
+
+            if (!doll.internal.containsKey('death time'))
+              doll.internal['death time'] = now;
+
+            var opacity =
+                max(0, 1 - (now - doll.internal['death time']) / 1000);
+
+            doll.style['pointer-events'] = 'none';
+
+            // 0 opacity may not work, so display is instead set to none.
+
+            opacity > 0
+                ? doll.style['opacity'] = formatNumberWithPrecision(opacity)
+                : doll.style['display'] = 'none';
+          } else {
+            doll..internal.remove('death time')..style.remove('display');
 
             if (ClientGlobals.session.hiddenDolls.containsKey(doll.id))
               doll.style
@@ -438,6 +350,14 @@ class CameraComponent {
 
   bool get hasFocus => context.callMethod('eval', ['document.hasFocus()']);
 
+  /// Prevents performance issues from too many missiles.
+
+  Iterable<Missile> get visibleMissiles =>
+
+      // Reversed to show the last 100 missiles.
+
+      List<Missile>.from(missiles).reversed.take(100);
+
   num get zoom => _zoom;
 
   bool brokenImage(String value, [String modifier]) =>
@@ -448,19 +368,6 @@ class CameraComponent {
   bool currentPlayer(Doll doll) =>
       ClientGlobals.session.doll != null &&
       ClientGlobals.session.doll.id == doll.id;
-
-  String displayImage(Doll doll) =>
-      ClientGlobals.session.tappedItemSources.containsKey(doll.id)
-          ? doll.tappedImage
-          : doll.image;
-
-  Map<String, String> displayNameStyle(Doll doll) =>
-      _groundedImage(doll) ? {} : {'margin-top': '-${round(16 * zoom, 2)}px'};
-
-  int dollSize(Doll doll) {
-    if (_groundedImage(doll)) return 16;
-    return 32;
-  }
 
   String displayBuffs(Doll doll) {
     // The player's buffs are not displayed under their health bar.
@@ -486,6 +393,19 @@ class CameraComponent {
     return result.join(', ');
   }
 
+  String displayImage(Doll doll) =>
+      ClientGlobals.session.tappedItemSources.containsKey(doll.id)
+          ? doll.tappedImage
+          : doll.image;
+
+  Map<String, String> displayNameStyle(Doll doll) =>
+      _groundedImage(doll) ? {} : {'margin-top': '-${round(16 * zoom, 2)}px'};
+
+  int dollSize(Doll doll) {
+    if (_groundedImage(doll)) return 16;
+    return 32;
+  }
+
   Map<String, String> dollStyle(Doll doll) {
     Map<String, String> result = {};
     if (_groundedImage(doll)) return result;
@@ -503,6 +423,7 @@ class CameraComponent {
   }
 
   void handleClick(MouseEvent event, [Doll doll]) {
+    event.preventDefault();
     _lastClickTime = now;
     replaceMap(rippleStyle, {'border-color': doll == null ? 'yellow' : 'red'});
     var point = _serverPoint(event.client);
@@ -539,10 +460,12 @@ class CameraComponent {
   }
 
   bool hasShadow(Doll doll) {
-    if (['temporal vortex', 'entropy weaver', 'whirlpool']
-        .contains(doll.infoName)) return false;
-    if (doll.infoName == 'chest') return true;
-    return doll == null || doll.player || _newArt.contains(doll.infoName);
+    if (doll?.image == null) return true;
+    if (doll.image.endsWith('jellyfish.png')) return true;
+    if (doll.image.endsWith('fish.png')) return false;
+    if (doll.image.endsWith('stairs.png')) return false;
+    if (doll.image.endsWith('altar.png')) return false;
+    return true;
   }
 
   Map<String, String> healthBarIconStyle(Doll doll) {
@@ -589,8 +512,11 @@ class CameraComponent {
     if (doll.infoName == 'scorpion') result['margin-top'] = '-2.75px';
     if (doll.infoName == 'lion') result['margin-top'] = '-2.75px';
     if (doll.infoName == 'crab') result['margin-top'] = '-2.75px';
+    if (doll.infoName == 'robot') result['margin-top'] = '-2.75px';
+    if (doll.infoName == 'juggernaut') result['margin-top'] = '-2.75px';
     if (doll.infoName == 'king crab') result['margin-top'] = '-5.5px';
     if (doll.infoName == 'spider demon') result['margin-top'] = '-5.5px';
+    if (doll.infoName == 'giant death robot') result['margin-top'] = '-2.75px';
     return result;
   }
 
@@ -610,36 +536,20 @@ class CameraComponent {
   }
 
   bool _groundedImage(Doll doll) {
-    if (doll == null) return true;
     if (doll.player) return false;
+    var image = doll?.image;
+    if (image == null) return true;
 
-    if ([
-      'rock',
-      'gold',
-      'uranium',
-      'stardust rock',
-      'temporal vortex',
-      'entropy weaver',
-      'whirlpool'
-    ].contains(doll.infoName)) return true;
+    // Trees are the only ungrounded resource.
 
-    if (_newArt.contains(doll.infoName)) return false;
-    return true;
-
-    // This code can be used if we ever decide to allow image bounds to be
-    // larger than one tile.
-
-    /*
-      if (image == null) return true;
-
-      // Trees are the only ungrounded resource.
-
-      if (image.endsWith('stairs.png')) return true;
-      if (image.endsWith('chest.png')) return true;
-      if (image.endsWith('fish.png')) return true;
-      if (image.endsWith('rock.png')) return true;
-      return false;
-     */
+    if (doll.image.endsWith('jellyfish.png')) return false;
+    if (image.endsWith('fish.png')) return true;
+    if (image.endsWith('stairs.png')) return true;
+    if (image.endsWith('chest.png')) return true;
+    if (image.endsWith('rock.png')) return true;
+    if (image.endsWith('altar.png')) return true;
+    if (image.endsWith('gravestone.png')) return true;
+    return false;
   }
 
   bool _hideDisplayName(Doll doll) {

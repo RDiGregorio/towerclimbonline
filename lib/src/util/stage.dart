@@ -31,7 +31,6 @@ class Stage<T extends Doll> extends OnlineObject {
   void set timestamp(int value) => _timestamp = value;
 
   void addDoll(T doll, [Point<int> location]) {
-    assert(doll.stage == null || doll.stage == this);
     if (dolls.containsKey(doll.id)) removeDoll(dolls[doll.id]);
 
     if (doll.temporary)
