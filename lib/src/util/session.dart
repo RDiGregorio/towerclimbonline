@@ -991,6 +991,8 @@ class Session extends OnlineObject {
   }
 
   void maxUpgrade(String text, [String input]) {
+    if (text == null) return;
+
     BigInt targetAmount =
         BigIntUtil.max(BigInt.one, parseBigInteger(input ?? '1'));
 
@@ -1580,6 +1582,20 @@ class Session extends OnlineObject {
         () => List<Item>.from(account.items.items.values
                 .where((item) => item.infoName == 'elysian sigil'))
             .forEach(account.items.deleteItem));
+
+    _applyPatch(
+        'remove antimatter patch',
+        () => List<Item>.from(account.items.items.values
+                .where((item) => item.infoName == 'antimatter'))
+            .forEach(account.items.deleteItem));
+
+    _applyPatch(
+        'particle accelerator patch',
+        () => List<Item>.from(account.items.items.values
+            .where((item) => item.infoName == 'particle accelerator'))
+          ..forEach(account.items.deleteItem)
+          ..forEach((item) => account
+              .lootItem(Item('particle accelerator')..amount = item.amount)));
 
     _applyPatch(
         'rename lament configuration patch',

@@ -69,8 +69,8 @@ void registerItems(Map<String, Stage<Doll>> stages) {
               use: (Doll doll, Item item) {
                 if (buff == 'level up') {
                   if (Config.debug)
-                    doll.account.sheet.stats
-                        .forEach((stat) => stat.experience = big(maxFinite));
+                    doll.account.sheet.stats.forEach((stat) => stat
+                        .experience += stat.experienceFromLevel(Stat.maxLevel));
 
                   return true;
                 }
@@ -278,8 +278,13 @@ void registerItems(Map<String, Stage<Doll>> stages) {
   registerWeaponInfo('revolver', 50, 'image/missile/white_bolt.png',
       const [Ego.ballistic, Ego.metal]);
 
-  registerWeaponInfo('shotgun', 250, 'image/missile/white_bolt.png',
-      const [Ego.twoHanded, Ego.ballistic, Ego.metal, Ego.maximumDamage]);
+  registerWeaponInfo('shotgun', 250, 'image/missile/white_bolt.png', const [
+    Ego.twoHanded,
+    Ego.ballistic,
+    Ego.metal,
+    Ego.maximumDamage,
+    Ego.stun
+  ]);
 
   registerWeaponInfo('scepter', 50, 'image/missile/white_bolt.png',
       const [Ego.metal, Ego.twoHanded, Ego.magic, Ego.all]);
@@ -287,10 +292,10 @@ void registerItems(Map<String, Stage<Doll>> stages) {
   registerWeaponInfo('flamethrower', 250, 'image/missile/red_bolt.png',
       const [Ego.twoHanded, Ego.magic, Ego.fire, Ego.burst]);
 
-  // An antimatter shotgun with stun.
+  // An antimatter shotgun. Antimatter uses black bolts.
 
   registerWeaponInfo(
-      'antimatter cannon', 250, 'image/missile/white_bolt.png', const [
+      'antimatter cannon', 250, 'image/missile/black_bolt.png', const [
     Ego.twoHanded,
     Ego.ballistic,
     Ego.metal,
@@ -598,32 +603,6 @@ void registerItems(Map<String, Stage<Doll>> stages) {
             return true;
           }));
 
-  registerItemInfo(
-      'particle accelerator',
-      ItemInfo(
-          egos: const [Ego.metal],
-          use: (Doll doll, Item accelerator) {
-            var energy = doll.account.items.getItem('energy'),
-                gold = doll.account.items.getItem('gold'),
-                amount = BigIntUtil.min(energy?.getAmount() ?? BigInt.zero,
-                    gold?.getAmount() ?? BigInt.zero);
-
-            var removedAmount = amount;
-
-            amount +=
-                amount * BigInt.from(accelerator.bonus) ~/ BigInt.from(100);
-
-            if (amount > BigInt.zero)
-              doll.account
-                ..items.removeItem('energy', removedAmount)
-                ..items.removeItem('gold', removedAmount)
-                ..lootItem(Item('antimatter')..setAmount(amount));
-            else
-              doll.alert(alerts[#nothingHappens]);
-
-            return true;
-          }));
-
   registerItemInfo('philosopher\'s stone',
       ItemInfo(use: (Doll doll, Item reactor) {
     var potions = doll.account.items.getItem('blood potion'),
@@ -647,9 +626,10 @@ void registerItems(Map<String, Stage<Doll>> stages) {
   }));
 
   registerItemInfo('puzzle box', ItemInfo(use: (Doll doll, Item puzzle) {
-    if (doll?.account != null && !doll.dead)
-      doll.randomJump(stages['tutorial0']);
+    // if (doll?.account != null && !doll.dead)
+    //   doll.randomJump(stages['tutorial0']);
 
+    doll.alert(alerts[#nothingHappens]);
     return true;
   }));
 
@@ -705,7 +685,6 @@ void registerItems(Map<String, Stage<Doll>> stages) {
 
   // Resources.
 
-  registerItemInfo('antimatter', ItemInfo());
   registerItemInfo('wood', ItemInfo());
   registerItemInfo('magic wood', ItemInfo());
   registerItemInfo('seaweed', ItemInfo());
@@ -753,4 +732,5 @@ void registerItems(Map<String, Stage<Doll>> stages) {
   registerItemInfo('spacetime fabric', ItemInfo());
   registerItemInfo('herb', ItemInfo());
   registerItemInfo('tentacle', ItemInfo());
+  registerItemInfo('particle accelerator', ItemInfo(egos: [Ego.metal]));
 }

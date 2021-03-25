@@ -92,12 +92,8 @@ class Item extends OnlineObject {
     if (infoName == 'level up potion') return false;
     if (potion) return true;
 
-    return const [
-      'nuclear reactor',
-      'philosopher\'s stone',
-      'puzzle box',
-      'particle accelerator'
-    ].contains(infoName);
+    return const ['nuclear reactor', 'philosopher\'s stone', 'puzzle box']
+        .contains(infoName);
   }
 
   /// Returns the display text without the bonus or amount.
@@ -212,11 +208,6 @@ class Item extends OnlineObject {
       return 'converts 1 uranium to $energy energy';
     }
 
-    if (infoName == 'particle accelerator') {
-      var energy = formatNumberWithPrecision(1 + bonus / 100);
-      return 'converts 1 energy and 1 gold to $energy antimatter';
-    }
-
     if (infoName == 'nuclear bomb')
       return 'kills all targets in range without reward except for bosses, players, and pets';
 
@@ -296,10 +287,7 @@ class Item extends OnlineObject {
 
   bool get tool => [Ego.mining, Ego.fishing, Ego.gathering].any(egos.contains);
 
-  bool get tradable {
-    if (infoName == 'antimatter' || egos.contains(Ego.antimatter)) return false;
-    return true;
-  }
+  bool get tradable => true;
 
   bool get twoHanded => egos.contains(Ego.twoHanded);
 

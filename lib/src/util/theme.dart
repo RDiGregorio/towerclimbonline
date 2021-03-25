@@ -122,7 +122,8 @@ class Theme {
 
     'gabriel',
     'stacy',
-    'popped collar chad'
+    'popped collar chad',
+    'odin'
   ], resources: const [
     'stardust fish',
     'stardust rock',

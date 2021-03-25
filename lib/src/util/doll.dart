@@ -1668,9 +1668,11 @@ class Doll extends OnlineObject {
         hurt(damage, critical ? 'critical' : null);
 
       if (effect.source != null && !effect.egos.contains(Ego.healing)) {
-        var reflections = equipmentEgos[Ego.reflection] ?? 0;
+        var reflections = equipmentEgos[Ego.reflection] ?? 0,
+            canReflect = effect.egos.contains(Ego.magic) ||
+                effect.egos.contains(Ego.ballistic);
 
-        if (reflections > 0)
+        if (canReflect && reflections > 0)
           effect.source.hurt(effect.source.applyDefense(
               max(1, min<int>(healthBeforeDamage, damage) * reflections)));
       }
@@ -2105,10 +2107,12 @@ class Doll extends OnlineObject {
 
     if (Clock.time - target._lastTeleport < 25) return false;
 
-    // While debugging, players are stealthy regardless of their stealth level.
+    return target.account.options['stealth'] == false;
 
-    return target.account.options['stealth'] == false ||
-        !Config.debug && level > target.stealth;
+    // Old stealth mechanics.
+
+    // return target.account.options['stealth'] == false ||
+    //   !Config.debug && level > target.stealth;
   }
 
   int _vitalityToHealth(int vitality) {

@@ -6,9 +6,10 @@ class Stat extends OnlineObject {
   int get ascensions => internal['ascensions'] ?? 0;
 
   void set ascensions(int value) {
+    var delta = experience - previousLevelExperience;
     setExperienceWithoutSplat(BigInt.zero);
     internal['ascensions'] = value;
-    internal['next level text'] = formatNumber(nextLevelExperience);
+    setExperienceWithoutSplat(delta);
   }
 
   BigInt get experience => big(internal['exp'] ?? 0);
@@ -25,12 +26,12 @@ class Stat extends OnlineObject {
 
   BigInt get nextLevelExperience {
     if (_level >= maxLevel) return BigInt.from(maxFinite);
-    return _experienceFromLevel(_level + 1);
+    return experienceFromLevel(_level + 1);
   }
 
   String get nextLevelExperienceText => internal['next level text'];
 
-  BigInt get previousLevelExperience => _experienceFromLevel(_level);
+  BigInt get previousLevelExperience => experienceFromLevel(_level);
 
   int get _level => min(internal['lvl'] ?? 1, maxLevel);
 
@@ -40,15 +41,15 @@ class Stat extends OnlineObject {
     return true;
   }
 
-  void setExperienceWithoutSplat(BigInt value) => _setExperience(value, false);
-
-  void setLevel(int value) =>
-      _setExperience(_experienceFromLevel(min(value, maxLevel)), false);
-
-  BigInt _experienceFromLevel(int level) {
+  BigInt experienceFromLevel(int level) {
     var result = pow(exp(level - 1), 1 / 25) * 1000 - 1000;
     return big(result.ceil()) * (BigInt.one << ascensions);
   }
+
+  void setExperienceWithoutSplat(BigInt value) => _setExperience(value, false);
+
+  void setLevel(int value) =>
+      _setExperience(experienceFromLevel(min(value, maxLevel)), false);
 
   int _levelFromExperience(BigInt experience) {
     num result = (experience ~/ (BigInt.one << ascensions)).toInt();

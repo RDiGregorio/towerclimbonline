@@ -111,7 +111,7 @@ class Ego {
     resistMagic: 'resists magic attacks',
     regen: 'heals user over time',
     stealth: 'invisibility (+100% stealth)',
-    reflection: 'reflects damage',
+    reflection: 'reflects ballistic damage; reflects magic damage',
     lucky: '+100% dropped items',
     life: '+1 life',
     stun: 'stun attack (prevents target\'s next attack)',

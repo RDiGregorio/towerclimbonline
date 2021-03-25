@@ -379,7 +379,7 @@ class Crafting {
     // Antimatter.
 
     add('particle accelerator', ['annihilation scroll', 'iron']);
-    add('antimatter cannon', ['antimatter', 'iron']);
+    add('antimatter cannon', ['particle accelerator', 'gold', 'energy']);
   }
 
   /// Used client side.

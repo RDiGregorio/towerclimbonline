@@ -354,12 +354,13 @@ class Account extends OnlineObject {
       session.internal.addEvent(ObservableEvent(type: 'close modal')));
 
   bool collectFromItemSource(Doll source, String type) {
-    var floor = stageToFloor(doll.stage.id);
+    // Bonus floors are treated as floor 1.
 
-    // Bonus floors are treated as floor 100.
+    var floor = max(1, stageToFloor(doll.stage.id)),
+        item,
+        extraItem,
+        experienceMultiplier = 10;
 
-    if (floor <= 0) floor = 100;
-    var item, extraItem, experienceMultiplier = 10;
     Stat skill;
     num amount = 1;
 
@@ -494,7 +495,8 @@ class Account extends OnlineObject {
         var food = ['grain', 'milk', 'vegetable', 'herb'],
             gems = ['ruby', 'emerald', 'sapphire', 'diamond', 'onyx'],
             scrolls = [
-              // Acid and poison are not scroll types because they are potion types.
+              // Acid and poison are not scroll types because they are potion
+              // types.
 
               'fire scroll',
               'ice scroll',
@@ -709,6 +711,10 @@ class Account extends OnlineObject {
           ingredientItems.any(
               (item) => item.food || item.potion || item.infoName == 'herb'))
         return 'cooking';
+
+      if (targetItem?.infoName == 'particle accelerator') return 'metalworking';
+
+      // Enchanting weapons with scrolls uses crafting.
 
       if (ingredientItems.any(
           (dynamic item) => item.infoName.contains(_scroll))) return 'crafting';
