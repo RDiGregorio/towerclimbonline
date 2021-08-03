@@ -57,9 +57,6 @@ void reload() {
   if (ClientGlobals.currentView != 'end') window.location.reload();
 }
 
-bool showingModal(String selector) =>
-    querySelector(selector)?.classes?.contains('in') == true;
-
 /// You still need to use [data-toggle] and [data-target] in the template or the
 /// modal won't appear.
 

@@ -79,21 +79,18 @@ Stream<WebSocket> getSecureWebSockets(
       await HttpServer.bindSecure(InternetAddress.anyIPv6, port, context);
   Logger.root.info('listening on port $port');
 
-  httpsServer.handleError((error, trace) {
-    Logger.root.severe('$error');
-    Logger.root.severe('$trace');
-  });
-
-  await for (var request in httpsServer) {
+  await for (var request in httpsServer.handleError(_onError)) {
     var socket = await runZoned(
         () => WebSocketTransformer.isUpgradeRequest(request)
             ? WebSocketTransformer.upgrade(request).catchError((error, trace) {
-                Logger.root.severe(error);
+                Logger.root.severe('$error');
                 Logger.root.severe('$trace');
                 return null;
               })
-            : null,
-        onError: (error, trace) => Logger.root.warning('$error'));
+            : null, onError: (error, trace) {
+      Logger.root.severe('$error');
+      Logger.root.severe('$trace');
+    });
 
     yield socket;
   }
@@ -106,21 +103,18 @@ Stream<WebSocket> getWebSockets(int port) async* {
   httpServer = await HttpServer.bind(InternetAddress.anyIPv6, port);
   Logger.root.info('listening on port $port');
 
-  httpServer.handleError((error, trace) {
-    Logger.root.severe('$error');
-    Logger.root.severe('$trace');
-  });
-
-  await for (var request in httpServer) {
+  await for (var request in httpServer.handleError(_onError)) {
     var socket = await runZoned(
         () => WebSocketTransformer.isUpgradeRequest(request)
             ? WebSocketTransformer.upgrade(request).catchError((error, trace) {
-                Logger.root.severe(error);
+                Logger.root.severe('$error');
                 Logger.root.severe('$trace');
                 return null;
               })
-            : null,
-        onError: (error, trace) => Logger.root.warning('$error'));
+            : null, onError: (error, trace) {
+      Logger.root.severe('$error');
+      Logger.root.severe('$trace');
+    });
 
     yield socket;
   }
@@ -143,17 +137,14 @@ void host(int port, Wrapper<ObservableMap> function(WebSocket socket),
 
   Future(() async => retryOnError(() async {
         if (ServerGlobals.shuttingDown) return;
-        SecurityContext context = SecurityContext();
+        var context = SecurityContext.defaultContext,
+            path = '/etc/letsencrypt/live/www.towerclimbonline.com';
 
         try {
-          Logger.root.info('loading certificates');
-
           if (!Config.debug)
             context
-              ..useCertificateChain(
-                  '/etc/letsencrypt/live/www.towerclimbonline.com/fullchain.pem')
-              ..usePrivateKey(
-                  '/etc/letsencrypt/live/www.towerclimbonline.com/privkey.pem');
+              ..useCertificateChain('$path/fullchain.pem')
+              ..usePrivateKey('$path/privkey.pem');
         } catch (error, trace) {
           Logger.root.severe(error);
           Logger.root.severe(trace);
@@ -217,10 +208,10 @@ Future<Map<Point<int>, int>> newCollisionMap(
 
   var ignore = const ['tutorial0_0_0', 'bonus2_0_0'];
 
-  if (dolls != 100 && !ignore.contains(name))
+  if (dolls != 100 && dolls != 0 && !ignore.contains(name))
     Logger.root.info('warning: $name has an invalid object count of $dolls');
 
-  if (chests != 5 && !ignore.contains(name))
+  if (chests != 5 && chests != 0 && !ignore.contains(name))
     Logger.root.info('warning: $name has an invalid chest count of $chests');
 
   return Map<Point<int>, int>.from(result);
@@ -306,11 +297,17 @@ void _host(WebSocket socket, Wrapper<ObservableMap> function(WebSocket socket),
         runZoned(() async {
           var list = json.decode(value);
 
-          send([
-            await Function.apply(
-                reflect(instance).getField(Symbol(list[0])).reflectee, list[1]),
-            list[2]
-          ]);
+          try {
+            send([
+              await Function.apply(
+                  reflect(instance).getField(Symbol(list[0])).reflectee,
+                  list[1]),
+              list[2]
+            ]);
+          } catch (error) {
+            Logger.root.severe(value);
+            rethrow;
+          }
         }, onError: onError);
     });
 
@@ -321,4 +318,17 @@ void _host(WebSocket socket, Wrapper<ObservableMap> function(WebSocket socket),
 
     send(ObservableEvent(type: 'change', data: {'value': instance}));
   }, onError: onError);
+}
+
+void _onError(Object error, StackTrace stackTrace) {
+  if (error is SocketException && error.osError != null) {
+    // So far, these errors have been logged, and have been harmless:
+    // Connection reset by peer (error code 104).
+    // Broken pipe (error code 32).
+
+    Logger.root.info(error.osError.message);
+    return;
+  }
+
+  throw error;
 }

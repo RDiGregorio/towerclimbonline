@@ -112,7 +112,11 @@ class ProceduralGenerator {
           'trog altar',
           'lugonu altar',
           'gozag altar',
-          'fedhas altar'
+          'fedhas altar',
+          'xom altar',
+          'ashenzari altar',
+          'okawaru altar',
+          'qazlal altar'
         ]);
       else if (i <= 16 && theme.resources.isNotEmpty)
         doll = randomValue(theme.resources);

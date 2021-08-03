@@ -19,6 +19,7 @@ class HighScoresModal {
     'astral',
     'astral2',
     'astral5',
+    'astral7',
     'eris',
     'eris2',
     'test3'

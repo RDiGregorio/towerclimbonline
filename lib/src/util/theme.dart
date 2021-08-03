@@ -45,10 +45,10 @@ class Theme {
     'spriggan'
   ], bosses: const [
     'fire dragon',
-    'griffin',
     'doom shroom',
     'ice dragon',
-    'lucifer'
+    'lucifer',
+    'juiblex'
   ], resources: const [
     'shark',
     'magic tree',
@@ -94,8 +94,7 @@ class Theme {
     'medusa',
     'beelzebub',
     'demogorgon',
-    'yeenoghu',
-    'juiblex'
+    'yeenoghu'
   ], resources: const [
     'herb',
     'rock'
@@ -114,12 +113,12 @@ class Theme {
     'ice turtle'
   ], bosses: const [
     'blessed dragon',
-    'gatekeeper',
     'dark star',
     'cosmic turtle',
 
     // Added for thematic reasons.
 
+    'gatekeeper',
     'gabriel',
     'stacy',
     'popped collar chad',

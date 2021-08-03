@@ -33,7 +33,6 @@ void registerItems(Map<String, Stage<Doll>> stages) {
   registerFood('teriyaki', 10);
   registerFood('ice cream', 10);
   registerFood('salad', 10);
-  registerFood('rice', 10);
   registerFood('noodles', 10);
 
   // Basic foods (high level).
@@ -176,30 +175,18 @@ void registerItems(Map<String, Stage<Doll>> stages) {
   registerPotion('dexterity potion', 'dex+');
   registerPotion('intelligence potion', 'int+');
   registerPotion('regen potion', 'regen', [Ego.regen]);
-  registerPotion('invisibility potion', 'invisibility', [Ego.stealth]);
   registerPotion('fast potion', 'spd+', [Ego.fast]);
 
   // Unobtainable potions.
+  // TODO: remove elixir and super resist potion
 
-  registerPotion('resist fire potion', 'resist fire', [Ego.resistFire]);
-  registerPotion('resist ice potion', 'resist ice', [Ego.resistIce]);
-
-  registerPotion(
-      'resist electric potion', 'resist electric', [Ego.resistElectric]);
-
-  registerPotion(
-      'resist gravity potion', 'resist gravity', [Ego.resistGravity]);
-
-  registerPotion('resist poison potion', 'resist poison', [Ego.resistPoison]);
-  registerPotion('resist acid potion', 'resist acid', [Ego.resistAcid]);
   registerPotion('elixir potion', 'elixir');
   registerPotion('super resist potion', 'super resist');
   registerPotion('level up potion', 'level up');
 
   // Weapons.
-  // [key, damage, missile, egos]
 
-  // Daggers and bows have an accuracy bonus.
+  // Daggers, bows, and whips have an accuracy bonus, but only 10 base damage.
 
   registerItemInfo(
       'dagger',
@@ -208,6 +195,15 @@ void registerItems(Map<String, Stage<Doll>> stages) {
           accuracy: 100,
           coolDown: CoolDown.average,
           egos: const [Ego.metal],
+          slot: #weapon));
+
+  registerItemInfo(
+      'demon whip',
+      ItemInfo(
+          damage: 10,
+          accuracy: 100,
+          coolDown: CoolDown.average,
+          egos: const [Ego.metal, Ego.demon],
           slot: #weapon));
 
   registerItemInfo(
@@ -225,49 +221,49 @@ void registerItems(Map<String, Stage<Doll>> stages) {
   registerWeaponInfo('book', 50, 'image/missile/white_bolt.png',
       const [Ego.twoHanded, Ego.magic, Ego.shield]);
 
-  registerWeaponInfo('demon whip', 10, null, [Ego.demon]);
-
   registerWeaponInfo(
-      'unicorn horn', 50, null, const [Ego.twoHanded, Ego.magic, Ego.healing]);
+      'supernova book', 50, 'image/missile/white_bolt.png', const [
+    Ego.twoHanded,
+    Ego.magic,
+    Ego.shield,
+    Ego.burst,
+    Ego.energy,
+    Ego.all
+  ]);
 
-  registerWeaponInfo(
-      'guitar', 50, null, const [Ego.twoHanded, Ego.magic, Ego.healing]);
+  // Horns.
+
+  registerWeaponInfo('unicorn horn', 50, null, const [Ego.magic, Ego.healing]);
+
+  registerWeaponInfo('kirin horn', 50, 'image/missile/white_bolt.png',
+      const [Ego.magic, Ego.electric, Ego.gravity, Ego.burst]);
 
   registerWeaponInfo('sword', 50, null, const [Ego.parry, Ego.metal]);
 
-  registerWeaponInfo('rainbow undecimber', 250, null, const [Ego.rainbow]);
-
-  registerWeaponInfo(
-      'battle axe', 250, null, const [Ego.metal, Ego.maximumDamage]);
-
-  // Wrath is a berserk burst battle axe.
-
-  registerWeaponInfo('wrath', 250, null,
-      const [Ego.wrath, Ego.metal, Ego.burst, Ego.maximumDamage]);
-
-  registerWeaponInfo('kirin horn', 250, 'image/missile/white_bolt.png',
-      const [Ego.twoHanded, Ego.magic, Ego.electric, Ego.gravity, Ego.burst]);
+  // AOE weapons.
 
   registerWeaponInfo(
       'scythe', 50, null, const [Ego.twoHanded, Ego.metal, Ego.all]);
 
-  registerWeaponInfo('spear', 50, null, const [Ego.metal, Ego.stun]);
+  registerWeaponInfo('scepter', 50, 'image/missile/white_bolt.png',
+      const [Ego.metal, Ego.twoHanded, Ego.magic, Ego.all]);
+
+  // Special weapons.
 
   registerWeaponInfo('rubber chicken', 0, null, const [Ego.death]);
+  registerWeaponInfo('rainbow undecimber', 50, null, const [Ego.rainbow]);
 
-  // A spear.
+  // Spears.
+
+  registerWeaponInfo('spear', 50, null, const [Ego.metal, Ego.stun]);
 
   registerWeaponInfo('gungnir', 50, null,
-      const [Ego.metal, Ego.acid, Ego.gravity, Ego.poison, Ego.stun]);
+      const [Ego.metal, Ego.berserk, Ego.electric, Ego.gravity, Ego.stun]);
+
+  // Burst weapons.
 
   registerWeaponInfo(
       'katana', 50, null, const [Ego.metal, Ego.burst, Ego.parry]);
-
-  registerWeaponInfo('stardust sword', 50, null, const [
-    // It's a rainbow sword with burst and berserk.
-
-    Ego.metal, Ego.parry, Ego.rainbow, Ego.burst, Ego.wrath
-  ]);
 
   registerWeaponInfo('rifle', 50, 'image/missile/white_bolt.png',
       const [Ego.twoHanded, Ego.burst, Ego.ballistic, Ego.metal]);
@@ -275,8 +271,17 @@ void registerItems(Map<String, Stage<Doll>> stages) {
   registerWeaponInfo('smg', 50, 'image/missile/white_bolt.png',
       const [Ego.burst, Ego.ballistic, Ego.metal]);
 
+  // The magic equivalent of a fire rifle.
+
+  registerWeaponInfo('flamethrower', 50, 'image/missile/red_bolt.png',
+      const [Ego.twoHanded, Ego.magic, Ego.fire, Ego.burst, Ego.metal]);
+
+  // Revolvers.
+
   registerWeaponInfo('revolver', 50, 'image/missile/white_bolt.png',
       const [Ego.ballistic, Ego.metal]);
+
+  // Weapons with maximum damage also have 250 base damage.
 
   registerWeaponInfo('shotgun', 250, 'image/missile/white_bolt.png', const [
     Ego.twoHanded,
@@ -286,11 +291,16 @@ void registerItems(Map<String, Stage<Doll>> stages) {
     Ego.stun
   ]);
 
-  registerWeaponInfo('scepter', 50, 'image/missile/white_bolt.png',
-      const [Ego.metal, Ego.twoHanded, Ego.magic, Ego.all]);
+  registerWeaponInfo(
+      'battle axe', 250, null, const [Ego.metal, Ego.maximumDamage]);
 
-  registerWeaponInfo('flamethrower', 250, 'image/missile/red_bolt.png',
-      const [Ego.twoHanded, Ego.magic, Ego.fire, Ego.burst]);
+  // Wrath is a berserk battle axe.
+
+  registerWeaponInfo(
+      'wrath', 250, null, const [Ego.berserk, Ego.metal, Ego.maximumDamage]);
+
+  registerWeaponInfo('guitar', 50, null,
+      const [Ego.twoHanded, Ego.magic, Ego.healing, Ego.all]);
 
   // An antimatter shotgun. Antimatter uses black bolts.
 
@@ -312,51 +322,70 @@ void registerItems(Map<String, Stage<Doll>> stages) {
   registerArmorInfo('aegis armor', null, #body, 30, 0,
       const [Ego.resistBallistic, Ego.resistMagic]);
 
-  registerArmorInfo('leather armor', null, #body, 10);
-  registerArmorInfo('vest', null, #body, 10);
-  registerArmorInfo('robe', null, #body, 0, 25);
+  registerArmorInfo('silk robe', null, #body, 0, 25, [Ego.resistMagic]);
   registerArmorInfo('helmet', null, #helmet, 10, 0, const [Ego.metal]);
   registerArmorInfo('gloves', null, #gloves, 5);
   registerArmorInfo('boots', null, #boots, 5);
-  registerArmorInfo('jordans', null, #boots, 5, 0, const [Ego.fast]);
+  registerArmorInfo('jordans', null, #boots, 5, 0, const [Ego.fast, Ego.power]);
 
-  // Sleipnirs combine jordans and evasion boots.
+  // Base for the resist ballistic vest.
 
-  registerArmorInfo('sleipnirs', null, #boots, 5, 25, const [Ego.fast]);
+  registerArmorInfo('vest', null, #body, 10);
+  registerArmorInfo('leather jacket', null, #body, 10);
+
+  // Base for the arcane robe.
+
+  registerArmorInfo('robe', null, #body, 0, 25);
+
+  // Sleipnirs combine accuracy boots and evasion boots, while also giving fast
+  // movement and extra experience.
+
+  registerArmorInfo('sleipnirs', null, #boots, 5, 25,
+      const [Ego.experience, Ego.fast, Ego.accuracy]);
+
   registerArmorInfo('cloak', null, #cloak, 0, 25);
   registerArmorInfo('hat', null, #helmet, 5);
   registerArmorInfo('crown', null, #helmet, 5, 0, const [Ego.metal]);
+  registerArmorInfo('evasion crown', null, #helmet, 5, 25, const [Ego.metal]);
+
+  // Thorns and dream crowns are both healing crowns that resist evil, with
+  // dream crowns being better for magic users.
 
   registerArmorInfo(
       'thorns', null, #helmet, 5, 0, const [Ego.blood, Ego.resistEvil]);
 
   registerArmorInfo('dream crown', null, #helmet, 5, 0,
-      const [Ego.metal, Ego.resistMagic, Ego.arcane, Ego.regen]);
+      const [Ego.metal, Ego.arcane, Ego.regen, Ego.resistEvil]);
 
   registerArmorInfo('fur hat', null, #helmet, 5, 0, const [Ego.resistIce]);
-  registerArmorInfo('fur coat', null, #body, 5, 0, const [Ego.resistIce]);
+  registerArmorInfo('fur coat', null, #body, 10, 0, const [Ego.resistIce]);
+
+  // Hats crafted from fabrics.
+
+  registerArmorInfo('ghostly hat', null, #helmet, 5, 0, const [Ego.spirit]);
+  registerArmorInfo('distortion hat', null, #helmet, 5, 25);
+
+  registerArmorInfo('starlight hat', null, #helmet, 5, 0,
+      const [Ego.reflection, Ego.experience]);
 
   // Scarves are treated as cloaks.
 
   registerArmorInfo('fur scarf', null, #cloak, 0, 25, const [Ego.resistIce]);
-  registerArmorInfo('ghostly cloak', null, #cloak, 0, 50, [Ego.stealth]);
-  registerArmorInfo('ghostly robe', null, #body, 0, 50, [Ego.stealth]);
+  registerArmorInfo('silk cloak', null, #cloak, 0, 25, const [Ego.resistMagic]);
+  registerArmorInfo('ghostly cloak', null, #cloak, 0, 50, [Ego.spirit]);
+  registerArmorInfo('ghostly robe', null, #body, 0, 50, [Ego.spirit]);
   registerArmorInfo('angel wings', null, #cloak, 0, 50, const [Ego.regen]);
   registerArmorInfo('demon wings', null, #cloak, 0, 50, const [Ego.power]);
 
-  registerArmorInfo(
-      'starlight cloak', null, #cloak, 0, 50, const [Ego.reflection]);
+  registerArmorInfo('starlight cloak', null, #cloak, 0, 50,
+      const [Ego.reflection, Ego.experience]);
 
-  registerArmorInfo(
-      'starlight robe', null, #body, 0, 50, const [Ego.reflection]);
+  registerArmorInfo('starlight robe', null, #body, 0, 50,
+      const [Ego.reflection, Ego.experience]);
 
   registerArmorInfo('distortion cloak', null, #cloak, 0, 75);
   registerArmorInfo('distortion robe', null, #body, 0, 75);
   registerArmorInfo('ring', null, #ring, 0, 0, [Ego.metal]);
-
-  registerArmorInfo('ancient ring', null, #ring, 0, 0,
-      [Ego.metal, Ego.burst, Ego.arcane, Ego.experience]);
-
   registerArmorInfo('turtle shell', null, #shield, 0, 0, [Ego.shield]);
 
   registerArmorInfo('cosmic turtle shell', null, #shield, 0, 0,
@@ -448,9 +477,6 @@ void registerItems(Map<String, Stage<Doll>> stages) {
   registerItemInfo('life amulet',
       ItemInfo(slot: #amulet, egos: const [Ego.metal, Ego.life]));
 
-  registerItemInfo(
-      'shark tooth necklace', ItemInfo(slot: #amulet, egos: const [Ego.regen]));
-
   registerItemInfo('invisibility amulet',
       ItemInfo(slot: #amulet, egos: const [Ego.stealth]));
 
@@ -531,9 +557,10 @@ void registerItems(Map<String, Stage<Doll>> stages) {
   // God items.
 
   registerArmorInfo(
-      'asprika', null, #cloak, 0, 25, const [Ego.experience, Ego.regen]);
+      'asprika', null, #cloak, 0, 75, const [Ego.regen, Ego.experience]);
 
-  registerArmorInfo('brynhild', null, #body, 30, 0, const [Ego.power]);
+  registerArmorInfo(
+      'brynhild', null, #body, 30, 0, const [Ego.power, Ego.experience]);
 
   // Thrown.
 
@@ -586,12 +613,8 @@ void registerItems(Map<String, Stage<Doll>> stages) {
             var uranium = doll.account.items.getItem('uranium'),
                 amount = big(uranium?.getAmount() ?? 0);
 
-            // A +100 nuclear reactor will give 2 items.
-            // A +500 nuclear reactor will give 6 items.
-            // A +900 nuclear reactor will give 10 items.
-            // A +999 nuclear reactor is better than a +900 nuclear reactor.
-
-            amount += amount * BigInt.from(reactor.bonus) ~/ BigInt.from(100);
+            amount +=
+                BigIntUtil.multiplyByDouble(amount, safeLog(reactor.bonus));
 
             if (amount > BigInt.zero)
               doll.account
@@ -604,16 +627,11 @@ void registerItems(Map<String, Stage<Doll>> stages) {
           }));
 
   registerItemInfo('philosopher\'s stone',
-      ItemInfo(use: (Doll doll, Item reactor) {
+      ItemInfo(use: (Doll doll, Item stone) {
     var potions = doll.account.items.getItem('blood potion'),
         amount = big(potions?.getAmount() ?? 0);
 
-    // A +100 stone will give 2 items.
-    // A +500 stone will give 6 items.
-    // A +900 stone will give 10 items.
-    // A +999 stone is better than a +900 stone.
-
-    amount += amount * BigInt.from(reactor.bonus) ~/ BigInt.from(100);
+    amount += BigIntUtil.multiplyByDouble(amount, safeLog(stone.bonus));
 
     if (amount > BigInt.zero)
       doll.account
@@ -625,17 +643,22 @@ void registerItems(Map<String, Stage<Doll>> stages) {
     return true;
   }));
 
-  registerItemInfo('puzzle box', ItemInfo(use: (Doll doll, Item puzzle) {
-    // if (doll?.account != null && !doll.dead)
-    //   doll.randomJump(stages['tutorial0']);
-
-    doll.alert(alerts[#nothingHappens]);
-    return true;
-  }));
+  registerItemInfo(
+      'puzzle box',
+      ItemInfo(
+          consumed: true,
+          use: (Doll doll, Item puzzle) {
+            var secretRareDrop = secretRare;
+            secretRareDrop.bonus = puzzle.bonus;
+            doll.account.lootItem(secretRareDrop);
+            doll.account.secretRareDropLog[secretRareDrop.displayText] = true;
+            return true;
+          }));
 
   registerItemInfo(
       'nuclear bomb',
       ItemInfo(
+          consumed: true,
           egos: const [Ego.metal],
           use: (Doll source, Item bomb) {
             source
@@ -647,13 +670,9 @@ void registerItems(Map<String, Stage<Doll>> stages) {
                     !doll.boss &&
                     doll.account == null &&
                     doll.info?.interaction == null)
-                .forEach((target) {
-              source.account.recentKills[target.id] = true;
-
-              target
-                ..killWithNoReward()
-                ..splat('no reward', 'effect-text');
-            });
+                .forEach((target) => target
+                  ..killWithNoReward()
+                  ..splat('no reward', 'effect-text'));
 
             return true;
           }));
@@ -670,7 +689,7 @@ void registerItems(Map<String, Stage<Doll>> stages) {
 
   registerWeaponInfo('scroll', 0, null, [Ego.magic]);
 
-  // Tools are two handed for balance reasons, like unicorn horns.
+  // Tools are two handed for balance reasons.
 
   registerWeaponInfo(
       'pickaxe', 0, null, const [Ego.twoHanded, Ego.mining, Ego.metal]);
@@ -719,7 +738,6 @@ void registerItems(Map<String, Stage<Doll>> stages) {
   // Other ingredients.
 
   registerItemInfo('energy', ItemInfo());
-  registerItemInfo('shark tooth', ItemInfo());
   registerItemInfo('grain', ItemInfo());
   registerItemInfo('hide', ItemInfo());
   registerItemInfo('fur', ItemInfo());

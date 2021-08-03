@@ -93,6 +93,7 @@ Map<Symbol, String> alerts = {
 
 final Map<String, Point<int>> entrances = {};
 final int maxFinite = double.maxFinite.floor();
+final BigInt maxInput = big(100000) * big('1X') - BigInt.one;
 final String missingItemName = '????';
 
 RegExp numberPattern = RegExp(r'^\d+[kmgtpezyx]?$'),
@@ -136,30 +137,8 @@ Item get secretRare {
 
   String info = randomValue(randomValue([
     // Weapons:
-    [
-      // Crafted from wood:
 
-      'bow',
-      'book',
-
-      // Crafted from iron or gold:
-
-      'scythe',
-      'dagger',
-      'sword',
-      'battle axe',
-      'spear',
-      'revolver',
-      'rifle',
-      'shotgun',
-      'scepter',
-
-      // Other:
-
-      'smg',
-      'katana',
-      'demon whip'
-    ],
+    ['smg', 'katana', 'supernova book', 'rainbow undecimber'],
 
     // Helmets.
 
@@ -186,15 +165,20 @@ Item get secretRare {
 
     // Boots.
 
-    ['evasion boots', 'power boots', 'accuracy boots'],
+    ['evasion boots', 'power boots', 'accuracy boots', 'invisibility boots'],
 
     // Gloves.
 
-    ['evasion gloves', 'power gloves', 'accuracy gloves'],
+    [
+      'evasion gloves',
+      'power gloves',
+      'accuracy gloves',
+      'crystal thieving gloves'
+    ],
 
     // Shields.
 
-    ['cosmic turtle shell', 'aegis shield'],
+    ['cosmic turtle shell', 'aegis shield', 'spirit shield'],
 
     // Amulets.
 
@@ -207,13 +191,12 @@ Item get secretRare {
       'defense amulet',
       'invisibility amulet',
       'life amulet',
-      'reflection amulet',
-      'shark tooth necklace'
+      'reflection amulet'
     ],
 
     // Rings.
 
-    ['meteorite ring', 'super resist ring', 'burst ring']
+    ['meteorite ring', 'super resist ring', 'burst ring', 'berserk ring']
   ]));
 
   List<int> egos = [];
@@ -232,7 +215,7 @@ Item get secretRare {
       // Combat effects.
 
       Ego.burst,
-      Ego.wrath,
+      Ego.berserk,
       Ego.demon,
 
       // Other effects.
@@ -242,46 +225,21 @@ Item get secretRare {
     ].where((ego) => !item.egos.contains(ego)));
   } else if (item.info.slot == #shield)
     egos.addAll([
-      Ego.resistMagic,
-      Ego.resistBallistic,
-
       // Universal armor egos (crystal is used instead of experience).
 
-      Ego.crystal, Ego.reflection, Ego.regen
+      Ego.crystal, Ego.reflection, Ego.regen, Ego.arcane, Ego.spirit
     ].where((ego) => !item.egos.contains(ego)));
-  else if (item.info.slot == #helmet)
+  else if ([#helmet, #body, #cloak].contains(item.info.slot))
     egos.addAll([
-      Ego.resistMagic,
-      Ego.resistBallistic,
-
       // Universal armor egos.
 
-      Ego.experience, Ego.reflection, Ego.regen
-    ].where((ego) => !item.egos.contains(ego)));
-  else if (item.info.slot == #body)
-    egos.addAll([
-      Ego.arcane,
-      Ego.resistMagic,
-      Ego.resistBallistic,
-
-      // Universal armor egos.
-
-      Ego.experience, Ego.reflection, Ego.regen
-    ].where((ego) => !item.egos.contains(ego)));
-  else if (item.info.slot == #cloak)
-    egos.addAll([
-      Ego.resistMagic,
-      Ego.resistBallistic,
-
-      // Universal armor egos.
-
-      Ego.experience, Ego.reflection, Ego.regen
+      Ego.experience, Ego.reflection, Ego.regen, Ego.arcane, Ego.spirit
     ].where((ego) => !item.egos.contains(ego)));
   else if (item.info.slot == #gloves)
     egos.addAll([
       // Universal armor egos.
 
-      Ego.experience, Ego.reflection, Ego.regen
+      Ego.experience, Ego.reflection, Ego.regen, Ego.arcane, Ego.spirit
     ].where((ego) => !item.egos.contains(ego)));
   else if (item.info.slot == #boots)
     egos.addAll([
@@ -289,29 +247,33 @@ Item get secretRare {
 
       // Universal armor egos.
 
-      Ego.experience, Ego.reflection, Ego.regen
+      Ego.experience, Ego.reflection, Ego.regen, Ego.arcane, Ego.spirit
     ].where((ego) => !item.egos.contains(ego)));
   else if (item.info.slot == #ring)
     egos.addAll([
-      Ego.wrath,
+      Ego.berserk,
       Ego.burst,
 
       // Universal armor egos.
 
       Ego.experience,
       Ego.regen,
-      Ego.reflection
+      Ego.reflection,
+      Ego.arcane,
+      Ego.spirit
     ].where((ego) => !item.egos.contains(ego)));
   else if (item.info.slot == #amulet)
     egos.addAll([
       Ego.shield,
-      Ego.life,
+      Ego.lucky,
 
       // Universal armor egos.
 
       Ego.experience,
       Ego.regen,
-      Ego.reflection
+      Ego.reflection,
+      Ego.arcane,
+      Ego.spirit
     ].where((ego) => !item.egos.contains(ego)));
 
   if (egos.isNotEmpty)
@@ -406,6 +368,11 @@ int calculateAccuracyPercentBonus(
   return result + increasePercent * weaponAccuracy ~/ 100;
 }
 
+int calculateCharmAttribute(Doll doll, Item weapon) {
+  num result = 10 + triangleNumber(doll.modifiedSummoningLevel) / 5;
+  return (result + result * weapon.bonus / 100).floor();
+}
+
 int calculateCoolDown(Doll doll, [Item weapon]) =>
     weapon == null ? CoolDown.average : weapon.info.coolDown;
 
@@ -420,9 +387,14 @@ int calculateDamage(Doll doll, [Item weapon]) {
   // Each +1 on a weapon increases damage (including from attributes like
   // strength).
 
+  var charm = weapon?.egos?.contains(Ego.charm) == true,
+      attribute = charm
+          ? calculateCharmAttribute(doll, weapon)
+          : doll._weaponAttribute(weapon);
+
   var result = percent(
-      doll.nonWeaponEquipment.fold(doll._weaponAttribute(weapon) + damage,
-          (damage, item) => damage + item.damage),
+      doll.nonWeaponEquipment
+          .fold(attribute + damage, (damage, item) => damage + item.damage),
       100 + damageIncreasePercent(bonus));
 
   if (doll?.account?.god == 'trog') result *= 2;
@@ -444,9 +416,10 @@ int calculateDamage(Doll doll, [Item weapon]) {
   return result;
 }
 
-int calculateDropBonus(Stat stat, int amount) {
-  if (amount < 2) return 0;
-  var bonusPerUpgrade = stat.level ~/ 20 + 1;
+int calculateDropBonus(int level, dynamic amount) {
+  amount = big(amount);
+  if (amount < BigInt.two) return 0;
+  var bonusPerUpgrade = level ~/ 20 + 1;
   return bonusPerUpgrade * (amount.bitLength - 1);
 }
 
@@ -468,15 +441,18 @@ int calculateEvasionPercentBonus(Iterable<dynamic> equipment) {
 
 /// Calculates if gathering is successful or not.
 
-bool calculateGatheringHit(Doll doll, int accuracy, int evasion) =>
-    calculateHit(
-        doll, levelToGatheringPower(accuracy), levelToGatheringPower(evasion));
+bool calculateGatheringHit(Doll doll, int accuracy, int evasion,
+        [num rateMultiplier = 1]) =>
+    calculateHit(doll, levelToGatheringPower(accuracy),
+        levelToGatheringPower(evasion), rateMultiplier);
 
 /// Calculates if an attack hits or not.
 
-bool calculateHit(Doll doll, num accuracy, num evasion) {
-  var rate = invertPercentage(accuracy * 50 / evasion);
-  var result = rate > randomDouble * 100;
+bool calculateHit(Doll doll, num accuracy, num evasion,
+    [num rateMultiplier = 1]) {
+  var rate = invertPercentage(accuracy * 50 / evasion) * rateMultiplier,
+      result = rate > randomDouble * 100;
+
   if (!result) doll?.splat('${rate.floor()}%', 'effect-text');
   return result;
 }
@@ -493,6 +469,26 @@ int calculateLevel(Doll doll) {
   var level = 1, result = 50 + triangleNumber(level);
   while (result < points) result = 50 + triangleNumber(++level);
   return level;
+}
+
+int calculateReflectedDamage(Doll doll) {
+  if (doll == null) return 0;
+
+  // The average bonus of the reflect items is treated like a weapon bonus.
+
+  var equipped = List<Item>.from(doll.equipped.values
+          .where((item) => item.egos.contains(Ego.reflection))),
+      bonus = equipped.fold(0, (result, item) => result + item.bonus) ~/
+          equipped.length;
+
+  // Reflection uses vitality for damage.
+
+  var attribute = doll.vitality;
+  var result = attribute + attribute * bonus ~/ 100;
+
+  // Reflection deals 25% damage.
+
+  return result * equipped.length ~/ 4;
 }
 
 /// Capitalizes the first letter of [string].
@@ -566,7 +562,10 @@ String digest(String string) =>
 int dollLevel(int difficulty, bool boss) {
   num result = max(1, difficulty);
   result *= boss ? 6 : 5;
-  result *= pow(1.01, difficulty);
+
+  // There is a jump in difficulty at the "haunted" floors.
+
+  if (difficulty > 5) result *= 2 * pow(1.01, difficulty / 2);
   return result.floor();
 }
 
@@ -577,9 +576,27 @@ bool equalElements(Iterable<dynamic> first, Iterable<dynamic> second) =>
 bool examine(Doll source, Doll target, bool showLocation) {
   if (target != null) {
     if (target.resource) {
-      var messages = [];
-      messages.add('name: resource');
-      messages.add('level: ${formatNumber(target.level)}');
+      var messages = [], item = target?.sanitizedName;
+
+      if (item == 'rock')
+        item = 'iron';
+      else if (item == 'tree')
+        item = 'wood';
+      else if (item == 'magic tree')
+        item = 'magic wood';
+      else if (item == 'stardust rock')
+        item = ['sapphire', 'ruby', 'emerald', 'diamond', 'onyx'].join(', ');
+      else if (item == 'stardust fish')
+        item = 'rainbow fish';
+      else if (item == 'stardust tree')
+        item = 'yggdrasil fruit';
+      else if (item == 'tentacles')
+        item = ['tentacle', 'blood potion'].join(', ');
+      else if (item == 'chest')
+        item = 'chest';
+      else if (item == 'dummy') item = 'punching bag';
+
+      messages.add('item: $item');
       source.informationPrompt(messages.join('<br>'));
       return false;
     }
@@ -623,7 +640,7 @@ bool examine(Doll source, Doll target, bool showLocation) {
     messages
       ..add('attributes: $agi agi, $dex dex, $intel int, $str str, $vit vit');
 
-    if (targetAccount != null)
+    if (targetAccount != null) {
       messages.add('skills: ${formatNumber(targetAccount.sheet.combat.level)} combat, ' +
           '${formatNumber(targetAccount.sheet.summoning.level)} summoning, ' +
           '${formatNumber(targetAccount.sheet.slaying.level)} luck, ' +
@@ -635,8 +652,8 @@ bool examine(Doll source, Doll target, bool showLocation) {
           '${formatNumber(targetAccount.sheet.crafting.level)} crafting, ' +
           '${formatNumber(targetAccount.sheet.crime.level)} stealth');
 
-    if (targetAccount?.god != null)
       messages.add('god: ${godName(targetAccount?.god)}');
+    }
 
     if (abilityDisplay.isNotEmpty) messages.add('abilities: $abilityDisplay');
 
@@ -647,21 +664,24 @@ bool examine(Doll source, Doll target, bool showLocation) {
 
       if (target.dropsSecretRare) {
         if (drops != '') drops += ', ';
-        drops += 'secret rare (0.10%)';
+        drops += 'puzzle box (1.00%)';
       }
 
-      if (drops != '') messages.add('drops: $drops');
+      if (drops != '' && !target.summoned) messages.add('drops: $drops');
     }
 
     if (showLocation)
-      messages.add(
-          'location: floor ${targetAccount?.currentFloor} (${targetAccount?.doll?.currentLocation?.x}, ${targetAccount?.doll?.currentLocation?.y})');
+      messages.add('location: floor ${targetAccount?.currentFloor} ' +
+          '(${targetAccount?.doll?.currentLocation?.x}, ${targetAccount?.doll?.currentLocation?.y})');
 
     source.informationPrompt(messages.join('<br>'));
   }
 
   return false;
 }
+
+BigInt extraResources(int level, int amount) =>
+    big(amount) * big(triangleNumber(level)) ~/ big(1000);
 
 Map<dynamic, dynamic> filterMap(
     Map<dynamic, dynamic> map, bool filter(dynamic key, dynamic value)) {
@@ -762,7 +782,7 @@ String getName(Symbol symbol) {
   return string.substring(8, string.length - 2);
 }
 
-String godName(String value) => capitalize(value);
+String godName(String value) => value == null ? 'none' : capitalize(value);
 
 /// Moves like a king in chess.
 
@@ -805,13 +825,15 @@ void kick(dynamic session) {
     ..logout(true);
 }
 
-num levelToGatheringPower(int level) => 10 + triangleNumber(level) / 5;
+num levelToGatheringPower(int level) => safeLog(10 + triangleNumber(level) / 5);
 
 Map<Point<int>, int> listKeyMapToPointKeyMap(Map<List<int>, int> map) {
   var result = {};
   map.forEach((list, value) => result[Point(list[0], list[1])] = value);
   return result;
 }
+
+num log2(num value) => log(value) / ln2;
 
 dynamic mapWrapperDecoder(dynamic key, dynamic value,
     {dynamic safety(dynamic key, dynamic value)}) {
@@ -939,8 +961,11 @@ DollInfo portal(Stage<Doll> targetStage, int targetX, int targetY, String image,
       interaction: (Account account, Doll doll) {
         var up = doll?.image?.contains('up_stairs') ?? false;
 
-        if (account.highestFloor <= stageToFloor(doll?.stage?.id) && up) {
-          account.alert('Defeating the boss unlocks the next floor.');
+        if (account.adjustedHighestFloor <= stageToFloor(doll?.stage?.id) &&
+            up) {
+          account
+              .alert('Defeating a boss on this floor unlocks the next floor.');
+
           return;
         }
 
@@ -1105,11 +1130,22 @@ void registerItemSource(String type, String image,
             resource: true,
             canPassThis: canPassThis,
             repeatInteraction: repeatInteraction,
-            interaction: (account, doll) {
+            interaction: (Account account, Doll doll) {
               if (!account.tappedItemSources.containsKey(doll.id) &&
                   !account.doll.warm(#left) &&
-                  account.collectFromItemSource(doll, type))
+                  account.collectFromItemSource(doll, type)) {
                 account.doll.warmUp(#left, CoolDown.average);
+
+                // Rewards nearby players. Chests are not shared because they
+                // are not repeatable.
+
+                if (type != 'chest')
+                  doll.playersInRange
+                      .where((looter) =>
+                          looter.id != account.id && looter.canLoot(doll))
+                      .forEach(
+                          (looter) => looter.collectFromItemSource(doll, type));
+              }
             }));
 
 void registerWeaponInfo(String key, int damage,
@@ -1144,8 +1180,9 @@ void replaceMap(Map<dynamic, dynamic> map, Map<dynamic, dynamic> other) {
 }
 
 void retryOnError(dynamic function()) {
-  runZoned(function, onError: (error) {
-    Logger.root.warning(error);
+  runZoned(function, onError: (error, trace) {
+    Logger.root.severe(error);
+    Logger.root.severe(trace);
     retryOnError(function);
   });
 }
@@ -1159,6 +1196,11 @@ num round(num value, int precision) {
 
 int roundDistance(Point<int> start, Point<int> end) =>
     start.distanceTo(end).round();
+
+num safeLog(num value) {
+  if (value == 0) return 0;
+  return log(value);
+}
 
 /// Converts non-word characters to underscores. Leading and trailing
 /// underscores are then stripped. The result is converted to lower case and
@@ -1245,7 +1287,7 @@ bool thisMonth(int timestamp) {
 }
 
 int triangleNumber(int value) {
-  assert(value > 0);
+  assert(value >= 0);
   return (value * value + value) ~/ 2;
 }
 

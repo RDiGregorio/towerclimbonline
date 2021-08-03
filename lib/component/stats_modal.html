@@ -14,11 +14,11 @@
         practice:
     </div>
     <label class="custom-input">
-        <select class="form-control input"
+        <select class="form-control input input-sm"
                 [(ngModel)]="xpMode">
             <option value="default">combat</option>
-            <option value="summoning">summoning</option>
             <option value="slaying">luck</option>
+            <option value="summoning">taming</option>
         </select>
     </label>
 </div>
@@ -27,7 +27,7 @@
         <td>
             <div class="panel panel-default transparent no-margin">
                 <div class="panel-heading header-buttons">
-                    Attributes
+                    Combat
                     <div class="pull-right">
                         <button class="btn btn-default thin-button"
                                 (click)="resetStats()">
@@ -153,32 +153,32 @@
                                         {{displayNumber(sheet.combat.internalLevel)}}{{displayAscensions(sheet.combat)}}
                                         <button *ngIf="isMaxLevel(sheet.combat)" class="btn btn-default thin-button"
                                                 (click)="ascend(sheet.combat)">
-                                            Ascend
+                                            Ascend ({{sheet.combat.levelAfterAscension}})
                                         </button>
                                     </div>
                                     <div class="small-text">
                                         {{displayExperience(sheet.combat)}}
                                     </div>
                                     <div class="small-text">
-                                        increases attributes
+                                        increases combat stats
                                     </div>
                                 </td>
                             </tr>
                             <tr>
                                 <td class="text-container">
                                     <div>
-                                        summoning:
+                                        taming:
                                         {{displayNumber(sheet.summoning.internalLevel)}}{{displayAscensions(sheet.summoning)}}
                                         <button *ngIf="isMaxLevel(sheet.summoning)" class="btn btn-default thin-button"
                                                 (click)="ascend(sheet.summoning)">
-                                            Ascend
+                                            Ascend ({{sheet.summoning.levelAfterAscension}})
                                         </button>
                                     </div>
                                     <div class="small-text">
                                         {{displayExperience(sheet.summoning)}}
                                     </div>
                                     <div class="small-text">
-                                        allows charming higher level pets
+                                        increases damage from leashes
                                     </div>
                                 </td>
                             </tr>
@@ -189,7 +189,7 @@
                                         {{displayNumber(sheet.slaying.internalLevel)}}{{displayAscensions(sheet.slaying)}}
                                         <button *ngIf="isMaxLevel(sheet.slaying)" class="btn btn-default thin-button"
                                                 (click)="ascend(sheet.slaying)">
-                                            Ascend
+                                            Ascend ({{sheet.slaying.levelAfterAscension}})
                                         </button>
                                     </div>
                                     <div class="small-text">
@@ -207,7 +207,7 @@
                                         {{displayNumber(sheet.fishing.internalLevel)}}{{displayAscensions(sheet.fishing)}}
                                         <button *ngIf="isMaxLevel(sheet.fishing)" class="btn btn-default thin-button"
                                                 (click)="ascend(sheet.fishing)">
-                                            Ascend
+                                            Ascend ({{sheet.fishing.levelAfterAscension}})
                                         </button>
                                     </div>
                                     <div class="small-text">
@@ -225,7 +225,7 @@
                                         {{displayNumber(sheet.mining.internalLevel)}}{{displayAscensions(sheet.mining)}}
                                         <button *ngIf="isMaxLevel(sheet.mining)" class="btn btn-default thin-button"
                                                 (click)="ascend(sheet.mining)">
-                                            Ascend
+                                            Ascend ({{sheet.mining.levelAfterAscension}})
                                         </button>
                                     </div>
                                     <div class="small-text">
@@ -244,7 +244,7 @@
                                         <button *ngIf="isMaxLevel(sheet.woodcutting)"
                                                 class="btn btn-default thin-button"
                                                 (click)="ascend(sheet.woodcutting)">
-                                            Ascend
+                                            Ascend ({{sheet.woodcutting.levelAfterAscension}})
                                         </button>
                                     </div>
                                     <div class="small-text">
@@ -262,7 +262,7 @@
                                         {{displayNumber(sheet.cooking.internalLevel)}}{{displayAscensions(sheet.cooking)}}
                                         <button *ngIf="isMaxLevel(sheet.cooking)" class="btn btn-default thin-button"
                                                 (click)="ascend(sheet.cooking)">
-                                            Ascend
+                                            Ascend ({{sheet.cooking.levelAfterAscension}})
                                         </button>
                                     </div>
                                     <div class="small-text">
@@ -281,7 +281,7 @@
                                         <button *ngIf="isMaxLevel(sheet.metalworking)"
                                                 class="btn btn-default thin-button"
                                                 (click)="ascend(sheet.metalworking)">
-                                            Ascend
+                                            Ascend ({{sheet.metalworking.levelAfterAscension}})
                                         </button>
                                     </div>
                                     <div class="small-text">
@@ -299,7 +299,7 @@
                                         {{displayNumber(sheet.crafting.internalLevel)}}{{displayAscensions(sheet.crafting)}}
                                         <button *ngIf="isMaxLevel(sheet.crafting)" class="btn btn-default thin-button"
                                                 (click)="ascend(sheet.crafting)">
-                                            Ascend
+                                            Ascend ({{sheet.crafting.levelAfterAscension}})
                                         </button>
                                     </div>
                                     <div class="small-text">
@@ -317,7 +317,7 @@
                                         {{displayNumber(sheet.crime.internalLevel)}}{{displayAscensions(sheet.crime)}}
                                         <button *ngIf="isMaxLevel(sheet.crime)" class="btn btn-default thin-button"
                                                 (click)="ascend(sheet.crime)">
-                                            Ascend
+                                            Ascend ({{sheet.crime.levelAfterAscension}})
                                         </button>
                                     </div>
                                     <div class="small-text">
@@ -326,9 +326,6 @@
                                     <div class="small-text">
                                         improves pickpocketing and chest rewards
                                     </div>
-                                    <!-- div class="small-text">
-                                        prevents enemies from attacking you
-                                    </div -->
                                 </td>
                             </tr>
                             <tr>

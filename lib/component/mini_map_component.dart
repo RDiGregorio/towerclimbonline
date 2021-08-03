@@ -25,7 +25,16 @@ class MiniMapComponent {
           sectionKey(doll.currentLocation) ==
               sectionKey(ClientGlobals.session?.doll?.currentLocation));
 
-  Map<String, String> get style => {'background-image': terrain};
+  int get height {
+    var map = ClientGlobals.session?.options ?? {};
+    return map['map size'] ?? 100;
+  }
+
+  Map<String, String> get style => {
+        'background-image': terrain,
+        'width': '${width}px',
+        'height': '${height}px'
+      };
 
   String get terrain {
     var location = ClientGlobals.session?.doll?.currentLocation;
@@ -38,26 +47,33 @@ class MiniMapComponent {
     return 'url("../$result?nocache=${ClientGlobals.start}")';
   }
 
+  int get width {
+    var map = ClientGlobals.session?.options ?? {};
+    return map['map size'] ?? 100;
+  }
+
   Map<String, String> pointStyle(Doll doll) {
-    var x = doll?.currentLocation?.x ?? 0, y = doll?.currentLocation?.y ?? 0;
+    num x = doll?.currentLocation?.x ?? 0, y = doll?.currentLocation?.y ?? 0;
+    x = (x % 100) * width ~/ 100;
+    y = (y % 100) * height ~/ 100;
+    var result = {'left': '${x}px', 'top': '${y}px'}, color = 'magenta';
 
-    var result = {'left': '${x % 100}px', 'top': '${y % 100}px'};
+    if (doll?.player == true) color = 'white';
 
-    if (doll?.player == true) {
-      var color = 'white';
-      result['background-color'] = color;
-      result['border-left-color'] = color;
-      result['border-top-color'] = color;
-    }
+    if (doll?.altar == true ||
+        doll?.shop == true ||
+        doll?.stairs == true ||
+        doll?.infoName == 'tutorial' ||
+        doll?.infoName == 'gravestone') color = 'gold';
 
-    if (doll?.altar == true || doll?.shop == true) {
-      var color = 'yellow';
-      result['background-color'] = color;
-      result['border-left-color'] = color;
-      result['border-top-color'] = color;
-    }
+    if (doll?.infoName == 'chest')
+      color = ClientGlobals.session.recentChests[doll.id] != true
+          ? 'cyan'
+          : 'black';
 
     if (doll?.boss == true) {
+      color = 'red';
+
       // Bosses blink if killing them will unlock a new floor.
 
       var difficulty =
@@ -66,6 +82,10 @@ class MiniMapComponent {
       if (ClientGlobals.session.highestFloor <= difficulty)
         result['animation'] = 'blinker 1s step-start infinite';
     }
+
+    result['background-color'] = color;
+    result['border-left-color'] = color;
+    result['border-top-color'] = color;
 
     return result;
   }

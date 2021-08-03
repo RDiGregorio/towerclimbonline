@@ -50,8 +50,10 @@ class ActionsComponent {
     until(() => ClientGlobals.session?.flags != null).then((result) {
       ClientGlobals.currentModalMessage = [
         '<p>Your goal is to reach the top of the tower.</p>',
-        '<p>Defeating a floor\'s boss unlocks the next floor.</p>',
-        '<p>You are given a time bonus for being offline, which multiplies experience and item rewards, so there is no advantage to playing many hours a day.</p>'
+        '<p>Defeating a boss on a floor unlocks the next floor.</p>',
+        '<p>You are given a time bonus for being offline, which multiplies ' +
+            'experience and item rewards, ' +
+            'so players with more free time aren\'t advantaged.</p>'
       ].join('');
 
       if (!ClientGlobals.session.getFlag('read guide')) {
@@ -87,8 +89,8 @@ class ActionsComponent {
         }
       }
 
-      if (showingModal('#input-modal')) {
-        querySelector('#input-modal input').focus();
+      if (querySelector('.modal-backdrop.in') != null) {
+        querySelector('#input-modal input')?.focus();
         return;
       }
 
@@ -317,6 +319,7 @@ class ActionsComponent {
 
   void handleMenuClick(String action) {
     showMenu = false;
+    _closeAll();
 
     switch (action) {
       case 'logout':
@@ -383,8 +386,8 @@ class ActionsComponent {
 
     Map<String, String> longDescription = {
       'regen': 'regenerating',
-      'invisibility': '+100% stealth',
       'frozen': 'frozen',
+      'burned': 'burned',
       'poisoned': 'poisoned',
       'agi+': '+50% agility',
       'str+': '+50% strength',

@@ -10,6 +10,10 @@ class BigIntUtil {
   static BigInt min(BigInt first, BigInt second) =>
       second < first ? second : first;
 
+  static BigInt multiplyByDouble(BigInt first, num second,
+          [int precision = 1000]) =>
+      first * big(second * precision) ~/ big(precision);
+
   static BigInt randomDivide(BigInt value, BigInt divideBy) {
     BigInt result = value ~/ divideBy;
 

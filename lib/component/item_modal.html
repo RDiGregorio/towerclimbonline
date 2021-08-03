@@ -1,9 +1,9 @@
 <div class="window-body-message">
     <table class="wide">
         <tr>
-            <td class="half-wide">
+            <td class="half-wide top-align">
                 <div>
-                    food threshold: {{autoHeal}}
+                    automatic food: {{autoHeal}}
                 </div>
                 <div class="small-text">
                     automatically eat action bar food
@@ -23,13 +23,13 @@
             <td class="top-align">
                 <div>
                     <div>
-                        automatically drink potions:
+                        automatic potions:
                     </div>
                     <div class="small-text">
                         automatically drink action bar potions
                     </div>
                     <label class="custom-input">
-                        <select class="form-control input"
+                        <select class="form-control input input-sm"
                                 [(ngModel)]="autoPotion">
                             <option value="on">on</option>
                             <option value="off">off</option>
@@ -72,31 +72,31 @@
             (click)="updateFilter('accessory')">
         {{buttonText('accessory')}}
     </button>
-    <!-- hidden to make the modal smaller -->
-    <!-- button class="lower-button-margin btn {{filter == 'food' ? 'btn-primary' : 'btn-default'}} wide-equip-button action-text center-message"
+    <button class="lower-button-margin btn {{filter == 'food' ? 'btn-primary' : 'btn-default'}} wide-equip-button action-text center-message"
             (click)="updateFilter('food')">
         {{buttonText('food')}}
     </button>
-    <button class="lower-button-margin btn {{filter == 'potion' ? 'btn-primary' : 'btn-default'}} wide-equip-button action-text center-message"
+    <button class="lower-button-margin btn {{filter == 'other' ? 'btn-primary' : 'btn-default'}} wide-equip-button action-text center-message"
+            (click)="updateFilter('other')">
+        {{buttonText('other')}}
+    </button>
+    <!-- hidden to make the modal smaller -->
+    <!-- button class="lower-button-margin btn {{filter == 'potion' ? 'btn-primary' : 'btn-default'}} wide-equip-button action-text center-message"
             (click)="updateFilter('potion')">
         {{buttonText('potions')}}
     </button>
     <button class="lower-button-margin btn {{filter == 'scroll' ? 'btn-primary' : 'btn-default'}} wide-equip-button action-text center-message"
             (click)="updateFilter('scroll')">
         {{buttonText('scrolls')}}
-    </button>
-    <button class="lower-button-margin btn {{filter == 'other' ? 'btn-primary' : 'btn-default'}} wide-equip-button action-text center-message"
-            (click)="updateFilter('other')">
-        {{buttonText('other')}}
     </button -->
 </div>
 <table class="wide">
     <tr>
-        <td>
+        <td class="top-align">
             <div class="panel panel-default transparent no-margin">
                 <div class="panel-heading header-buttons">
-                    <span>Items</span>
-                    <span class="pull-right">
+                    <!-- span>Items</span -->
+                    <span>
                         <button
                                 class="btn btn-default thin-button {{mode == 'use' ? 'btn-primary' : 'btn-default'}}"
                                 (click)="toggleMode('use')">
@@ -105,7 +105,7 @@
                         <button
                                 class="btn btn-default thin-button {{mode != 'use' ? 'btn-primary' : 'btn-default'}}"
                                 (click)="toggleMode('examine')">
-                            Examine
+                            Info
                         </button>
                     </span>
                 </div>
@@ -124,13 +124,13 @@
                                     </span>
                                 </td>
                             </tr>
-                            <tr class="{{doubleEquipped(item.id) ? 'yellow-text' : ''}}">
+                            <!-- tr class="{{doubleEquipped(item.id) ? 'yellow-text' : ''}}">
                                 <td class="text-container small-text">
                                     <span>
                                         {{itemDescription(item)}}&nbsp;
                                     </span>
                                 </td>
-                            </tr>
+                            </tr -->
                         </table>
                     </a>
                     <table class="fixed-table"></table>
@@ -139,7 +139,7 @@
         </td>
         <td class="panel-gutter"></td>
         <td class="top-align">
-            <div class="panel panel-default transparent no-margin">
+            <div class="panel panel-default transparent no-margin item-info-panel">
                 <div class="panel-heading">
                     Information
                 </div>
@@ -148,9 +148,6 @@
                         <table class="fixed-table">
                             <tr>
                                 <td class="text-container">
-                                    <div *ngIf="primaryEgos.length > 0">
-                                        weapon effects:
-                                    </div>
                                     <div *ngIf="leftDamageBonus != 0">
                                         +{{leftDamageBonus}} damage
                                     </div>
@@ -159,6 +156,9 @@
                                     </div>
                                     <div *ngIf="leftAccuracyBonus != '0'">
                                         +{{leftAccuracyBonus}}% accuracy
+                                    </div>
+                                    <div *ngIf="primaryEgos.length > 0">
+                                        weapon effects:
                                     </div>
                                     <ul class="no-margin">
                                         <li *ngFor="let ego of primaryEgos">
@@ -184,14 +184,14 @@
                                             </li>
                                         </ul>
                                     </div>
-                                    <div *ngIf="defensiveEgos.length > 0">
-                                        armor effects:
-                                    </div>
                                     <span *ngIf="defenseUpgrades != 0">
                                         {{defenseUpgrades.toStringAsFixed(2)}}% damage reduction
                                     </span>
                                     <div *ngIf="evasionBonus != '0'">
                                         +{{evasionBonus}}% evasion
+                                    </div>
+                                    <div *ngIf="defensiveEgos.length > 0">
+                                        armor effects:
                                     </div>
                                     <ul class="no-margin">
                                         <li *ngFor="let ego of defensiveEgos">
@@ -210,7 +210,7 @@
 <div class="modal-footer-buttons modal-buttons">
     <div class="pull-left">
         <label>
-            <input autofocus class="form-control"
+            <input autofocus class="form-control input-sm"
                    placeholder="search"
                    [(ngModel)]="searchInput"
                    [maxlength]="100">
@@ -223,7 +223,7 @@
                     loadout&nbsp;
                 </td>
                 <td>
-                    <select class="form-control input" [(ngModel)]="loadout">
+                    <select class="form-control input input-sm bold" [(ngModel)]="loadout">
                         <option value="0">0</option>
                         <option value="1">1</option>
                         <option value="2">2</option>

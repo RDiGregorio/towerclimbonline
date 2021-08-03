@@ -1,42 +1,75 @@
-<table class="wide">
-    <tr>
-        <td class="exchange-left">
-            <form autocomplete="off" onsubmit="return false"
-                  class="form-inline">
-                <label>
-                    <input
-                            class="form-control"
-                            placeholder="item"
-                            [(ngModel)]="item"
-                            [maxlength]="100">
-                </label>
-                <label>
-                    <input
-                            class="form-control"
-                            placeholder="price"
-                            [(ngModel)]="price"
-                            [maxlength]="100">
-                </label>
-                <label>
-                    <input
-                            class="form-control"
-                            placeholder="amount"
-                            [(ngModel)]="amount"
-                            [maxlength]="100">
-                </label>
-                <div>
-                    <button class="btn btn-default lower-button-margin"
-                            [disabled]="disabled(price) || disabled(amount) || item.isEmpty"
-                            (click)="buy()">
+<div class="exchange-modal">
+    <table class="wide">
+        <tr>
+            <td class="exchange-left">
+                <div class="lower-button-margin">
+                    <button [class]="mode == 'buy' ? 'btn btn-primary' : 'btn btn-default'" (click)="setMode('buy')">
                         Buy
                     </button>
-                    <button class="btn btn-default lower-button-margin"
-                            [disabled]="disabled(price) || disabled(amount) || item.isEmpty"
-                            (click)="sell()">
+                    <button [class]="mode == 'sell' ? 'btn btn-primary' : 'btn btn-default'" (click)="setMode('sell')">
                         Sell
                     </button>
+                    <button [class]="mode == 'browse' ? 'btn btn-primary' : 'btn btn-default'"
+                            (click)="setMode('browse')">
+                        Browse
+                    </button>
                 </div>
-                <div>
+                <!-- form autocomplete="off" onsubmit="return false" class="form-inline">
+                    <label>
+                        <select class="form-control input exchange-item-input input-sm"
+                                [(ngModel)]="exchangeMode"
+                                [maxlength]="100">
+                            <option value="buy">buy</option>
+                            <option value="sell">sell</option>
+                            <option value="browse">browse</option>
+                        </select>
+                    </label>
+                </form -->
+                <form autocomplete="off" onsubmit="return false" *ngIf="mode != 'browse'"
+                      class="form-inline">
+                    <div *ngIf="mode == 'buy'">
+                        <label>
+                            <input
+                                    class="form-control input-sm"
+                                    placeholder="item"
+                                    [(ngModel)]="item"
+                                    [maxlength]="100">
+                        </label>
+                    </div>
+                    <div *ngIf="mode == 'sell'">
+                        <label>
+                            <select class="form-control input exchange-item-input input-sm"
+                                    [(ngModel)]="item">
+                                <option value=""></option>
+                                <option value="{{item.displayTextWithoutAmount}}" *ngFor="let item of sortedItems">
+                                    {{item.displayTextWithoutAmount}}
+                                </option>
+                            </select>
+                        </label>
+                    </div>
+                    <label>
+                        <input
+                                class="form-control input-sm"
+                                placeholder="price"
+                                [(ngModel)]="price"
+                                [maxlength]="100">
+                    </label>
+                    <label>
+                        <input
+                                class="form-control input-sm"
+                                placeholder="amount"
+                                [(ngModel)]="amount"
+                                [maxlength]="100">
+                    </label>
+                    <div>
+                        <button class="btn btn-default"
+                                [disabled]="disabled(price) || disabled(amount) || disabledItem(item)"
+                                (click)="offer()">
+                            Complete
+                        </button>
+                    </div>
+                </form>
+                <div *ngIf="mode == 'browse'">
                     <button class="btn btn-default lower-button-margin"
                             (click)="browseBuy()">
                         Buying offers
@@ -46,36 +79,41 @@
                         Selling offers
                     </button>
                 </div>
-            </form>
-            <table class="fixed-table"></table>
-        </td>
-        <td class="panel-gutter"></td>
-        <td class="exchange-right">
-            <div class="panel panel-default transparent no-margin">
-                <div class="panel-heading">
-                    Your offers
+                <table class="fixed-table"></table>
+            </td>
+            <td class="panel-gutter"></td>
+            <td class="exchange-right">
+                <div class="panel panel-default transparent no-margin" *ngIf="mode != 'browse'">
+                    <div class="panel-heading">
+                        Your offers
+                    </div>
+                    <div class="panel-body action-list list-group">
+                        <a *ngFor="let offer of buyOffers"
+                           class="list-group-item list-group-item-action default-cursor"
+                           (click)="close(offer)">
+                            {{formatOffer(offer)}}
+                        </a>
+                        <a *ngFor="let offer of sellOffers"
+                           class="list-group-item list-group-item-action default-cursor"
+                           (click)="close(offer)">
+                            {{formatOffer(offer)}}
+                        </a>
+                        <table class="fixed-table"></table>
+                    </div>
                 </div>
-                <div class="panel-body action-list list-group">
-                    <a *ngFor="let offer of buyOffers"
-                       class="list-group-item list-group-item-action default-cursor"
-                       (click)="close(offer)">
-                        {{formatOffer(offer)}}
-                    </a>
-                    <a *ngFor="let offer of sellOffers"
-                       class="list-group-item list-group-item-action default-cursor"
-                       (click)="close(offer)">
-                        {{formatOffer(offer)}}
-                    </a>
-                    <table class="fixed-table"></table>
-                </div>
-            </div>
-        </td>
-    </tr>
-</table>
-<div *ngIf="exchangeBrowser.isNotEmpty"
-     class="panel-body action-list list-group no-margin transparent">
-    <div *ngFor="let offer of exchangeBrowser"
-         class="list-group-item list-group-item-action default-cursor transparent">
-        {{formatBrowsingOffer(offer)}}
+            </td>
+        </tr>
+    </table>
+    <div *ngIf="mode == 'browse'"
+         class="panel-body action-list list-group no-margin transparent exchange-browse">
+        <div *ngIf="browsing && exchangeBrowser.isEmpty"
+             class="list-group-item list-group-item-action default-cursor transparent">
+            no offers
+        </div>
+        <div *ngFor="let offer of exchangeBrowser"
+             (click)="clickBrowsedOffer(offer)"
+             class="list-group-item list-group-item-action default-cursor transparent">
+            {{formatBrowsingOffer(offer)}}
+        </div>
     </div>
 </div>

@@ -22,7 +22,7 @@ class Ego {
       confusion = 15,
       blindness = 16,
       charm = 17,
-      wrath = 18,
+      berserk = 18,
       regen = 19,
       stealth = 20,
       food = 21,
@@ -58,19 +58,21 @@ class Ego {
       mining = 51,
       gathering = 52,
       rainbow = 53,
-      demon = 54;
+      demon = 54,
+      spirit = 55,
+      melee = 56;
 
   static const Map<int, String> longDescriptions = {
     acid: 'acid attack (+100% damage; ignores target defense)',
-    fire: 'fire attack (+200% damage)',
+    fire: 'fire attack (+100% damage; prevents target healing)',
     ice: 'ice attack (+100% damage; prevents target movement)',
     electric: 'electric attack (+100% damage; ignores target evasion)',
-    poison: 'poison attack (+100% damage; damages target over time)',
+    poison: 'poison attack ' +
+        '(+100% damage; target loses 25% damage dealt every 5 seconds)',
     fast: 'fast movement',
-    slow: null,
-    wrath: 'berserk attack (3 × damage)',
-    blood: 'heals user by 10% damage dealt',
-    thieving: '+1% resources from pickpocketing per upgrade',
+    berserk: 'berserk attack (3 × damage)',
+    blood: 'heals user by 25% damage dealt',
+    thieving: 'increases stealth',
     power: '+25% damage',
     magic: 'magic weapon (uses intelligence for damage)',
     ballistic: 'ballistic weapon (uses dexterity for damage)',
@@ -82,7 +84,7 @@ class Ego {
     blindness: 'blindness attack (-50% target dexterity)',
     gravity:
         'gravity attack (+100% damage; target loses 2.5% remaining health)',
-    experience: '+10% experience',
+    experience: '+25% experience',
     antimatter: 'antimatter attack (+500% damage)',
     all: 'area of effect',
 
@@ -90,16 +92,16 @@ class Ego {
 
     energy: 'energy attack (+100% damage)',
     crystal: 'made of crystal (+100% skill experience)',
-    fishing: '+1% resources from fishing per upgrade',
-    mining: '+1% resources from mining per upgrade',
-    gathering: '+1% resources from gathering per upgrade',
+    fishing: 'increases fishing',
+    mining: 'increases mining',
+    gathering: 'increases gathering',
 
     // "25%" and not "+25%" because the base parry is 0.
 
     parry: '25% parry',
     death: 'death attack (kills target without reward)',
     metal: 'made of metal',
-    charm: 'increases summoning by upgrade amount',
+    charm: 'tames pets',
     resistAcid: 'resists acid attacks',
     resistFire: 'resists fire attacks',
     resistIce: 'resists ice attacks',
@@ -107,12 +109,13 @@ class Ego {
     resistPoison: 'resists poison attacks',
     resistGravity: 'resists gravity attacks',
     resistEvil: 'resists evil (blood, death, and debuff) attacks',
-    resistBallistic: 'resists ballistic attacks',
-    resistMagic: 'resists magic attacks',
-    regen: 'heals user over time',
-    stealth: 'invisibility (+100% stealth)',
-    reflection: 'reflects ballistic damage; reflects magic damage',
-    lucky: '+100% dropped items',
+    resistBallistic: 'resists ballistic attacks (½ damage)',
+    resistMagic: 'resists magic attacks (½ damage)',
+    regen: 'heals user 5% of max health every 5 seconds',
+    stealth: '+25% stealth',
+    reflection: 'reflection ' +
+        '(uses 25% vitality for damage; +1% reflection damage per upgrade)',
+    lucky: '+25% luck',
     life: '+1 life',
     stun: 'stun attack (prevents target\'s next attack)',
     maximumDamage: 'deals maximum damage',
@@ -122,8 +125,10 @@ class Ego {
     // "50%" and not "+50%" because the base damage reduction is 0.
 
     shield: '50% damage reduction',
+    spirit: '25% damage reduction',
     rainbow: 'rainbow',
-    demon: 'demon'
+    demon: 'demon',
+    melee: 'melee weapon (uses strength for damage)'
   };
 
   static const Map<int, String> descriptions = {
@@ -134,7 +139,7 @@ class Ego {
     poison: 'poison',
     fast: 'fast',
     slow: 'slow',
-    wrath: 'berserk',
+    berserk: 'berserk',
     blood: 'blood',
     power: 'power',
     magic: 'magic',
@@ -179,7 +184,8 @@ class Ego {
     gathering: 'lumberjack',
     shield: 'defense',
     rainbow: 'rainbow',
-    demon: 'demon'
+    demon: 'demon',
+    spirit: 'spirit'
   };
 
   static const Map<int, int> resistedBy = {

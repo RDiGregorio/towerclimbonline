@@ -29,7 +29,7 @@ class DollInfo extends OnlineObject {
       int canPassThis = Terrain.doll,
       this.boss = false,
       this.hidden = false,
-      this.aggro = false,
+      this.aggro = true,
       this.moves = true,
       this.preventsPvP = false,
       this.repeatInteraction = false,

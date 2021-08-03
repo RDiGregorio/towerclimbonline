@@ -5,13 +5,14 @@ part of util;
 /// careful when writing server side code!
 
 class Session extends OnlineObject {
-  static const int maxFloor = 424;
+  static const int maxFloor = 630;
   static final Map<int, Completer<dynamic>> _completers = {};
   static final Map<String, Function> adminCommands = {};
   static final Map<String, RecoveryAttempt> recoveries = {};
   static final Map<String, String> secret = {};
   static Function proceduralStage;
   static Function sendEmail;
+  static final Set<String> _users = Set<String>();
   Account _account;
 
   Completer<dynamic> _loginCompleter = Completer(),
@@ -153,6 +154,7 @@ class Session extends OnlineObject {
 
         setAction('teleport', 0);
         setAction('explore', 1);
+        setAction('examine', 2);
 
         account
           ..doll.summon()
@@ -269,6 +271,9 @@ class Session extends OnlineObject {
   }
 
   Item get primaryWeapon => internal['left'];
+
+  Map<String, dynamic> get recentChests =>
+      internal['chests'] ??= ObservableMap();
 
   int get restartTime => internal['restart time'] ?? 0;
 
@@ -433,11 +438,19 @@ class Session extends OnlineObject {
   void buyItem(String itemId, String count) {
     var item = shopItems[itemId];
 
-    if (account.interactionLocation != account.doll.currentLocation ||
+    if (item == null ||
+        account.interactionLocation != account.doll.currentLocation ||
         account.interactionStage != account.doll.stage ||
         account.interactionType != #shop) return;
 
     account.buyItem(item, count);
+  }
+
+  /// Max upgrades all equipment.
+
+  void cleanupItems() {
+    _cleanupItems().forEach((Item item) => maxUpgrade(
+        item.displayTextWithoutAmount, '${_remainingAfterCleanup(item)}'));
   }
 
   void click(String target) {
@@ -492,7 +505,7 @@ class Session extends OnlineObject {
 
         var item = Item.fromDisplayText(targetName);
 
-        if (item.infoName == Item._dummyItemName) {
+        if (item.infoName == Item.dummyItemName) {
           alert('Invalid command.');
           return;
         }
@@ -503,27 +516,27 @@ class Session extends OnlineObject {
     }
 
     if (input == '/commands') {
-      alert('commands, die, drops, examine, rares, where');
+      alert('commands, die, drops, examine, players, where');
+      return;
+    }
+
+    if (input == '/players') {
+      var players = peerAccounts.length;
+      alert('There are $players players online.');
       return;
     }
 
     if (input == '/die') {
+      // No lethal damage note is made for suicides.
+
       account.doll.health = 0;
       return;
     }
 
     if (input == '/where') {
-      alert(
-          '${account.doll.currentLocation.x}, ${account.doll.currentLocation.y}');
+      alert('${account.doll.currentLocation.x}, ' +
+          '${account.doll.currentLocation.y}');
 
-      return;
-    }
-
-    if (input == '/rares') {
-      var rares = List.from(account.secretRareDropLog.keys),
-          output = rares.isEmpty ? 'none' : takeLast(rares, 20).join(', ');
-
-      alert('recent secret rare drops: ' + output);
       return;
     }
 
@@ -650,32 +663,31 @@ class Session extends OnlineObject {
     replaceMap(account.doll.customization.internal, map.internal);
   }
 
-  void exchangeBuy(String item, num price, num amount) {
-    price = min<int>(price.floor(), maxFinite);
-    amount = amount.floor();
-    if (item == null || amount < 1 || price < 1) return;
-    item = item.trim().toLowerCase();
+  void exchangeBuy(String key, String price, String amount) {
+    var bigPrice = big(price), bigAmount = big(amount);
+    if (key == null || bigPrice < BigInt.one || bigAmount < BigInt.one) return;
+    key = key.trim().toLowerCase();
+    key = setBonus(key, clamp(getBonus(key), 0, trillion - 1));
+    Item item = Item(key);
 
-    if (!itemExists(item) || !Item(item).tradable) {
+    if (!itemExists(key) || !item.tradable) {
       alert("You can\'t buy that.");
       return;
     }
 
-    // FIXME: use big ints here to avoid the small function
+    if (account.money < bigPrice * bigAmount) {
+      var newAmount = BigIntUtil.min(account.money ~/ bigPrice, bigAmount);
 
-    if (small(account.money) < price * amount) {
-      var newAmount = min<int>(small(account.money) ~/ price, amount);
-
-      if (newAmount != amount) {
+      if (newAmount != bigAmount) {
         alert(alerts[#tooPoor]);
-        amount = newAmount;
+        bigAmount = newAmount;
       }
 
-      if (amount < 1) return;
+      if (bigAmount < BigInt.one) return;
     }
 
-    Future(
-        () async => account.exchangeBuy(await _exchange, item, price, amount));
+    Future(() async => account.exchangeBuy(
+        await _exchange, item.comparisonText, bigPrice, bigAmount, item.bonus));
   }
 
   void exchangeClose(String id) {
@@ -685,9 +697,12 @@ class Session extends OnlineObject {
     Future(() async => account.exchangeClose(await _exchange, offer));
   }
 
-  void exchangeSell(String key, num price, num amount) {
-    price = min<int>(price.floor(), maxFinite);
-    var item = account.items.getItemByDisplayText(key);
+  void exchangeSell(String key, String price, String amount) {
+    if (key == null) return;
+
+    var bigPrice = big(price),
+        bigAmount = big(amount),
+        item = account.items.getItemByDisplayText(key);
 
     if (item == null) {
       alert('You don\'t have any of that item.');
@@ -699,11 +714,11 @@ class Session extends OnlineObject {
       return;
     }
 
-    amount = min<int>(amount.floor(), item.amount);
-    if (key == null || amount < 1 || price < 1) return;
+    bigAmount = BigIntUtil.min(bigAmount, item.getAmount());
+    if (bigAmount < BigInt.one || bigPrice < BigInt.one) return;
 
-    Future(() async =>
-        account.exchangeSell(await _exchange, key, price, amount, item));
+    Future(() async => account.exchangeSell(
+        await _exchange, item.comparisonText, bigPrice, bigAmount, item));
   }
 
   void finalizeTrade() {
@@ -848,15 +863,23 @@ class Session extends OnlineObject {
     } else
       onLogout.then(accountCompleter.complete);
 
+    // Successfully logs in.
+
+    if (_users.add(sanitized))
+
+      // Logs each player who has logged in since the server started.
+
+      Logger.root.info('$sanitized logged in');
+
     resource.timeBonus += max(0, now - resource.lastSeen);
 
     resource.timeBonus =
         min<int>(resource.timeBonus, ServerGlobals.maxTimeBonus);
 
-    // Prevents abuse by requiring players to be offline for 60 seconds to get
+    // Prevents abuse by requiring players to be offline for 5 seconds to get
     // the multiplier.
 
-    if (resource.timeBonus < 60000) resource.timeBonus = 0;
+    if (Config.debug || resource.timeBonus < 5000) resource.timeBonus = 0;
 
     if (resource.timeBonus > 0) {
       var timeBonusSeconds =
@@ -913,7 +936,6 @@ class Session extends OnlineObject {
       ..abilities['dismiss pet'] = true
       ..abilities['pet target'] = true
       ..abilities['pickpocket'] = true
-      ..abilities['charm'] = true
       ..abilities['explore'] = true
       ..spawnStageName = 'tutorial0'
       ..spawnLocation = const Point(2, 2);
@@ -968,6 +990,8 @@ class Session extends OnlineObject {
       ..stats
           .forEach((stat) => stat.setExperienceWithoutSplat(stat.experience));
 
+    _deleteMissingItems();
+
     // Patches errors.
 
     runZoned(_patch, onError: (error, trace) {
@@ -1006,7 +1030,6 @@ class Session extends OnlineObject {
       if (ingredients.isEmpty) return false;
       var item = itemWithLowestBonus(ingredients);
       if (!item.canUpgrade) return false;
-
       var adjustedAmount;
 
       if (remainingAmount != null) {
@@ -1265,10 +1288,14 @@ class Session extends OnlineObject {
       // The email can fail if Google blocks it for security reasons.
 
       try {
-        await sendEmail(
-            resource.email, 'recovery code: ${recoveries[sanitized].code}');
+        // FIXME: email library is deprecated and no longer works.
 
-        return true;
+        // await sendEmail(
+        //     resource.email, 'recovery code: ${recoveries[sanitized].code}');
+
+        // return true;
+
+        return false;
       } catch (error) {
         Logger.root.severe('email failed: $error');
         return false;
@@ -1324,10 +1351,12 @@ class Session extends OnlineObject {
 
   void teleport(num floor, [bool procedural = false]) {
     if (account.doll.dead) return;
+    floor = min(floor, maxFloor);
+    if (floor <= 50) procedural = false;
 
-    if (floor > account.highestFloor) {
+    if (floor > account.adjustedHighestFloor) {
       alert(alerts[#notUnlocked]);
-      if (!Config.debug) floor = account.highestFloor;
+      if (!Config.debug) floor = account.adjustedHighestFloor;
     }
 
     floor = max(0, floor - 1);
@@ -1350,7 +1379,7 @@ class Session extends OnlineObject {
 
       if (stage != null) {
         var entrance = entrances[stage?.id];
-        if (stageName == 'dungeon0') entrance = Point(116, 118);
+        if (stageName == 'dungeon0') entrance = Point(16, 118);
 
         // A player can die while waiting for a floor to generate.
 
@@ -1394,21 +1423,13 @@ class Session extends OnlineObject {
       var nearbyDolls = List.from(account.doll
           .search(ServerGlobals.sight * 2, ServerGlobals.sight * 2));
 
-      replaceMap(
-          hiddenDolls,
-          nearbyDolls.fold({}, (map, doll) {
-            if (!account.canViewDoll(doll)) map[doll.id] = true;
-            return map;
-          }));
-
       if (account.doll.stage != null)
         replaceMap(
             importantDolls,
             account.doll.stage.dolls.values.fold({}, (map, doll) {
               if (doll.player ||
                   doll.boss && !doll.summoned && !doll.temporary ||
-                  doll.altar ||
-                  doll.shop) map[doll.id] = doll;
+                  doll.hasInteraction) map[doll.id] = doll;
 
               return map;
             }));
@@ -1419,6 +1440,8 @@ class Session extends OnlineObject {
             if (doll.goodResource(account)) map[doll.id] = true;
             return map;
           }));
+
+      replaceMap(recentChests, account.recentChests);
 
       replaceMap(internal['view'] ??= ObservableMap(),
           nearbyDolls.fold({}, (map, doll) => map..[doll.id] = doll));
@@ -1527,6 +1550,24 @@ class Session extends OnlineObject {
     }
   }
 
+  List<Item> _cleanupItems() {
+    var map = Map<String, BigInt>(), result = <Item>[];
+
+    List<Item>.from(account.items.items.values
+            .where((item) => item.canUpgrade && item.equipment))
+        .forEach((Item item) {
+      if (map.containsKey(item.comparisonText))
+        map[item.comparisonText] += item.getAmount();
+      else {
+        map[item.comparisonText] = item.getAmount();
+        result.add(item);
+      }
+    });
+
+    return List<Item>.from(result.where((item) =>
+        map[item.comparisonText] > big(_remainingAfterCleanup(item))));
+  }
+
   bool _contactable(String user) {
     if (!_online(user)) return false;
     var onlineStatus = peerAccounts[user].options['online status'] ?? 'on';
@@ -1534,6 +1575,10 @@ class Session extends OnlineObject {
     if (onlineStatus == 'off') return false;
     return peerAccounts[user].contacts.containsKey(account.id);
   }
+
+  void _deleteMissingItems() => List<Item>.from(account.items.items.values
+          .where((item) => item.getAmount() <= BigInt.zero))
+      .forEach(account.items.deleteItem);
 
   void _exchangeSync() {
     Future(() async {
@@ -1572,15 +1617,15 @@ class Session extends OnlineObject {
             .forEach((item) => item.setAmount(item.getAmount())));
 
     _applyPatch(
-        'remove leash patch',
-        () => List<Item>.from(account.items.items.values
-                .where((item) => item.infoName == 'leash'))
-            .forEach(account.items.deleteItem));
-
-    _applyPatch(
         'remove elysian sigil patch',
         () => List<Item>.from(account.items.items.values
                 .where((item) => item.infoName == 'elysian sigil'))
+            .forEach(account.items.deleteItem));
+
+    _applyPatch(
+        'remove shark tooth patch',
+        () => List<Item>.from(account.items.items.values.where(
+                (item) => item.infoName?.contains('shark tooth') == true))
             .forEach(account.items.deleteItem));
 
     _applyPatch(
@@ -1619,13 +1664,6 @@ class Session extends OnlineObject {
       }
     });
 
-    _applyPatch('item amount patch', () async {
-      var list = List<Item>.from(
-          account.items.items.values.where((item) => item.amount <= 0));
-
-      list.forEach(account.items.deleteItem);
-    });
-
     _applyPatch('berserk burst ring patch', () async {
       var list = List<Item>.from(account.items.items.values
           .where((item) => item.comparisonText == 'berserk burst ring'));
@@ -1653,6 +1691,19 @@ class Session extends OnlineObject {
           ..forEach((item) => account.lootItem(Item('katana', 1, [Ego.electric])
             ..amount = item.amount
             ..bonus = item.bonus)));
+
+    _applyPatch(
+        'remove invisibility potion patch',
+        () => List<Item>.from(account.items.items.values
+                .where((item) => item.infoName == 'invisibility potion'))
+            .forEach(account.items.deleteItem));
+  }
+
+  int _remainingAfterCleanup(Item item) {
+    if (item.twoHanded) return 1;
+    var slot = item.info?.slot;
+    if (slot == #weapon || slot == #shield) return 2;
+    return 1;
   }
 
   Future<dynamic> _scores(String key) =>

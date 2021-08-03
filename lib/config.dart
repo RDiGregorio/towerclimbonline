@@ -3,7 +3,7 @@ library config;
 // [Config] is visible to the client, so secrets are not set here.
 
 class Config {
-  static const bool debug = false, app = false, hidePlayers = false;
+  static const bool debug = true, app = false, hidePlayers = false;
   static const Duration emailResetDelay = Duration(days: 7);
 
   static const String

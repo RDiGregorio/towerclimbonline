@@ -20,11 +20,12 @@ class CraftingModal implements OnDestroy {
       upgradeOptions = const [],
       ingredients = const [];
 
-  bool _resetFlag = true, loading = false;
+  bool _resetFlag = true, loading = false, canCleanup = true;
   Map<String, String> _upgradeOptionsCache = {}, _amountsCache = {};
   Map<String, Item> _itemFromDisplayTextCache = {};
   StreamSubscription<ObservableEvent> _subscription;
   final ChangeDetectorRef _changeDetectorRef;
+  BigInt _startingExperience;
 
   CraftingModal(this._changeDetectorRef) {
     _subscription = ClientGlobals.session.items.internal
@@ -62,8 +63,32 @@ class CraftingModal implements OnDestroy {
             .contains(searchInput.toLowerCase()));
   }
 
+  String get formattedGainedExperience =>
+      formatCurrency(gainedExperience, false);
+
+  BigInt get gainedExperience {
+    var experience = sheet.crafting.experience +
+        sheet.metalworking.experience +
+        sheet.cooking.experience;
+
+    return experience - startingExperience;
+  }
+
   Map<String, Item> get items =>
       Map<String, Item>.from(ClientGlobals.session.items?.items ?? const {});
+
+  CharacterSheet get sheet => ClientGlobals.session?.sheet;
+
+  bool get showMessage => crafted != null && craftedAmount > 0;
+
+  BigInt get startingExperience {
+    if (_startingExperience == null)
+      _startingExperience = sheet.crafting.experience +
+          sheet.metalworking.experience +
+          sheet.cooking.experience;
+
+    return _startingExperience;
+  }
 
   Item get _crafted => ClientGlobals.session.crafted;
 
@@ -85,12 +110,21 @@ class CraftingModal implements OnDestroy {
   void askAmount() {
     showInputModal('Amount (${formatOption(selected)})', 'craft item', (input) {
       ClientGlobals.session.remote(_remoteAction, [selected, input]);
-
       selected = null;
       ingredients = const [];
+      canCleanup = true;
     });
 
     querySelector('#input-modal-toggle').click();
+  }
+
+  void cleanupItems() {
+    // The crafting modal must be closed and reopened before repeating this.
+
+    if (canCleanup) {
+      canCleanup = false;
+      ClientGlobals.session.remote(#cleanupItems, []);
+    }
   }
 
   void craftAll() {
@@ -98,7 +132,8 @@ class CraftingModal implements OnDestroy {
       ClientGlobals.session.remote(_remoteAction, [selected, null]);
       selected = null;
       ingredients = const [];
-      //_changeDetectorRef.markForCheck();
+      canCleanup = true;
+      // _changeDetectorRef.markForCheck();
     }
   }
 

@@ -20,9 +20,12 @@ class Doll extends OnlineObject {
 
   int _created,
       _poisonCycle = 0,
+      _poisonDamage = 0,
+      _charmDamage = 0,
       messageTime = 0,
       lastCombatTime = -25,
       lastPlayerCombatTime = -25,
+      combatStartTime,
       _lastUpkeep = 0,
       _lastTeleport = -25,
       _lastStun = 0,
@@ -37,11 +40,7 @@ class Doll extends OnlineObject {
 
   final Set<Effect> effects = Set();
 
-  bool spawning = false,
-      stuck = false,
-      summoned = false,
-      mounted = false,
-      _noReward = false;
+  bool spawning = false, stuck = false, summoned = false, _noReward = false;
 
   final Map<String, String> style = {},
       messageStyle = {},
@@ -99,18 +98,11 @@ class Doll extends OnlineObject {
     var result = <String>[];
     if (account != null) return result;
 
-    // Bosses on floors higher than 100 can cast supernova.
+    // Bosses on floors higher than 50 can cast supernova.
 
-    if (boss && (difficulty ?? 0) > 100)
-      result.add('supernova');
+    if (boss && (difficulty ?? 0) > 50) result.add('supernova');
 
-    // Bosses on floors higher than 50 (but not higher than 100) can cast meteor
-    // storm.
-
-    else if (boss && (difficulty ?? 0) > 50) result.add('meteor storm');
-
-    // Bosses do not lose their normal attacks when gaining meteor storm or
-    // supernova.
+    // Bosses do not lose their normal attacks when gaining supernova.
 
     var infoAbilities = info?.abilities ?? <String>[];
     if (infoAbilities.isEmpty) result.add(null);
@@ -140,7 +132,12 @@ class Doll extends OnlineObject {
 
   bool get boss {
     if (player) return false;
-    return internal['boss'] ?? info?.boss ?? false;
+
+    // Resources are the same level as their floor's boss.
+
+    if (resource) return true;
+    if (info == null) return internal['boss'] ?? false;
+    return info.boss;
   }
 
   int get bossLevel => internal['boss level'] ?? 0;
@@ -153,6 +150,15 @@ class Doll extends OnlineObject {
 
   Map<String, dynamic> get buffs =>
       account?.buffs ?? (internal['buffs'] ??= ObservableMap());
+
+  bool get burned => buffs.containsKey('burned');
+
+  void set burned(bool value) {
+    if (value) {
+      if (!resistances.containsKey(Ego.resistFire)) buffs['burned'] = Buff();
+    } else
+      buffs.remove('burned');
+  }
 
   int get canPassThis => dead || spawning ? Terrain.land : info.canPassThis;
 
@@ -171,7 +177,7 @@ class Doll extends OnlineObject {
   }
 
   DollCustomization get customization {
-    if (['human', 'newbie shop', 'gozag'].contains(infoName)) {
+    if (['human', 'newbie shop', 'gozag', 'random shop'].contains(infoName)) {
       if (_customization == null)
         _customization =
             json.decode(randomHumanJson(id), reviver: mapWrapperDecoder);
@@ -246,7 +252,7 @@ class Doll extends OnlineObject {
     return result;
   }
 
-  bool get dropsSecretRare => boss && difficulty != null && difficulty > 50;
+  bool get dropsSecretRare => boss && (difficulty ?? 0) > 50;
 
   int get energy => internal['mp'] ??= maxEnergy;
 
@@ -263,13 +269,22 @@ class Doll extends OnlineObject {
   Map<String, dynamic> get equipped =>
       account?.equipped ?? adjustedEquipment ?? info.equipped;
 
-  int get evasion {
-    var result = calculateEvasion(this);
-    if (account?.god == 'lugonu') result *= 2;
-    return result;
-  }
+  int get evasion => calculateEvasion(this);
 
   int get experience => max(1, maxHealth ~/ 10);
+
+  bool get expired {
+    if (account != null ||
+        playerPet ||
+        !boss ||
+        !inCombat ||
+        dead ||
+        combatStartTime == null) return false;
+
+    // 5 minutes.
+
+    return Clock.time - combatStartTime > 1500;
+  }
 
   int get foodEaten => internal['eat'] ?? 0;
 
@@ -293,7 +308,12 @@ class Doll extends OnlineObject {
 
   bool get hasInteraction => info?.interaction != null;
 
-  bool get healer => primaryWeapon?.egos?.contains(Ego.healing) == true;
+  bool get healer {
+    var list = List.from(weapons);
+
+    return !list.isEmpty &&
+        list.every((weapon) => weapon.egos.contains(Ego.healing));
+  }
 
   int get health => maxHealth - totalDamageTaken;
 
@@ -357,15 +377,7 @@ class Doll extends OnlineObject {
 
   bool get missingInfo => info == _dollInfo['missing'];
 
-  int get modifiedSummoningLevel {
-    var result = account?.sheet?.summoning?.level ?? 1;
-
-    if (primaryWeapon?.egos?.contains(Ego.charm) == true)
-      result += primaryWeapon.bonus;
-
-    if (account?.god == 'fedhas') result *= 2;
-    return result;
-  }
+  int get modifiedSummoningLevel => account?.sheet?.summoning?.level ?? 1;
 
   /// Equipped non-weapon items.
 
@@ -377,7 +389,7 @@ class Doll extends OnlineObject {
 
   String get overheadText => internal['overhead'];
 
-  int get petRequirement => level;
+  int get petRequirement => boss ? level * 2 : level;
 
   bool get player => internal['player'] ?? false;
 
@@ -413,6 +425,8 @@ class Doll extends OnlineObject {
     return iterable.first;
   }
 
+  int get regenAmount => max(1, _vitalityToHealth(_vitality) ~/ 20);
+
   bool get regenerating =>
       buffs.containsKey('regen') || equipmentEgos.containsKey(Ego.regen);
 
@@ -423,6 +437,9 @@ class Doll extends OnlineObject {
       });
 
   bool get resource => info?.resource ?? false;
+
+  String get sanitizedName =>
+      account?.id == null ? infoName : sanitizeName(account.id);
 
   int get secondaryAttackRange =>
       secondaryWeapon?.attackRange ?? info.attackRange;
@@ -445,11 +462,15 @@ class Doll extends OnlineObject {
 
   Stage<Doll> get stage => _stage;
 
+  bool get stairs => !player && (infoName?.startsWith('portal') ?? false);
+
   int get stealth {
     if (account == null) return 0;
-    var result = account.sheet.crime.level * (stealthItems + 1);
-    if (account?.god == 'dithmenos') result *= 2;
-    return result;
+    num result = account.sheet.crime.level;
+    result += result * stealthItems / 4;
+    if (account?.god == 'dithmenos') result += result / 2;
+    result += result * thievingBonus / 100;
+    return result.floor();
   }
 
   int get stealthItems {
@@ -458,7 +479,6 @@ class Doll extends OnlineObject {
     // Only players can be stealthy.
 
     if (account == null) return result;
-    if (buffs.containsKey('invisibility')) result++;
     result += resistances[Ego.stealth] ?? 0;
     return result;
   }
@@ -532,6 +552,11 @@ class Doll extends OnlineObject {
       _buff('vit', _sheet?.vitality ?? _adjustedLevel(info?.vitality ?? 0));
 
   void act() {
+    if (expired) {
+      splat('time limit', 'effect-text');
+      killWithNoReward();
+    }
+
     if (account != null) {
       // A player's temporary invisibility is lost when they target something.
 
@@ -548,14 +573,13 @@ class Doll extends OnlineObject {
 
       // Automatically uses potions.
 
-      if (account.autoPotion) {
+      if (!dead && account.autoPotion) {
         var whitelist = [
           'agility potion',
           'strength potion',
           'dexterity potion',
           'intelligence potion',
           'regen potion',
-          'invisibility potion',
           'fast potion'
         ];
 
@@ -574,9 +598,6 @@ class Doll extends OnlineObject {
 
           if (item.infoName == 'regen potion')
             return buffs.containsKey('regen');
-
-          if (item.infoName == 'invisibility potion')
-            return buffs.containsKey('invisibility');
 
           if (item.infoName == 'fast potion') return buffs.containsKey('spd+');
 
@@ -598,11 +619,10 @@ class Doll extends OnlineObject {
     if (masterDoll != null && summoned && !masterIsVisible)
       stage?.removeDoll(this);
 
-    // Handles aquatic monsters.
+    // Prevents monsters from getting stuck behind walls.
 
-    if (info?.moves != true &&
-        targetDoll != null &&
-        chessDistanceTo(targetDoll.currentLocation) > 5) stuck = true;
+    if (stuck && targetDoll != null && !canFireAt(targetDoll))
+      targetDoll = null;
 
     if (summoned) {
       targetLocation = null;
@@ -610,8 +630,8 @@ class Doll extends OnlineObject {
       if (masterDoll?.stage != stage || masterDoll?.dead != false) {
         if (!summoned) masterDoll = null;
       } else if (_abilities[masterDoll.ability]?.combat != false &&
-          masterDoll?.interacting != true)
-        targetDoll ??= masterDoll?.targetDoll;
+          masterDoll?.interacting != true &&
+          masterDoll?.healer != true) targetDoll ??= masterDoll?.targetDoll;
     }
 
     // Prevents pets from killing resources.
@@ -635,10 +655,10 @@ class Doll extends OnlineObject {
       targetLocation = null;
     }
 
-    // Handles death and cool down.
+    // Handles death and cool down. Cool downs happen even while dead.
 
-    if (dead) return;
     coolDown(ServerGlobals.tickDelay);
+    if (dead) return;
 
     if (account?.petSpawned == true &&
         account.pet?.dead == true &&
@@ -708,26 +728,15 @@ class Doll extends OnlineObject {
       return;
     }
 
-    if (account != null && interacting) {
-      if (ability == 'examine' && targetDoll.resource) {
-        // TODO: examine for resources
-
-        /*
-          examine(this, targetDoll, false);
-          ability = null;
-          targetDoll = null;
-          targetLocation = null;
-          return;
-        */
-      }
-
+    if (account != null &&
+        interacting &&
+        (ability == null || !targetDoll.resource)) {
       walk();
 
       if (chessDistanceTo(targetDoll.currentLocation) > 1) return;
       targetLocation = null;
 
       if (!account.doll.warm(#walk)) {
-        if (account.recentKills.containsKey(targetDoll.id)) return;
         targetDoll.info.interaction(account, targetDoll);
 
         // [targetDoll] is reset while using portals.
@@ -740,7 +749,19 @@ class Doll extends OnlineObject {
       return;
     }
 
-    if (account == null && targetDoll != null) ability = randomValue(abilities);
+    String randomAbility() {
+      var distanceToTarget = chessDistanceTo(targetDoll.currentLocation);
+
+      var result = List<String>.from(abilities.where((String ability) {
+        if (ability == null) return distanceToTarget <= attackRange();
+        var range = _abilities[ability]?.range ?? 0;
+        return distanceToTarget <= range;
+      }));
+
+      return result.isEmpty ? null : randomValue(result);
+    }
+
+    if (account == null && targetDoll != null) ability = randomAbility();
 
     if (targetDoll != null) {
       var approach = _abilities[ability]?.combat ?? true;
@@ -761,8 +782,19 @@ class Doll extends OnlineObject {
     }
 
     if (account != null) throwItem();
+
+    // Sometimes, after a monster moves closer to its target, it can use an
+    // ability that it couldn't use before. This handles that case.
+
+    if (account == null && targetDoll != null && ability == null)
+      ability = randomAbility();
+
     useAbility(ability);
     if (ability != null && _abilities[ability]?.combat == true) ability = null;
+
+    // Gathering nodes should never be attacked.
+
+    if (targetDoll?.info?.interaction != null) return;
 
     if (targetDoll != null && _abilities[ability]?.combat != false) {
       var weaponList = List.from(weapons);
@@ -820,7 +852,8 @@ class Doll extends OnlineObject {
               i++)
             if (egos.contains(Ego.all))
               search(10, 10)
-                  .where(canAreaEffect)
+                  .where(
+                      (doll) => canAreaEffect(doll, egos.contains(Ego.healing)))
                   .forEach((doll) => effect(doll, true));
             else
               effect();
@@ -842,10 +875,13 @@ class Doll extends OnlineObject {
     egos ??= const [];
     if (egos.contains(Ego.healing)) return damage;
     var resists = resistances;
-    if (account?.god == 'elyvilon') damage ~/= 2;
+
+    // Like other resistances, ballistic resistance does not stack.
 
     if (egos.contains(Ego.ballistic) &&
         resists.containsKey(Ego.resistBallistic)) damage ~/= 2;
+
+    // Like other resistances, magic resistance does not stack.
 
     if (egos.contains(Ego.magic) && resists.containsKey(Ego.resistMagic))
       damage ~/= 2;
@@ -854,17 +890,21 @@ class Doll extends OnlineObject {
         .where((item) => !item.upgradesIncreaseEvasion)
         .fold(defense, (result, item) => result + item.bonus / 10);
 
-    // Acid attacks ignore defense, including from shields.
+    // Acid attacks ignore defense, including from shields and spirit items.
 
     var shields = List.from(
-        equipped.values.where((item) => item.egos.contains(Ego.shield)));
+            equipped.values.where((item) => item.egos.contains(Ego.shield))),
+        spirits = List.from(
+            equipped.values.where((item) => item.egos.contains(Ego.spirit)));
 
     if (egos.contains(Ego.acid) && !resists.containsKey(Ego.resistAcid)) {
       shields.clear();
+      spirits.clear();
       bonus = 0;
     }
 
-    if (!shields.isEmpty) damage ~/= 1 << shields.length;
+    if (!shields.isEmpty) damage = (damage * pow(.5, shields.length)).floor();
+    if (!spirits.isEmpty) damage = (damage * pow(.75, spirits.length)).floor();
 
     // Weapon bonuses increase damage and armor bonuses decrease damage.
 
@@ -899,7 +939,15 @@ class Doll extends OnlineObject {
     return weapons.fold(1, (result, weapon) => max(result, weapon.attackRange));
   }
 
-  bool canAreaEffect(Doll doll) {
+  bool canAreaEffect(Doll doll, [bool healing = false]) {
+    if (player && healing) {
+      // Player AOE healing is special cased to heal all players and pets, even
+      // if an enemy is being targeted.
+
+      if (doll.player || doll.playerPet) return true;
+      return false;
+    }
+
     if (doll.dead) return false;
     if (doll.id == id || doll.hasInteraction) return false;
     if (!canFireAt(doll)) return false;
@@ -911,7 +959,7 @@ class Doll extends OnlineObject {
     if (!player && !playerPet && (!doll.player && !doll.playerPet))
       return false;
 
-    // Players can't hit players or player pets they aren't targeting with AOE.
+    // Players/pets can't hit other players/pets they aren't targeting with AOE.
 
     if ((player || playerPet) && (doll.player || doll.playerPet)) return false;
     return true;
@@ -955,6 +1003,11 @@ class Doll extends OnlineObject {
   void coolDown([int amount = 1]) => List.from(_delays.keys).forEach((symbol) {
         if ((_delays[symbol] -= amount) <= 0) _delays.remove(symbol);
       });
+
+  void enterCombat() {
+    if (!inCombat) combatStartTime = Clock.time;
+    lastCombatTime = Clock.time;
+  }
 
   void equip(Item item) {
     if (item?.info?.slot == null) return;
@@ -1044,18 +1097,25 @@ class Doll extends OnlineObject {
       foodEaten++;
     }
 
-    // A doll can't heal while dead.
+    // A doll can't heal while dead or burned.
 
     if (health <= 0) return true;
+
+    if (burned) {
+      splat('0', 'heal-text');
+      return true;
+    }
+
     amount = max(1, amount);
     health += amount;
     splat('$amount', 'heal-text');
     return true;
   }
 
-  void hurt(int amount, [String message, String classes]) {
+  void hurt(Doll damageSource, int amount, [String message, String classes]) {
     assert(amount >= 0);
     if (info?.interaction != null) return;
+    if (account?.god == 'elyvilon') amount ~/= 2;
     amount = max(1, amount);
     health -= amount;
 
@@ -1067,9 +1127,20 @@ class Doll extends OnlineObject {
     if (health <= 0 &&
         equipmentEgos.containsKey(Ego.life) &&
         buffs['extra life'] == null) {
-      buffs['extra life'] = Buff();
       health = maxHealth;
+
+      // Prevents losing multiple lives to a single burst attack.
+
       effects.clear();
+
+      // Being revived acts like leaving combat.
+
+      if (buffs.isNotEmpty) buffs.clear();
+      buffs['extra life'] = Buff();
+      foodEaten = 0;
+      _poisonDamage = 0;
+      _charmDamage = 0;
+      _poisonCycle = 0;
     }
 
     // Auto heal.
@@ -1079,7 +1150,8 @@ class Doll extends OnlineObject {
         health > 0 &&
         health < maxHealth &&
         health < account.autoHeal &&
-        foodEaten < _healLimit) {
+        foodEaten < _healLimit &&
+        !burned) {
       // Automatically uses the food that heals the least.
 
       var items = List.from(account.actions.values
@@ -1090,6 +1162,8 @@ class Doll extends OnlineObject {
 
       if (items.isEmpty || !_useItem(items.first)) break;
     }
+
+    if (health <= 0) account?.noteLethalDamage(damageSource, amount);
   }
 
   void informationPrompt(String message) => account?.informationPrompt(message);
@@ -1137,37 +1211,28 @@ class Doll extends OnlineObject {
   }
 
   void leaveCombat() {
+    combatStartTime = null;
     lastCombatTime = -25;
   }
 
-  void pickpocket() {
-    if (targetDoll == null) return;
-
-    // Thieving gloves only increase amounts, not pickpocketing accuracy.
-
-    if (!calculateGatheringHit(targetDoll, stealth, targetDoll.level)) return;
+  void pickpocket(Doll target) {
+    if (target == null) return;
 
     // The same formulas are used for gathering and pickpocketing.
     // 1 item is worth 10 wei.
 
-    num amount = 10 + (stealth + thievingBonus) / 2;
-    amount += amount * targetDoll.experience / 1000;
-    amount = amount.floor();
-
-    // Handles crystal thieving gloves.
-
-    var crystalItems = equipped?.values?.where((item) =>
-                const [Ego.thieving, Ego.crystal].every(item.egos.contains)) ??
-            const [],
-        experience = max(1, amount);
+    var amount = stealth / 2,
+        bigAmount = big(max(10, amount.floor())) +
+            extraResources(target.level, amount.floor()),
+        experience = bigAmount;
 
     // A player gets extra experience and loot for being offline.
 
-    var bigAmount = big(amount) * big(account.timeBonusMultiplier);
+    bigAmount = bigAmount * big(account.timeBonusMultiplier);
 
     account
       ..gainExperience(
-          crystalItems.isNotEmpty ? big(experience) * BigInt.two : experience,
+          account.hasCrystalGloves ? experience * BigInt.two : experience,
           'crime')
       ..money += bigAmount
       ..alert('You gain: ${formatCurrency(bigAmount)}.');
@@ -1195,25 +1260,37 @@ class Doll extends OnlineObject {
     buffs['regen'] = Buff(duration: duration);
   }
 
-  void reward(Account looter, int count) {
+  void revivePet() {
+    _petSpawningTime = now;
+  }
+
+  void reward(Account looter, [int count = 1]) {
     // The same formula is used for gathering.
 
-    var amount = max(1, looter.sheet.slaying.level ~/ 20),
-        multiplier = amount + amount * experience ~/ 1000;
+    num looterSlayingLevel = looter.sheet.slaying.level,
+        luckyItems = looter.doll?.equipmentEgos[Ego.lucky] ?? 0;
+
+    looterSlayingLevel += looterSlayingLevel * luckyItems / 4;
+    if (looter.god == 'gozag') looterSlayingLevel += looterSlayingLevel / 2;
+    looterSlayingLevel = looterSlayingLevel.floor();
+
+    num amount = looterSlayingLevel / 20;
+
+    // Unlike gathering, luck doesn't have tools. Therefore, an implied tool is
+    // used, based on the target's level.
+
+    amount += amount * level / 100;
+    amount = amount.floor();
+    var multiplier = big(max(1, amount)) + extraResources(level, amount);
 
     // A player gets extra experience and loot for being offline.
 
     count *= looter.timeBonusMultiplier;
-
     var drops = List.from(info.loot?.drops ?? []);
 
-    // Secret rares for floors higher than the top floor of the static tower.
+    // Secret rares.
 
-    if (dropsSecretRare && random(1000) == 0) {
-      var secretRareDrop = secretRare;
-      drops.add(secretRareDrop);
-      looter.secretRareDropLog[secretRareDrop.displayText] = true;
-    }
+    if (dropsSecretRare && random(100) == 0) drops.add(Item('puzzle box'));
 
     drops.forEach((item) {
       Item copy = item.copy;
@@ -1221,10 +1298,11 @@ class Doll extends OnlineObject {
       // To prevent inventory clutter, randomness is not used.
 
       copy.canUpgrade && !copy.food && !copy.potion
-          ? copy.bonus = calculateDropBonus(looter.sheet.slaying, multiplier)
-          : copy.amount *= multiplier;
+          ? copy.bonus = calculateDropBonus(looterSlayingLevel, multiplier)
+          : copy.setAmount(copy.getAmount() * multiplier);
 
-      looter.lootItem(copy..amount *= count);
+      copy.setAmount(copy.getAmount() * big(count));
+      looter.lootItem(copy);
     });
   }
 
@@ -1324,6 +1402,9 @@ class Doll extends OnlineObject {
       // [Doll]s are healed after combat.
 
       foodEaten = 0;
+      _poisonDamage = 0;
+      _charmDamage = 0;
+      _poisonCycle = 0;
 
       removeAllBut(buffs, const [
         'agi+',
@@ -1338,7 +1419,6 @@ class Doll extends OnlineObject {
         'resist gravity',
         'resist acid',
         'resist poison',
-        'invisibility',
         'pker'
       ]);
 
@@ -1355,21 +1435,20 @@ class Doll extends OnlineObject {
     });
 
     if (_poisonCycle++ % 25 == 0) {
-      // Handles poison. Poison hits every 25 ticks (5 seconds) for 5% of max
-      // health.
-
-      if (poisoned) {
-        var damage = max(1, _vitalityToHealth(_vitality) ~/ 20);
-        health -= damage;
-        splat('$damage', 'poison-text');
-      }
-
-      // Regeneration is done last.
+      // Regeneration is done before poison to make killing bosses with only
+      // gravity and poison harder.
 
       if (regenerating && health < maxHealth) {
         var count = equipmentEgos[Ego.regen] ?? 0;
         if (buffs.containsKey('regen')) count++;
-        heal(max(1, _vitalityToHealth(_vitality) * count ~/ 20));
+        heal(regenAmount * count);
+      }
+
+      // Handles poison. Poison hits every 25 ticks (5 seconds).
+
+      if (poisoned) {
+        var amount = max(1, _poisonDamage ~/ 4);
+        hurt(this, amount, 'poison', 'poison-text');
       }
     }
   }
@@ -1426,11 +1505,9 @@ class Doll extends OnlineObject {
         (result = _path(location ?? targetLocation)))
       warmUp(#walk, walkingCoolDown);
 
-    // A [Doll] is stuck if it fails to move or never moves. Stuck dolls change
-    // their targets, so aquatic monsters and frozen monsters always change
-    // their targets.
+    // A [Doll] is stuck if it fails to move.
 
-    stuck = (_hasTarget && result == false) || frozen;
+    stuck = _hasTarget && result == false;
   }
 
   /// Used with [warmUp] and [coolDown].
@@ -1448,7 +1525,7 @@ class Doll extends OnlineObject {
   }
 
   void _aggro() {
-    if (!summoned && !info.aggro && !boss || temporary) return;
+    if (!summoned && info?.aggro == false) return;
 
     if (summoned && !(masterDoll?.account?.options['pet aggro'] ?? false))
       return;
@@ -1470,21 +1547,19 @@ class Doll extends OnlineObject {
     List<Doll> targets = List.from(function().where((Doll target) {
       // Pets shouldn't aggro players or other pets.
 
-      if (summoned) {
-        if (target.account != null ||
-            target.info?.interaction != null ||
-            target.summoned) return false;
+      if (summoned &&
+          (target.account != null ||
+              target.info?.interaction != null ||
+              target.summoned)) return false;
 
-        if (!target.inCombat &&
-            masterDoll.account.recentKills.containsKey(target.id)) return false;
-      }
+      // Monsters that don't move shouldn't target things they can't attack.
 
-      // Stealth turns off in combat.
+      var moves = info?.moves ?? false;
 
-      return !target.dead &&
-          _visible(target) &&
-          target.account?.recentKills?.containsKey(id) != true &&
-          canFireAt(target);
+      if ((!moves || frozen) && chessDistanceTo(target.currentLocation) > 5)
+        return false;
+
+      return !target.dead && _visible(target) && canFireAt(target);
     }));
 
     if (targets.isNotEmpty) {
@@ -1508,7 +1583,8 @@ class Doll extends OnlineObject {
 
     // todo: a lot of this code can be moved into the Ego class
 
-    var healing = effect.egos.contains(Ego.healing);
+    var healing = effect.egos.contains(Ego.healing),
+        charming = effect.egos.contains(Ego.charm);
 
     // Allows players to get drops.
 
@@ -1520,28 +1596,34 @@ class Doll extends OnlineObject {
 
     // Hidden targets are generally environmental and can't be attacked.
 
-    if (dead || hidden || effect.source?.account?.canViewDoll(this) == false)
-      return;
+    if (dead || hidden) return;
 
     if (effect.source != null && !healing) {
       if (sourceAccount != null && account != null) {
         // Handles non-pvp areas.
 
         if (!account.canPvP || !sourceAccount.canPvP) {
-          splat('pvp off', 'effect-text');
+          splat('pvp disabled', 'effect-text');
           return;
         }
       }
 
-      lastCombatTime = effect.source.lastCombatTime = Clock.time;
+      // Both enter combat at the same time.
+
+      enterCombat();
+      effect.source.enterCombat();
     }
 
     // Causes non-players to retaliate to attacks if they don't already have a
-    // target or are stuck.
+    // target, are stuck, can't fire at their target, or their target is too far
+    // away.
 
     if (effect.causesRetaliation(this) &&
         !player &&
-        (targetDoll == null || stuck)) {
+        (targetDoll == null ||
+            stuck ||
+            !canFireAt(targetDoll) ||
+            chessDistanceTo(targetDoll.currentLocation) > 5)) {
       targetLocation = null;
       targetDoll = effect.source;
     }
@@ -1550,53 +1632,51 @@ class Doll extends OnlineObject {
 
     if (effect.causesRetaliation(this) &&
         player &&
-        (targetDoll == null) &&
+        targetDoll == null &&
         (targetLocation == null || targetLocation == currentLocation)) {
       targetLocation = null;
       targetDoll = effect.source;
     }
 
-    // Handles misses. Healing and electric attacks ignore defense and evasion.
-
     var resists = resistances, accuracy = effect.accuracy;
-
-    // Lugonu.
-
-    if (accuracy != null && effect.source?.account?.god == 'lugonu')
-      accuracy *= 2;
 
     // Only effects that deal damage can be critical.
 
-    var critical = effect.damage > 0 && random(20) == 0;
+    var critical = !healing && effect.damage > 0 && random(20) == 0;
+
+    // Handles misses. Healing and electric attacks ignore defense and evasion.
 
     if (!effect.egos.contains(Ego.electric) ||
         resists
             .containsKey(Ego.resistElectric)) if (!critical &&
         accuracy != null &&
-        !effect.egos.contains(Ego.healing) &&
+        !healing &&
         !calculateHit(this, accuracy, evasion)) return;
 
     var parries = weapons.where((item) => item.egos.contains(Ego.parry)).length;
-    if (effect.egos.contains(Ego.healing)) parries = 0;
+    if (healing) parries = 0;
 
-    if (parries > 0 && randomDouble < parries / 4) {
-      splat('parry', 'effect-text');
-      return;
+    if (parries > 0) {
+      // With 2 swords, a player has a 43.75% chance of parrying.
+      // With Okawaru and 2 swords, a player has a 93.75% chance of parrying.
+
+      if (randomDouble > pow(account?.god == 'okawaru' ? .25 : .75, parries)) {
+        splat('parry', 'effect-text');
+        return;
+      }
     }
 
     // Handles damage.
 
     if (effect.damage != null) {
       assert(effect.damage >= 0);
-      var maxDamage = applyDefense(effect.damage, effect.egos), damage;
 
-      damage = effect.egos.contains(Ego.maximumDamage)
-          ? maxDamage
-          : random(maxDamage + 1);
+      // Critical hits never miss and deal maximum damage.
 
-      // Critical hits never miss and deal double damage.
-
-      if (critical) damage *= 2;
+      var maxDamage = applyDefense(effect.damage, effect.egos),
+          damage = effect.egos.contains(Ego.maximumDamage) || critical
+              ? maxDamage
+              : random(maxDamage + 1);
 
       // Extra ego damage to make up for being resisted (not including blood
       // or ballistic).
@@ -1612,14 +1692,10 @@ class Doll extends OnlineObject {
         Ego.antimatter,
         Ego.antimatter,
 
-        // +200%
-
-        Ego.fire,
-        Ego.fire,
-
         // +100%
 
         Ego.energy,
+        Ego.fire,
         Ego.ice,
         Ego.electric,
         Ego.gravity,
@@ -1633,8 +1709,8 @@ class Doll extends OnlineObject {
 
       // Berserk, like burst, does not stack.
 
-      if (effect.egos.contains(Ego.wrath) ||
-          effect.sourceNonWeaponEgos.keys.contains(Ego.wrath)) damage *= 3;
+      if (effect.egos.contains(Ego.berserk) ||
+          effect.sourceNonWeaponEgos.keys.contains(Ego.berserk)) damage *= 3;
 
       var rebase = damage;
 
@@ -1647,13 +1723,7 @@ class Doll extends OnlineObject {
           damage += rebase * amount;
       });
 
-      // Gravity hurts 2.5% of a target's remaining health.
-
-      if (effect.egos.contains(Ego.gravity) &&
-          !equipmentEgos.containsKey(Ego.resistGravity))
-        damage += max(1, health ~/ 40);
-
-      if (effect.egos.contains(Ego.healing)) {
+      if (healing) {
         if (effect.source.account != null && summoned)
           // A player is healing their pet.
 
@@ -1664,17 +1734,61 @@ class Doll extends OnlineObject {
           effect.source.masterDoll?.heal(damage);
         else
           heal(damage);
+      } else if (charming) {
+        if (!tamableBy(effect.source)) {
+          splat('no effect', 'effect-text');
+
+          effect.source
+            ..targetDoll = null
+            ..ability = null;
+
+          return;
+        }
+
+        // There is no need for Elyvilon to reduce charm damage, because players
+        // can't be charmed.
+
+        damage = max(1, damage);
+        _charmDamage += damage;
+
+        var percentage = min(100, _charmDamage * 100 ~/ maxHealth),
+            text = '$percentage% tamed';
+
+        splat(critical ? '$damage ($text, critical)' : '$damage ($text)',
+            'charm-text');
+
+        if (_charmDamage >= maxHealth) {
+          if (effect.source.account.pet != null)
+            effect.source.account.pet.stage
+                ?.removeDoll(effect.source.account.pet);
+
+          effect.source.account.pet = Doll(infoName, null, false, difficulty);
+          effect.source.account.doll.summon();
+          killWithNoReward();
+        }
       } else
-        hurt(damage, critical ? 'critical' : null);
+        hurt(effect.source, damage, critical ? 'critical' : null);
 
-      if (effect.source != null && !effect.egos.contains(Ego.healing)) {
-        var reflections = equipmentEgos[Ego.reflection] ?? 0,
-            canReflect = effect.egos.contains(Ego.magic) ||
-                effect.egos.contains(Ego.ballistic);
+      // Gravity hurts 2.5% of a target's remaining health.
 
-        if (canReflect && reflections > 0)
-          effect.source.hurt(effect.source.applyDefense(
-              max(1, min<int>(healthBeforeDamage, damage) * reflections)));
+      if (effect.egos.contains(Ego.gravity) &&
+          !equipmentEgos.containsKey(Ego.resistGravity))
+        hurt(this, max(1, health ~/ 40), 'gravity', 'gravity-text');
+
+      if (effect.source != null && !healing && !charming) {
+        var reflections = equipmentEgos[Ego.reflection] ?? 0;
+
+        if (reflections > 0) {
+          var reflectedDamage = calculateReflectedDamage(this);
+
+          // Reflected damage is not affected by gods or equipment.
+
+          reflectedDamage = effect.source.applyDefense(reflectedDamage);
+          reflectedDamage = max(1, random(reflectedDamage + 1));
+
+          effect.source
+              .hurt(this, reflectedDamage, 'reflection', 'reflection-text');
+        }
       }
 
       // Handles death attacks.
@@ -1683,6 +1797,7 @@ class Doll extends OnlineObject {
           !resists.containsKey(Ego.resistEvil)) {
         killWithNoReward();
         splat('no reward', 'effect-text');
+        account?.noteLethalDamage(effect.source, damage);
       }
 
       // Handles blood attacks.
@@ -1694,7 +1809,13 @@ class Doll extends OnlineObject {
 
       if (blood > 0 && !equipmentEgos.containsKey(Ego.resistEvil))
         effect.source
-            ?.heal(max(1, min<int>(healthBeforeDamage, damage) * blood ~/ 10));
+            ?.heal(max(1, min<int>(healthBeforeDamage, damage) * blood ~/ 4));
+
+      if (effect.egos.contains(Ego.poison) &&
+          !equipmentEgos.containsKey(Ego.resistPoison)) {
+        _poisonDamage += damage;
+        poisoned = true;
+      }
     }
 
     var resistedCurse = equipmentEgos.containsKey(Ego.resistEvil);
@@ -1708,10 +1829,8 @@ class Doll extends OnlineObject {
     if (!resistedCurse && effect.egos.contains(Ego.confusion))
       setDebuff(Ego.confusion, true);
 
-    if (effect.egos.contains(Ego.poison) &&
-        !equipmentEgos.containsKey(Ego.resistPoison)) poisoned = true;
-
     if (effect.egos.contains(Ego.ice)) frozen = true;
+    if (effect.egos.contains(Ego.fire)) burned = true;
 
     // Handles stun.
 
@@ -1762,13 +1881,9 @@ class Doll extends OnlineObject {
         .forEach((item) => equipped.remove(item.id));
   }
 
-  void _dropLoot() =>
-      playersInRange.where((looter) => looter.canLoot(this)).forEach((looter) {
-        var count = 1, luck = looter.doll?.equipmentEgos[Ego.lucky] ?? 0;
-        count += luck;
-        if (looter.god == 'gozag') count *= 2;
-        reward(looter, count);
-      });
+  void _dropLoot() => playersInRange
+      .where((looter) => looter.canLoot(this))
+      .forEach((looter) => reward(looter));
 
   List<List<int>> _findPath(
       Point<int> start, Point<int> end, dynamic at(dynamic point)) {
@@ -1952,7 +2067,7 @@ class Doll extends OnlineObject {
 
       Future.delayed(const Duration(seconds: 5), () {
         if (account.online) {
-          lastCombatTime = -25;
+          leaveCombat();
           lastPlayerCombatTime = -25;
           _abilities['respawn'].use(this);
           spawning = false;
@@ -1978,33 +2093,36 @@ class Doll extends OnlineObject {
           if (info.boss) {
             // The floor after the current floor is unlocked.
 
-            var unlocked = (difficulty ?? stageToFloor(stage?.id)) + 1;
+            var unlocked = stageToFloor(stage?.id) + 1;
 
             // There are overflow errors after the highest floor.
 
-            unlocked = min(unlocked, Session.maxFloor);
-
-            if (unlocked > looter.highestFloor)
+            if (unlocked > looter.highestFloor) {
               looter
                 ..highestFloor = unlocked
                 ..alert('Floor $unlocked is unlocked.');
+
+              // Players are teleported to floors as they are unlocked.
+
+              Future.delayed(Duration(seconds: 1), () {
+                if (looter.sessions.isNotEmpty &&
+                    looter.currentFloor < unlocked &&
+                    looter.currentFloor < Session.maxFloor)
+                  looter.sessions.first.teleport(unlocked, false);
+              });
+            }
           }
 
           info.killFlags.forEach((flag) => looter.flags[flag] = true);
         });
       }
 
-      // TODO: should the recent kills logic be removed? It's not used anymore.
-
-      if (!boss)
-        playersInRange.forEach((looter) => looter.recentKills[id] = true);
-
       // Summoned and temporary monsters don't respawn like other monsters.
 
       Future.delayed(const Duration(seconds: 30), () {
         if (!temporary && !summoned) {
           jump(spawnStage, spawnLocation);
-          lastCombatTime = 0;
+          leaveCombat();
           spawning = false;
           _noReward = false;
           health = maxHealth;
@@ -2099,20 +2217,17 @@ class Doll extends OnlineObject {
   }
 
   bool _visible(Doll target) {
-    // Only players can be stealthy.
-
-    if (target.account == null || target.inCombat) return true;
-
     // Prevents players from being attacked after teleporting.
 
-    if (Clock.time - target._lastTeleport < 25) return false;
+    if (target?.account != null && Clock.time - target._lastTeleport < 25)
+      return false;
 
-    return target.account.options['stealth'] == false;
+    if (target?.account == null || targetDoll?.id == target?.id) return true;
 
-    // Old stealth mechanics.
+    // Bosses always attack players.
 
-    // return target.account.options['stealth'] == false ||
-    //   !Config.debug && level > target.stealth;
+    return (boss && !Config.debug) ||
+        target.account.options['stealth'] == false;
   }
 
   int _vitalityToHealth(int vitality) {

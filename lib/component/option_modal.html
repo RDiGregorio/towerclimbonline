@@ -6,10 +6,10 @@
                     aggressive enemies:
                 </div>
                 <label class="custom-input">
-                    <select class="form-control input"
+                    <select class="form-control input input-sm"
                             [(ngModel)]="stealth">
-                        <option value="on">off</option>
                         <option value="off">on</option>
+                        <option value="on">off</option>
                     </select>
                 </label>
             </div>
@@ -18,7 +18,7 @@
                     aggressive pets:
                 </div>
                 <label class="custom-input">
-                    <select class="form-control input"
+                    <select class="form-control input input-sm"
                             [(ngModel)]="petAggro">
                         <option value="on">on</option>
                         <option value="off">off</option>
@@ -30,31 +30,19 @@
                     show events:
                 </div>
                 <label class="custom-input">
-                    <select class="form-control input"
+                    <select class="form-control input input-sm"
                             [(ngModel)]="showEvents">
                         <option value="on">on</option>
                         <option value="off">off</option>
                     </select>
                 </label>
             </div>
-            <!-- div>
-                <div>
-                    combat evasion:
-                </div>
-                <label class="custom-input">
-                    <select class="form-control input"
-                            [(ngModel)]="showEvasionPercent">
-                        <option value="off">fraction</option>
-                        <option value="on">percentage</option>
-                    </select>
-                </label>
-            </div -->
             <div>
                 <div>
                     show FPS:
                 </div>
                 <label class="custom-input">
-                    <select class="form-control input"
+                    <select class="form-control input input-sm"
                             [(ngModel)]="showFps">
                         <option value="on">on</option>
                         <option value="off">off</option>
@@ -66,10 +54,10 @@
                     show progress:
                 </div>
                 <label class="custom-input">
-                    <select class="form-control input"
+                    <select class="form-control input input-sm"
                             [(ngModel)]="progressDisplay">
                         <option value="combat">combat</option>
-                        <option value="summoning">summoning</option>
+                        <option value="summoning">taming</option>
                         <option value="slay">luck</option>
                         <option value="fishing">fishing</option>
                         <option value="mining">mining</option>
@@ -89,33 +77,26 @@
                     <label>
                         <input type="range"
                                [(ngModel)]="zoom"
-                               min="1"
+                               min="0.5"
                                max="5"
                                step="0.1">
                     </label>
                 </div>
             </div>
-            <!-- div>
+            <div>
                 <div>
-                    script:
+                    map size:
                 </div>
                 <div>
                     <label>
-                        <input class="form-control"
-                               [(ngModel)]="script">
+                        <input type="range"
+                               [(ngModel)]="mapSize"
+                               min="100"
+                               max="200"
+                               step="1">
                     </label>
                 </div>
-                <button class="btn btn-default"
-                        (click)="run()"
-                        [disabled]="script.isEmpty">
-                    Run
-                </button>
-                <button class="btn btn-default"
-                        (click)="loop()"
-                        [disabled]="script.isEmpty">
-                    Loop
-                </button>
-            </div -->
+            </div>
         </td>
         <td class="option-section">
             <form autocomplete="off" onsubmit="return false">
@@ -133,7 +114,7 @@
                 </div>
                 <div>
                     <label>
-                        <input class="form-control"
+                        <input class="form-control input-sm"
                                placeholder="new recovery email"
                                [(ngModel)]="newEmail"
                                [maxlength]="100">
@@ -151,7 +132,7 @@
             <form autocomplete="off" onsubmit="return false">
                 <div>
                     <label>
-                        <input class="form-control"
+                        <input class="form-control input-sm"
                                type="password"
                                placeholder="old password"
                                [(ngModel)]="oldPassword"
@@ -160,7 +141,7 @@
                 </div>
                 <div>
                     <label>
-                        <input class="form-control"
+                        <input class="form-control input-sm"
                                type="password"
                                placeholder="new password"
                                [(ngModel)]="newPassword"
@@ -169,7 +150,7 @@
                 </div>
                 <div>
                     <label>
-                        <input class="form-control"
+                        <input class="form-control input-sm"
                                type="password"
                                placeholder="new password"
                                [(ngModel)]="repeatNewPassword"

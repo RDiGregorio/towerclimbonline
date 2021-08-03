@@ -59,9 +59,12 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
           use: (Doll source) {
             source
               ..ability = null
-              ..jump(stages['dungeon0'], Point(162, 165));
+              ..jump(stages['dungeon0'], Point(62, 165));
 
-            if (source.account?.petSpawned == true) source.summon();
+            if (source.account?.petSpawned == true) {
+              source.revivePet();
+              source.summon();
+            }
             return true;
           }));
 
@@ -192,59 +195,16 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
             if (source.chessDistanceTo(source.targetDoll.currentLocation) > 1)
               return false;
             else {
-              source.pickpocket();
-              return true;
-            }
-          }));
+              var doll = source.targetDoll, account = source.account;
 
-  registerAbility(
-      'charm',
-      Ability(
-          combat: false,
-          use: (Doll source) {
-            Doll target = source.targetDoll;
-            if (target == null) return false;
+              if (doll != null) {
+                source.pickpocket(doll);
 
-            if (source.chessDistanceTo(target.currentLocation) > 1)
-              return false;
-            else {
-              if (!target.tamableBy(source)) {
-                source
-                  ..alert(alerts[#no])
-                  ..targetDoll = null
-                  ..ability = null;
-
-                return false;
+                doll.playersInRange
+                    .where((looter) =>
+                        looter.id != account.id && looter.canLoot(doll))
+                    .forEach((looter) => looter.doll?.pickpocket(doll));
               }
-
-              var petRequirement = target?.petRequirement ?? 0;
-
-              if (petRequirement > source.modifiedSummoningLevel) {
-                source.informationPrompt('You need a summoning level of ' +
-                    formatNumber(petRequirement) +
-                    ' to do that. Your summoning level is ' +
-                    '${formatNumber(source.modifiedSummoningLevel)}.');
-
-                source
-                  ..targetDoll = null
-                  ..ability = null;
-
-                return false;
-              }
-
-              if (source.account.pet != null)
-                source.account.pet.stage?.removeDoll(source.account.pet);
-
-              source.account.pet =
-                  Doll(target.infoName, null, false, target.difficulty);
-
-              target.killWithNoReward();
-              target.splat('charm', 'effect-text');
-              source.account.doll.summon();
-
-              source
-                ..targetDoll = null
-                ..ability = null;
 
               return true;
             }
@@ -532,6 +492,9 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
                 .any((item) => item.egos.contains(Ego.burst))
             ? 3
             : 1,
+
+        // level is used to boost damage, making up for not using a weapon.
+
         weapon = Item('scroll')..bonus = source.level;
 
     for (int i = 0; i < count; i++)

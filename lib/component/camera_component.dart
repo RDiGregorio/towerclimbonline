@@ -32,7 +32,7 @@ class CameraComponent {
       _minZ = 0,
       _frames = 0,
       _frameTime = now,
-      _nocache = 0;
+      _nocache = now;
 
   Point<int> _pointer;
   Point<num> _rippleLocation = const Point(0, 0);
@@ -198,6 +198,11 @@ class CameraComponent {
             if (ClientGlobals.session.tappedItemSources.containsKey(doll.id))
               doll.style['pointer-events'] = 'none';
           }
+
+          // Handles opened chests.
+
+          if (ClientGlobals.session.recentChests[doll.id] == true)
+            doll.style['opacity'] = '0.5';
 
           if (doll == ClientGlobals.session.doll)
             doll.style['pointer-events'] = 'none';
@@ -387,9 +392,8 @@ class CameraComponent {
       result.add('debuffed');
 
     if (doll.buffKeys.contains('frozen')) result.add('frozen');
-
+    if (doll.buffKeys.contains('burned')) result.add('burned');
     if (doll.buffKeys.contains('poisoned')) result.add('poisoned');
-
     return result.join(', ');
   }
 
@@ -568,7 +572,7 @@ class CameraComponent {
   }
 
   void _scroll(int sign) => ClientGlobals.zoom = clamp(
-      ClientGlobals.zoom - round(.1 * sign * ClientGlobals.zoom, 2), 1, 5);
+      ClientGlobals.zoom - round(.1 * sign * ClientGlobals.zoom, 2), .5, 5);
 
   Point<num> _serverPoint(Point<num> clientPoint) {
     if (ClientGlobals.session.doll == null) return const Point(0, 0);

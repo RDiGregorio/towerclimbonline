@@ -1,7 +1,7 @@
 <form autocomplete="off" onsubmit="return false"
       class="form-inline">
     <label>
-        <input id="int-input"
+        <input autofocus id="int-input"
                class="form-control"
                [(ngModel)]="input"
                [maxlength]="100">
@@ -12,11 +12,11 @@
             [disabled]="disabled">
         OK
     </button>
-    <div class="checkbox">
+    <!-- div class="checkbox">
         <label>
             <input type="checkbox"
                    [(ngModel)]="procGen">
                 procedurally generated
         </label>
-    </div>
+    </div -->
 </form>

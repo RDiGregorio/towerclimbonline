@@ -54,8 +54,11 @@ class ItemContainer extends OnlineObject {
       items.values.firstWhere((item) => item.displayTextWithoutAmount == text,
           orElse: () => null);
 
+  List<Item> getItemsByComparisonText(String text) => List<Item>.from(
+      items.values.where((item) => item.comparisonText == text));
+
   void removeAll(ItemContainer container) => container.items.values
-      .forEach((item) => removeItem(item.text, item.amount));
+      .forEach((item) => removeItem(item.text, item.getAmount()));
 
   bool removeItem(String text, [dynamic amount = 1]) {
     amount = big(amount);
@@ -63,34 +66,7 @@ class ItemContainer extends OnlineObject {
     var item = getItem(text);
     if (item == null || item.getAmount() < amount) return false;
     item.removeAmount(amount);
-    if (item.amount <= 0) internal['items'].remove(item.text);
+    if (item.getAmount() <= BigInt.zero) internal['items'].remove(item.text);
     return true;
-  }
-
-  /// Warning: dangerous function. If [beforeTest] returns true, the item is
-  /// destroyed and replaced with [after].
-
-  void replaceAll(bool beforeTest(Item item), Item after(),
-      {bool carryAmount = true,
-      bool carryBonus = true,
-      bool multiplyAmounts = false}) {
-    assert(!carryAmount || !multiplyAmounts);
-    var values = List.from(items.values);
-
-    for (var i = 0; i < values.length; i++) {
-      Item beforeItem = values[i];
-
-      if (beforeTest(values[i])) {
-        deleteItem(beforeItem);
-        var afterItem = after();
-
-        if (carryAmount)
-          afterItem.amount = beforeItem.amount;
-        else if (multiplyAmounts) afterItem.amount *= beforeItem.amount;
-
-        if (carryBonus) afterItem.bonus = beforeItem.bonus;
-        addItem(afterItem);
-      }
-    }
   }
 }

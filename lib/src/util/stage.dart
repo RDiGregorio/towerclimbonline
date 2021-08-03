@@ -147,17 +147,7 @@ class Stage<T extends Doll> extends OnlineObject {
     var terrainType = getTerrain(location);
 
     return terrainType != null &&
-        dollsAt(location).where((Doll obstacle) {
-              // If a monsters is targeting a player, it can walk through
-              // monsters that player has killed.
-
-              if (doll.account == null &&
-                  doll.targetDoll?.account !=
-                      null) if (doll.targetDoll.account.recentKills.keys
-                  .contains(obstacle.id)) return false;
-
-              return true;
-            }).fold(
+        dollsAt(location).fold(
                 terrainType,
                 (terrainType, doll) =>
                     max<num>(terrainType, doll.canPassThis)) <=

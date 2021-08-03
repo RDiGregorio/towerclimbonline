@@ -21,8 +21,7 @@ class ClientGlobals {
   static Session session;
   static bool tradeAccepted = false;
   static String loginMessage = '';
-
-  static Future<num> _zoomThrottle;
+  static Future<dynamic> _zoomThrottle;
 
   static num get zoom => _options['zoom'] ?? 3;
 
@@ -37,7 +36,7 @@ class ClientGlobals {
     if (_zoomThrottle == null) {
       _zoomThrottle = Future.delayed(const Duration(milliseconds: 100), () {
         session?.remote(#setOption, ['zoom', zoom]);
-        return null;
+        _zoomThrottle = null;
       });
     }
   }

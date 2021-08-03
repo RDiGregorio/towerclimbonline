@@ -15,8 +15,6 @@ class Crafting {
 
       _craftedTo = {};
 
-  /// Only used client side.
-
   static void add(String result, Iterable<String> ingredients) {
     List.from(ingredients)
       ..add(result)
@@ -44,10 +42,15 @@ class Crafting {
       : Set<String>.from(_craftedTo[key] ?? const []);
 
   static void init() {
+    // The items that can't be crafted are:
+    // god items
+    // super resist ring
+    // super resist hat
+    // invisibility boots
+    // berserk ring
+
     _craftedFrom.clear();
     _craftedTo.clear();
-
-    // TODO: create different types of herbs.
 
     // Potions. Acid and blood potions can't be crafted.
 
@@ -56,7 +59,6 @@ class Crafting {
     add('dexterity potion', ['herb']);
     add('intelligence potion', ['herb']);
     add('regen potion', ['herb']);
-    add('invisibility potion', ['herb']);
     add('fast potion', ['herb']);
     add('poison potion', ['herb']);
     add('confusion potion', ['herb']);
@@ -163,15 +165,12 @@ class Crafting {
     // Rings.
 
     add('ring', const ['gold']);
-    add('resist fire ring', const ['ruby', 'gold']);
-    add('resist ice ring', const ['sapphire', 'gold']);
-    add('resist electric ring', const ['diamond', 'gold']);
     add('regen ring', const ['emerald', 'gold']);
     add('experience ring', const ['onyx', 'gold']);
     add('meteorite ring', const ['meteorite', 'gold']);
     add('burst ring', const ['rainbow diamond', 'gold']);
 
-    // Amulets.
+    // Amulets (defense replaces regen).
 
     add('golden charm', const ['gold']);
     add('power amulet', const ['ruby', 'gold']);
@@ -181,14 +180,13 @@ class Crafting {
     add('invisibility amulet', const ['onyx', 'gold']);
     add('life amulet', const ['rainbow diamond', 'gold']);
     add('reflection amulet', const ['meteorite', 'gold']);
-    add('shark tooth necklace', const ['shark tooth']);
 
     // Crowns.
 
     add('crown', const ['gold']);
-    add('resist fire crown', const ['gold', 'ruby']);
-    add('resist ice crown', const ['gold', 'sapphire']);
-    add('resist electric crown', const ['gold', 'diamond']);
+    add('power crown', const ['gold', 'ruby']);
+    add('evasion crown', const ['gold', 'sapphire']);
+    add('accuracy crown', const ['gold', 'diamond']);
     add('regen crown', const ['gold', 'emerald']);
     add('experience crown', const ['gold', 'onyx']);
     add('dream crown', const ['rainbow diamond', 'gold']);
@@ -252,19 +250,25 @@ class Crafting {
 
     // Leather.
 
-    add('boots', const ['hide']);
     add('power boots', const ['ruby', 'hide']);
     add('evasion boots', const ['sapphire', 'hide']);
     add('accuracy boots', const ['diamond', 'hide']);
-    add('thieving gloves', const ['hide']);
+    add('regen boots', const ['emerald', 'hide']);
+    add('experience boots', const ['onyx', 'hide']);
     add('power gloves', const ['ruby', 'hide']);
     add('evasion gloves', const ['sapphire', 'hide']);
     add('accuracy gloves', const ['diamond', 'hide']);
+    add('regen gloves', const ['emerald', 'hide']);
+    add('experience gloves', const ['onyx', 'hide']);
     add('cloak', const ['hide']);
-    add('leather armor', const ['hide']);
+    add('leash', const ['hide']);
 
-    // Leashes have been removed for trivializing the game.
-    // add('leash', const ['hide']);
+    // Useless, but added for consistency.
+
+    add('boots', const ['hide']);
+    add('gloves', const ['hide']);
+    add('hat', const ['hide']);
+    add('leather jacket', const ['hide']);
 
     // Fur.
 
@@ -274,17 +278,21 @@ class Crafting {
 
     // Web.
 
-    add('robe', const ['web']);
+    add('silk robe', const ['web']);
+    add('silk cloak', const ['web']);
     add('resist ballistic vest', const ['web']);
 
     // Fabric.
 
     add('ghostly robe', const ['ghostly fabric']);
     add('ghostly cloak', const ['ghostly fabric']);
+    add('ghostly hat', const ['ghostly fabric']);
     add('distortion robe', const ['spacetime fabric']);
     add('distortion cloak', const ['spacetime fabric']);
+    add('distortion hat', const ['spacetime fabric']);
     add('starlight robe', const ['starlight fabric']);
     add('starlight cloak', const ['starlight fabric']);
+    add('starlight hat', const ['starlight fabric']);
 
     // Feathers.
 
@@ -303,7 +311,6 @@ class Crafting {
     add('sushi', const ['fish']);
     add('teriyaki', const ['meat']);
     add('noodles', const ['grain']);
-    add('rice', const ['grain']);
     add('salad', const ['vegetable']);
     add('ice cream', const ['milk']);
     add('yggdrasil smoothie', const ['yggdrasil fruit']);
@@ -336,7 +343,7 @@ class Crafting {
     add('crystal thieving gloves', const ['seaweed']);
     add('crystal shield', const ['seaweed']);
 
-    // Crystal weapons.
+    // Crystal weapons (no books or bows).
 
     add('crystal scythe', ['seaweed']);
     add('crystal dagger', ['seaweed']);
@@ -380,6 +387,10 @@ class Crafting {
 
     add('particle accelerator', ['annihilation scroll', 'iron']);
     add('antimatter cannon', ['particle accelerator', 'gold', 'energy']);
+
+    // Other.
+
+    add('flamethrower', ['iron', 'fire scroll']);
   }
 
   /// Used client side.

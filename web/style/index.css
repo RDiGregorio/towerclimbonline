@@ -204,6 +204,10 @@
     }
 }
 
+.item-info-panel {
+    height: 145px;
+}
+
 .panel-gutter {
     width: 15px;
 }
@@ -221,7 +225,22 @@
 }
 
 .poison-text {
+    /* color: rgb(255, 127, 255); */
+    /* red, for consistency */
+
+    color: rgb(255, 127, 127);
+}
+
+.charm-text {
     color: rgb(255, 127, 255);
+}
+
+.reflection-text {
+    color: rgb(255, 127, 127);
+}
+
+.gravity-text {
+    color: rgb(255, 127, 127);
 }
 
 .damage-text {
@@ -600,6 +619,10 @@ button.close {
     height: 34px;
 }
 
+.text-modal .modal-content {
+    /* width: 500px; */
+}
+
 .unlink {
     color: rgb(51, 51, 51);
 }
@@ -705,9 +728,12 @@ button.close {
     color: yellow !important;
 }
 
+.exchange-browse {
+    height: 119px;
+}
+
 .exchange-left {
     vertical-align: top;
-    padding-top: 5px;
 }
 
 .exchange-right {
@@ -716,6 +742,10 @@ button.close {
 
 .top-align {
     vertical-align: top;
+}
+
+.exchange-item-input {
+    width: 187px !important;
 }
 
 .action-text {
@@ -848,8 +878,13 @@ button.close {
     max-height: 200px;
 }
 
+.exchange-modal {
+    height: 200px;
+}
+
 .scrolling-modal {
-    max-height: 300px;
+    max-height: 500px;
+    overflow-y: auto;
 }
 
 .header-buttons {
@@ -857,7 +892,7 @@ button.close {
 }
 
 .overflow-scroll {
-    overflow: scroll;
+    overflow: auto;
 }
 
 .debug-textarea {
@@ -873,19 +908,17 @@ button.close {
     right: 0;
     margin-top: 7px;
     margin-right: 5px;
-    width: 100px;
-    height: 100px;
     border: 1px solid black;
     background-color: black;
     pointer-events: auto;
 }
 
 .point {
-    margin-top: -2px;
-    margin-left: -2px;
+    margin-top: -3px;
+    margin-left: -3px;
     position: absolute;
-    width: 3px;
-    height: 3px;
+    width: 5px;
+    height: 5px;
     border: 1px solid red;
     background-color: red;
     pointer-events: none;

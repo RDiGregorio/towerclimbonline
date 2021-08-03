@@ -13,6 +13,8 @@ import 'package:towerclimbonline/util.dart';
     directives: [coreDirectives, formDirectives],
     templateUrl: 'option_modal.html')
 class OptionModal {
+  static Future<dynamic> _throttle;
+
   String oldPassword = '',
       newPassword = '',
       message = '',
@@ -30,6 +32,22 @@ class OptionModal {
   String get email => ClientGlobals.session.email ?? 'none';
 
   int get lastEmailReset => ClientGlobals.session.lastEmailReset ?? 0;
+
+  num get mapSize {
+    var map = ClientGlobals.session?.options ?? {};
+    return map['map size'] ?? 100;
+  }
+
+  void set mapSize(dynamic value) {
+    value = clamp(parseInteger(value), 100, 200);
+
+    if (_throttle == null) {
+      _throttle = Future.delayed(const Duration(milliseconds: 100), () {
+        ClientGlobals.session?.remote(#setOption, ['map size', value]);
+        _throttle = null;
+      });
+    }
+  }
 
   String get pendingEmail => ClientGlobals.session.pendingEmail ?? 'none';
 

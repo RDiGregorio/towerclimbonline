@@ -285,10 +285,7 @@ void main() {
   test('channels', () async {
     var accountManager = newMockResourceManager(),
         channelManager = newMockResourceManager(),
-        user = Session(
-            () => Account(Doll()),
-            accountManager,
-            channelManager),
+        user = Session(() => Account(Doll()), accountManager, channelManager),
         contact =
             Session(() => Account(Doll()), accountManager, channelManager);
 
@@ -407,6 +404,29 @@ void main() {
     expect(doll.applyDefense(1000), 62);
   });
 
+  test('spirit', () {
+    registerWeaponInfo('natural weapon', 0);
+    registerItemInfo('shield', ItemInfo(slot: #body, egos: [Ego.shield]));
+    registerItemInfo('spirit', ItemInfo(slot: #body, egos: [Ego.spirit]));
+    registerDollInfo('b', DollInfo(equipped: {'0': Item('shield')}));
+    registerDollInfo('c', DollInfo(equipped: {'0': Item('spirit')}));
+
+    registerDollInfo(
+        'd', DollInfo(equipped: {'0': Item('shield'), '1': Item('shield')}));
+
+    registerDollInfo(
+        'e', DollInfo(equipped: {'0': Item('spirit'), '1': Item('spirit')}));
+
+    var doll = Doll('b');
+    expect(doll.applyDefense(1000), 500);
+    doll = Doll('c');
+    expect(doll.applyDefense(1000), 750);
+    doll = Doll('d');
+    expect(doll.applyDefense(1000), 250);
+    doll = Doll('e');
+    expect(doll.applyDefense(1000), 562);
+  });
+
   test('crafting', () {
     Crafting.add('cereal', const ['milk', 'grain']);
     Crafting.add('sushi', const ['fish']);
@@ -457,11 +477,28 @@ void main() {
 
   test('exchange', () {
     var exchange = Exchange();
-    var sellOffer = exchange.sell('a', 'sword', 100, 3, Item('sword'));
-    var buyOffer = exchange.buy('a', 'sword', 120, 2);
-    expect(sellOffer.progress, 2);
-    expect(buyOffer.progress, 2);
-    expect(buyOffer.change, 40);
+
+    var sellOffer =
+        exchange.sell('a', 'key', big(100), big(3), Item('+2 sword'));
+
+    var buyOffer = exchange.buy('a', 'key', big(120), big(2), 0);
+    expect(sellOffer.progress, big(2));
+    expect(buyOffer.progress, big(2));
+    expect(buyOffer.change, big(40));
+  });
+
+  test('exchange bonuses', () {
+    var exchange = Exchange();
+
+    var sellOffer =
+        exchange.sell('a', 'key', big(100), big(3), Item('+2 sword'));
+
+    exchange.sell('b', 'key', big(120), big(1), Item('+3 sword'));
+    exchange.sell('b', 'key', big(130), big(1), Item('+4 sword'));
+    var buyOffer = exchange.buy('a', 'key', big(130), big(2), 3);
+    expect(sellOffer.progress, big(0));
+    expect(buyOffer.progress, big(2));
+    expect(buyOffer.change, big(10));
   });
 
   test(
@@ -531,7 +568,7 @@ void main() {
       expect(stat.internalLevel, Stat.maxLevel);
 
       expect(stat.experience,
-          big(Stat.maxLevelExperience) * (BigInt.one << stat.ascensions));
+          big(Stat.maxLevelExperience) * stat.ascensionMultiplier);
     }
 
     for (int i = 0; i < 1000; i++) test(i);
@@ -720,7 +757,7 @@ void main() {
   test('berserk burst ring', () {
     registerItems(const {});
     var item = Item.fromDisplayText('burst ring'),
-        copy = item.copyWithEgos([Ego.wrath]);
+        copy = item.copyWithEgos([Ego.berserk]);
 
     expect(copy.displayText, 'berserk burst ring');
   });

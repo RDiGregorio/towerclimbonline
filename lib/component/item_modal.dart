@@ -46,7 +46,8 @@ class ItemModal implements OnDestroy {
 
   String get autoHeal {
     var result = ClientGlobals.session.options['auto heal'] ?? 0;
-    return result == 0 ? 'disabled' : '${formatNumber(result)} health';
+    result = min<int>(trillion - 1, result);
+    return result == 0 ? 'disabled' : '${formatCurrency(result, false)} health';
   }
 
   String get autoPotion {
@@ -171,8 +172,11 @@ class ItemModal implements OnDestroy {
       return List<Item>.from(sortedItems.where((item) => item.scroll));
 
     if (filter == 'other')
-      return List<Item>.from(sortedItems.where((Item item) =>
-          !item.equipment && !item.food && !item.potion && !item.scroll));
+      return List<Item>.from(sortedItems.where((Item item) {
+        if (item.potion || item.scroll) return true;
+        if (item.equipment || item.food) return false;
+        return true;
+      }));
 
     return sortedItems;
   }
@@ -208,6 +212,9 @@ class ItemModal implements OnDestroy {
         break;
       case 'head':
         result = function(#helmet);
+        break;
+      case 'other':
+        result = function(#thrown);
         break;
     }
 
@@ -279,10 +286,10 @@ class ItemModal implements OnDestroy {
   }
 
   void setAutoHeal() {
-    showInputModal('Food threashold', 'auto heal', (input) {
+    showInputModal('Threashold', 'auto heal', (input) {
       return ClientGlobals.session.remote(#setOption, [
         'auto heal',
-        min(trillion - 1, parseInteger(input))
+        min(maxFinite, parseInteger(input)),
       ]).then((result) => _changeDetectorRef.markForCheck());
     });
 

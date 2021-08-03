@@ -4,7 +4,7 @@ part of util;
 /// done on login.
 
 class Item extends OnlineObject {
-  static const String _dummyItemName = 'error';
+  static const String dummyItemName = 'error';
   static RegExp _bonus = RegExp(r'\+\d+ ');
   static const int _basePrice = 10;
   String _comparisonText, _displayTextWithoutAmount, _amountText, _displayText;
@@ -45,7 +45,7 @@ class Item extends OnlineObject {
 
     // Returns a dummy item if the item doesn't exist.
 
-    if (infoName == null) return Item(_dummyItemName);
+    if (infoName == null) return Item(dummyItemName);
     text = removeLast(text, infoName);
     var item = Item(infoName);
 
@@ -84,6 +84,7 @@ class Item extends OnlineObject {
   }
 
   bool get canUpgrade {
+    if (infoName == null || getAmount() <= BigInt.zero) return false;
     if (food) return true;
     if (equipment) return info.slot != #thrown;
 
@@ -113,7 +114,8 @@ class Item extends OnlineObject {
     return _comparisonText = result;
   }
 
-  bool get consumable => food || (potion && !equipment);
+  bool get consumable =>
+      food || (potion && !equipment) || infoName == 'nuclear bomb';
 
   /// Returns a copy of this [Item] with a different [id].
 
@@ -178,6 +180,10 @@ class Item extends OnlineObject {
         ..remove(Ego.demon)
         ..addAll([Ego.sickness, Ego.confusion, Ego.blindness]);
 
+    if (info?.slot == #weapon &&
+        ![Ego.ballistic, Ego.magic, Ego.charm].any(result.contains))
+      result.add(Ego.melee);
+
     return result;
   }
 
@@ -189,7 +195,7 @@ class Item extends OnlineObject {
     if (food) return 'heals ${healingAmount.toStringAsFixed(2)}% health';
 
     if (thrown)
-      return 'deals damage ' +
+      return 'attacks target ' +
           'with +1% damage and accuracy for each of your combat levels';
 
     if (infoName == 'agility potion') return '+50% agility';
@@ -197,19 +203,42 @@ class Item extends OnlineObject {
     if (infoName == 'dexterity potion') return '+50% dexterity';
     if (infoName == 'intelligence potion') return '+50% intelligence';
     if (infoName == 'puzzle box') return 'a mesmerizing puzzle box';
+    if (infoName == 'level up potion') return 'only used for testing';
 
     if (infoName == 'philosopher\'s stone') {
-      var gold = formatNumberWithPrecision(1 + bonus / 100);
+      var gold = formatNumberWithPrecision(1 + safeLog(bonus));
       return 'converts 1 blood potion to $gold gold';
     }
 
     if (infoName == 'nuclear reactor') {
-      var energy = formatNumberWithPrecision(1 + bonus / 100);
+      var energy = formatNumberWithPrecision(1 + safeLog(bonus));
       return 'converts 1 uranium to $energy energy';
     }
 
     if (infoName == 'nuclear bomb')
-      return 'kills all targets in range without reward except for bosses, players, and pets';
+      return 'kills all targets without reward' +
+          ' except for bosses, players, and pets';
+
+    if (egos.contains(Ego.fishing)) {
+      var modifier = bonus;
+      return '+${formatNumber(modifier)}% fishing';
+    }
+
+    if (egos.contains(Ego.mining)) {
+      var modifier = bonus;
+      return '+${formatNumber(modifier)}% mining';
+    }
+
+    if (egos.contains(Ego.gathering)) {
+      var modifier = bonus;
+      return '+${formatNumber(modifier)}% gathering';
+    }
+
+    if (egos.contains(Ego.thieving)) {
+      var modifier = bonus;
+
+      return '+${formatNumber(modifier)}% stealth';
+    }
 
     return null;
   }

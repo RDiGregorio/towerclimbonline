@@ -3,12 +3,19 @@ part of util;
 class Effect {
   final Doll source;
   final int damage, accuracy;
-  final List<int> egos;
+  List<int> egos;
   Map<int, int> sourceNonWeaponEgos = {};
   int delay;
 
   Effect(this.source,
       {this.delay = 0, this.damage, this.accuracy, this.egos = const []}) {
+    if (source?.account?.god == 'qazlal' &&
+        this.damage != null &&
+        !egos.contains(Ego.healing) &&
+        !egos.contains(Ego.charm))
+      egos = List<int>.from(
+          Set<int>.from(egos)..addAll([Ego.fire, Ego.ice, Ego.electric]));
+
     if (source != null)
       source.nonWeaponEquipment.forEach((item) => item.egos.forEach((ego) {
             sourceNonWeaponEgos[ego] ??= 0;
@@ -25,11 +32,6 @@ class Effect {
     // Healing doesn't cause retaliation.
 
     if (source == null || egos.contains(Ego.healing)) return false;
-
-    if (doll.info?.moves == false) {
-      // todo: this is where stuck is needed
-    }
-
     return true;
   }
 }

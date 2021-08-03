@@ -2,51 +2,64 @@ part of util;
 
 class ExchangeOffer extends OnlineObject {
   ExchangeOffer(
-      [String username, String key, int price, int amount, Item soldItem]) {
+      [String username,
+      String key,
+      BigInt price,
+      BigInt amount,
+      Item soldItem,
+      int bonus]) {
     internal
       ..['name'] = username
       ..['key'] = key?.trim()
-      ..['price'] = price
-      ..['amount'] = amount
-      ..['change'] = 0
-      ..['progress'] = 0
-      ..['sold'] = soldItem?.copy;
+      ..['price'] = '$price'
+      ..['amount'] = '$amount'
+      ..['change'] = '0'
+      ..['progress'] = '0'
+      ..['sold'] = soldItem?.copy
+      ..['bought'] = ObservableMap()
+      ..['bonus'] = bonus;
   }
 
-  int get amount => internal['amount'];
+  BigInt get amount => big(internal['amount']);
 
-  Item get boughtItem {
-    if (internal['bought'] == null) return null;
-    return internal['bought'].copy..amount = 1;
+  int get bonus {
+    if (soldItem != null) return soldItem.bonus;
+    return internal['bonus'] ?? 0;
   }
 
-  int get change => internal['change'];
+  List<Item> get boughtItems => List<Item>.from(internal['bought'].values);
 
-  void set change(int change) {
-    internal['change'] = change;
+  BigInt get change => big(internal['change']);
+
+  void set change(BigInt change) {
+    internal['change'] = '$change';
   }
 
-  bool get complete => remaining <= 0;
+  bool get complete => remaining <= BigInt.zero;
 
   String get key => internal['key']?.trim();
 
-  int get price => internal['price'];
+  BigInt get price => big(internal['price']);
 
-  int get progress => internal['progress'];
+  BigInt get progress => big(internal['progress']);
 
-  void set progress(int progress) {
-    internal['progress'] = progress;
+  void set progress(BigInt progress) {
+    internal['progress'] = '$progress';
   }
 
-  int get remaining => amount - progress;
+  BigInt get remaining => amount - progress;
 
   /// Returns the item being sold if there is one. Returns null if this is an
   /// offer to buy.
 
-  Item get soldItem {
-    if (internal['sold'] == null) return null;
-    return internal['sold'].copy..amount = 1;
-  }
+  Item get soldItem => internal['sold'];
 
   String get username => internal['name'];
+
+  void addBoughtItem(Item item, BigInt amount) {
+    var copy = item.copy;
+    copy.setAmount(amount);
+    internal['bought'][copy.id] = copy;
+    progress += amount;
+  }
 }

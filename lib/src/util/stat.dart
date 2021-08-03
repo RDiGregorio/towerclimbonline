@@ -2,6 +2,10 @@ part of util;
 
 class Stat extends OnlineObject {
   static const int maxLevelExperience = 25450468793770, maxLevel = 600;
+  BigInt _cache = BigInt.zero;
+  int _levelAfterAscension;
+
+  BigInt get ascensionMultiplier => BigInt.one << ascensions;
 
   int get ascensions => internal['ascensions'] ?? 0;
 
@@ -24,6 +28,19 @@ class Stat extends OnlineObject {
 
   int get level => _level * (ascensions + 1);
 
+  int get levelAfterAscension {
+    if (_cache != experience) {
+      _cache = experience;
+      var copy = Stat();
+      copy.ascensions = ascensions;
+      copy.setExperienceWithoutSplat(experience);
+      copy.ascensions++;
+      _levelAfterAscension = copy.internalLevel;
+    }
+
+    return _levelAfterAscension;
+  }
+
   BigInt get nextLevelExperience {
     if (_level >= maxLevel) return BigInt.from(maxFinite);
     return experienceFromLevel(_level + 1);
@@ -43,7 +60,7 @@ class Stat extends OnlineObject {
 
   BigInt experienceFromLevel(int level) {
     var result = pow(exp(level - 1), 1 / 25) * 1000 - 1000;
-    return big(result.ceil()) * (BigInt.one << ascensions);
+    return big(result.ceil()) * ascensionMultiplier;
   }
 
   void setExperienceWithoutSplat(BigInt value) => _setExperience(value, false);
@@ -52,7 +69,7 @@ class Stat extends OnlineObject {
       _setExperience(experienceFromLevel(min(value, maxLevel)), false);
 
   int _levelFromExperience(BigInt experience) {
-    num result = (experience ~/ (BigInt.one << ascensions)).toInt();
+    num result = (experience ~/ ascensionMultiplier).toInt();
     if (result <= 0) return 1;
     if (result >= maxLevelExperience) return maxLevel;
     result = pow((result + 1000) / 1000, 25);

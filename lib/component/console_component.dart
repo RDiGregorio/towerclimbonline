@@ -321,15 +321,15 @@ class ConsoleComponent {
     if (input == null || input.isEmpty) return;
     var id = querySelector('.console-left .active').id, list = id.split('-');
 
+    // Handles commands
+
+    if (input.startsWith('/')) {
+      ClientGlobals.session.remote(#command, [input]);
+      input = null;
+      return;
+    }
+
     if (list[0] == 'alert') {
-      // Handles commands
-
-      if (input.startsWith('/')) {
-        ClientGlobals.session.remote(#command, [input]);
-        input = null;
-        return;
-      }
-
       ClientGlobals.session.remote(#messagePublic, [input]);
       input = null;
       return;

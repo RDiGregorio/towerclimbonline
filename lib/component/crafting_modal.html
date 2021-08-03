@@ -1,5 +1,6 @@
 <p class="red-text bold">
-    There's a chance of destroying an item while attempting to upgrade it.
+    There's a 50% chance of destroying an item while attempting to upgrade it.<br>
+    "Cleanup" max upgrades all equipment.
 </p>
 <div class="equip-buttons">
     <button [class]="action == 'craft' ? 'btn btn-primary' : 'btn btn-default'" (click)="setAction('craft')">
@@ -8,9 +9,15 @@
     <button [class]="action == 'upgrade' ? 'btn btn-primary' : 'btn btn-default'" (click)="setAction('upgrade')">
         Upgrading
     </button>
+    <button [disabled]="!canCleanup"
+            class="btn btn-default"
+            (click)="cleanupItems()">
+        Cleanup
+    </button>
 </div>
 <p>
-    <span *ngIf="crafted != null && craftedAmount > 0">You gain: {{crafted}}.</span>&nbsp;
+    <span *ngIf="showMessage">You gain: {{crafted}}.</span>
+    <span>{{formattedGainedExperience}} experience gained.</span>
 </p>
 <table class="wide" *ngIf="action == 'craft'">
     <tr>
@@ -94,7 +101,7 @@
 <div class="modal-footer-buttons modal-buttons">
     <div class="pull-left">
         <label>
-            <input autofocus class="form-control"
+            <input autofocus class="form-control input-sm"
                    placeholder="search"
                    [(ngModel)]="searchInput"
                    [maxlength]="100">
