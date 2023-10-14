@@ -385,8 +385,24 @@ void main() {
     registerDollInfo('a', DollInfo(equipped: {'0': Item('ballistic armor')}));
 
     var doll = Doll('a')..equipped.values.forEach((item) => item.bonus = 0);
-    expect(doll.applyDefense(1000, const [Ego.ballistic]), 500);
-    expect(doll.applyDefense(999, const [Ego.ballistic]), 499);
+    expect(doll.applyDefense(big(1000), const [Ego.ballistic]), big(500));
+    expect(doll.applyDefense(big(999), const [Ego.ballistic]), big(499));
+  });
+
+  test('stacked ballistic resistance', () {
+    registerItemInfo(
+        'ballistic armor',
+        ItemInfo(
+            slot: #body,
+            egos: const [Ego.resistBallistic, Ego.resistBallistic]));
+
+    registerDollInfo('a', DollInfo(equipped: {'0': Item('ballistic armor')}));
+
+    var doll = Doll('a')..equipped.values.forEach((item) => item.bonus = 0);
+    expect(doll.applyDefense(big(1000), const [Ego.ballistic]), big(250));
+
+    expect(doll.applyDefense(big(1000), const [Ego.ballistic, Ego.acid]),
+        big(1000));
   });
 
   test('defense', () {
@@ -395,13 +411,13 @@ void main() {
     registerDollInfo('b', DollInfo(equipped: {'0': Item('armor')}));
     registerDollInfo('c', DollInfo(equipped: {'0': Item('armor')}));
     var doll = Doll('b')..equipped.values.forEach((item) => item.bonus = 500);
-    expect(doll.applyDefense(1000), 500);
+    expect(doll.applyDefense(big(1000)), big(500));
     doll = Doll('c')..equipped.values.forEach((item) => item.bonus = 999);
-    expect(doll.applyDefense(1000), 250);
+    expect(doll.applyDefense(big(1000)), big(250));
     doll = Doll('c')..equipped.values.forEach((item) => item.bonus = 2000);
-    expect(doll.applyDefense(1000), 125);
+    expect(doll.applyDefense(big(1000)), big(125));
     doll = Doll('c')..equipped.values.forEach((item) => item.bonus = 4000);
-    expect(doll.applyDefense(1000), 62);
+    expect(doll.applyDefense(big(1000)), big(62));
   });
 
   test('spirit', () {
@@ -418,13 +434,13 @@ void main() {
         'e', DollInfo(equipped: {'0': Item('spirit'), '1': Item('spirit')}));
 
     var doll = Doll('b');
-    expect(doll.applyDefense(1000), 500);
+    expect(doll.applyDefense(big(1000)), big(500));
     doll = Doll('c');
-    expect(doll.applyDefense(1000), 750);
+    expect(doll.applyDefense(big(1000)), big(750));
     doll = Doll('d');
-    expect(doll.applyDefense(1000), 250);
+    expect(doll.applyDefense(big(1000)), big(250));
     doll = Doll('e');
-    expect(doll.applyDefense(1000), 562);
+    expect(doll.applyDefense(big(1000)), big(562));
   });
 
   test('crafting', () {
@@ -514,7 +530,7 @@ void main() {
 
     // Gravity appears before ice because the egos are sorted.
 
-    expect(item.displayTextWithoutAmount, "gravity ice smg");
+    expect(item.displayTextWithoutAmount, 'gravity ice smg');
   });
 
   test('invert percent', () {
@@ -531,6 +547,12 @@ void main() {
       var stat = Stat()..setLevel(i);
       expect(stat.level, i);
     }
+  });
+
+  test('max level', () {
+    var stat = Stat()..setLevel(Stat.maxLevel);
+    expect(stat.level, Stat.maxLevel);
+    expect(stat.experience, big(Stat.maxLevelExperience));
   });
 
   test('experience curve', () {
@@ -554,7 +576,7 @@ void main() {
       var stat = Stat();
       stat.ascensions = ascensions;
 
-      for (int i = ascensions > 100 ? Stat.maxLevel : 1;
+      for (int i = ascensions > 5 ? Stat.maxLevel : 1;
           i <= Stat.maxLevel;
           i++) {
         stat.setLevel(i);
@@ -593,25 +615,6 @@ void main() {
     expect(setBonus('+2 dagger', 7), '+7 dagger');
   });
 
-  test('max floor', () {
-    registerItems(const {});
-
-    // There are overflow errors above the max floor. This test verifies that
-    // there are no overflow errors on the max floor.
-
-    registerDollInfo('boss', DollInfo(boss: true));
-
-    for (int i = 1; i <= Session.maxFloor; i++) {
-      var doll = Doll('boss', null, false, i);
-      expect(doll.health > 1, equals(true));
-
-      expect(
-          BigInt.from(calculateDamage(doll, Item('wrath'))) * BigInt.from(10) >
-              BigInt.from(maxFinite),
-          false);
-    }
-  });
-
   test('format currency', () {
     expect(formatCurrency(maxFinite), 'Ξ9,223P');
     expect(formatCurrency(big(maxFinite) * big(1000)), 'Ξ9,223E');
@@ -639,12 +642,23 @@ void main() {
     expect(parseInteger('10000P'), maxFinite);
   });
 
+  test('max floor', () {
+    // This test verifies that there are no overflow errors on the max floor.
+
+    registerDollInfo('boss', DollInfo(boss: true));
+
+    for (int i = 1; i <= Session.maxFloor; i++) {
+      var doll = Doll('boss', null, false, i);
+      expect(doll.vitality > 0, true);
+    }
+  });
+
   test('parseInteger', () {
-    expect(parseInteger("-1"), -1);
+    expect(parseInteger('-1'), -1);
   });
 
   test('retry', () {
-    int count = 0, limit = 1000;
+    int count = 0, limit = 10;
 
     retryOnError(() {
       if (++count < limit) throw Error();

@@ -1,12 +1,12 @@
 <div id="modal-toggle"
      class="no-events"
-     data-toggle="modal"
-     data-target="#action-modal">
+     [attr.data-toggle]="'modal'"
+     [attr.data-target]="'#action-modal'">
 </div>
 <div id="input-modal-toggle"
      class="no-events"
-     data-toggle="modal"
-     data-target="#input-modal">
+     [attr.data-toggle]="'modal'"
+     [attr.data-target]="'#input-modal'">
 </div>
 <div class="panel panel-default console glass">
     <div *ngIf="conversationMessages.isNotEmpty" class="panel-body conversation">
@@ -35,7 +35,7 @@
                     <li class="active"
                         id="chat-">
                         <a class="console-pill default-cursor"
-                           data-toggle="pill"
+                           [attr.data-toggle]="'pill'"
                            href="#public-output"
                            (click)="clickPublic()">
                             <span class="console-pill-text no-events">
@@ -49,7 +49,7 @@
                     </li>
                     <li id="alert-">
                         <a class="console-pill default-cursor"
-                           data-toggle="pill"
+                           [attr.data-toggle]="'pill'"
                            href="#alert-output"
                            (click)="clickAlerts()">
                             <span class="console-pill-text no-events">
@@ -64,7 +64,7 @@
                     <li *ngIf="channel != ''"
                         id="group-chat">
                         <a class="console-pill default-cursor"
-                           data-toggle="pill"
+                           [attr.data-toggle]="'pill'"
                            href="#group-chat-output"
                            (click)="clickChannel()">
                             <span class="console-pill-text no-events">
@@ -83,7 +83,7 @@
                     <li *ngFor="let contact of privateMessages.keys"
                         id="chat-{{contact}}">
                         <a class="console-pill default-cursor"
-                           data-toggle="pill"
+                           [attr.data-toggle]="'pill'"
                            href="#private-{{contact}}"
                            (click)="clickPrivate(contact)">
                             <span class="console-pill-text no-events">
@@ -204,7 +204,7 @@
                         </table>
                     </div>
                 </div>
-                <form (submit)="handleSubmit()" onsubmit="return false">
+                <form (ngSubmit)="handleSubmit()">
                     <input class="form-control"
                            [(ngModel)]="input"
                            [maxlength]="1000">
@@ -214,7 +214,7 @@
                 <ul class="nav nav-pills console-nav">
                     <li class="active">
                         <a class="console-pill default-cursor"
-                           data-toggle="pill"
+                           [attr.data-toggle]="'pill'"
                            href="#contacts">
                             <span class="console-pill-text">
                                 <i class="fa fa-user"></i>
@@ -223,7 +223,7 @@
                     </li>
                     <!-- li>
                         <a class="console-pill default-cursor"
-                           data-toggle="pill"
+                           [attr.data-toggle]="'pill'"
                            href="#ignore">
                             <span class="console-pill-text default-cursor">
                                 <i class="fa fa-ban"></i>
@@ -232,7 +232,7 @@
                     </li -->
                     <li>
                         <a class="console-pill default-cursor"
-                           data-toggle="pill"
+                           [attr.data-toggle]="'pill'"
                            href="#channel">
                             <span class="console-pill-text">
                                 <i class="fa fa-users"></i>
@@ -267,14 +267,14 @@
                         </div>
                         <div class="pull-right">
                             <button (click)="handleClick('add contact')"
-                                    data-toggle="modal"
-                                    data-target="#input-modal"
+                                    [attr.data-toggle]="'modal'"
+                                    [attr.data-target]="'#input-modal'"
                                     class="btn btn-default console-icon-button">
                                 <i class="fa fa-user-plus text-success"></i>
                             </button>
                             <button (click)="handleClick('remove contact')"
-                                    data-toggle="modal"
-                                    data-target="#input-modal"
+                                    [attr.data-toggle]="'modal'"
+                                    [attr.data-target]="'#input-modal'"
                                     class="btn btn-default console-icon-button">
                                 <i class="fa fa-user-times text-danger"></i>
                             </button>
@@ -289,14 +289,14 @@
                         </div>
                         <div class="pull-right">
                             <button (click)="handleClick('add ignore')"
-                                    data-toggle="modal"
-                                    data-target="#input-modal"
+                                    [attr.data-toggle]="'modal'"
+                                    [attr.data-target]="'#input-modal'"
                                     class="btn btn-default console-icon-button">
                                 <i class="fa fa-user-plus text-success"></i>
                             </button>
                             <button (click)="handleClick('remove ignore')"
-                                    data-toggle="modal"
-                                    data-target="#input-modal"
+                                    [attr.data-toggle]="'modal'"
+                                    [attr.data-target]="'#input-modal'"
                                     class="btn btn-default console-icon-button">
                                 <i class="fa fa-user-times text-danger"></i>
                             </button>
@@ -316,14 +316,14 @@
                         <div class="pull-right"
                              *ngIf="channel == ''">
                             <button (click)="handleClick('join channel')"
-                                    data-toggle="modal"
-                                    data-target="#input-modal"
+                                    [attr.data-toggle]="'modal'"
+                                    [attr.data-target]="'#input-modal'"
                                     class="btn btn-default console-icon-button">
                                 <i class="fa fa-sign-in-alt text-primary"></i>
                             </button>
                             <button (click)="handleClick('create channel')"
-                                    data-toggle="modal"
-                                    data-target="#input-modal"
+                                    [attr.data-toggle]="'modal'"
+                                    [attr.data-target]="'#input-modal'"
                                     class="btn btn-default console-icon-button">
                                 <i class="fa fa-star gold-icon"></i>
                             </button>
@@ -332,15 +332,15 @@
                              *ngIf="channel != ''">
                             <button (click)="handleClick('kick user')"
                                     [disabled]="!isMod() && !isOwner()"
-                                    data-toggle="modal"
-                                    data-target="#input-modal"
+                                    [attr.data-toggle]="'modal'"
+                                    [attr.data-target]="'#input-modal'"
                                     class="btn btn-default console-icon-button">
                                 <i class="fa fa-ban text-danger"></i>
                             </button>
                             <button (click)="handleClick('channel options')"
                                     [disabled]="!isOwner()"
-                                    data-toggle="modal"
-                                    data-target="#action-modal"
+                                    [attr.data-toggle]="'modal'"
+                                    [attr.data-target]="'#action-modal'"
                                     class="btn btn-default console-icon-button">
                                 <i class="fa fa-cog text-primary"></i>
                             </button>

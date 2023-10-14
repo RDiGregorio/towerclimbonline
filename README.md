@@ -1,4 +1,8 @@
-This project requires a PostgreSQL database.
+**This project was originally written for Dart 1. I'm currently in the process of porting it to Dart 3.**
+
+~~This project requires a PostgreSQL database.~~
+
+I need to update database drivers. The current code is using a mock database.
 
 **Setup**
 
@@ -6,13 +10,17 @@ This project requires a PostgreSQL database.
 2. Run `webdev build` to build the project.
 3. Run `dart bin/main.dart` to start the server.
 
-Be sure to set the correct host in config.dart and secrets in secret.yaml!
+Be sure to set the correct host in config.dart and secrets in secret/secret.yaml!
+
+**Debugging**
 
 If you have any issues, possible solutions are:
 
 1. Make sure port forwarding is set up on your router.
 2. Make sure your firewall isn't blocking any connections.
 3. Make sure Tomcat can access outside connections.
+
+You can debug the client using WebStorm by right-clicking and running web/index.html.
 
 **Tools**
 
@@ -22,12 +30,3 @@ If you have any issues, possible solutions are:
 
 1. https://opengameart.org/
 2. https://certbot.eff.org/
-
-**Observatory**
-
-For Google Compute Engine:
-
-1. Generate private keys (locally, not on the VM)
-2. Add them under https://console.cloud.google.com/compute/metadata
-3. Run `sudo ssh -i ./observe -L8181:127.0.0.1:8181 username@towerclimbonline.com` with your username
-3. Open your browser to http://localhost:8181

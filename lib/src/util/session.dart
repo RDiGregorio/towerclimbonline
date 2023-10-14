@@ -5,7 +5,7 @@ part of util;
 /// careful when writing server side code!
 
 class Session extends OnlineObject {
-  static const int maxFloor = 630;
+  static const int maxFloor = 999;
   static final Map<int, Completer<dynamic>> _completers = {};
   static final Map<String, Function> adminCommands = {};
   static final Map<String, RecoveryAttempt> recoveries = {};
@@ -285,6 +285,9 @@ class Session extends OnlineObject {
 
   String get stage => internal['stage'];
 
+  Map<String, dynamic> get stageFlags =>
+      internal['stage flags'] ??= ObservableMap();
+
   Map<String, dynamic> get tappedItemSources =>
       internal['tapped'] ??= ObservableMap();
 
@@ -419,8 +422,8 @@ class Session extends OnlineObject {
   void applySweepingChanges() {}
 
   void ascend(String id) {
-    Stat stat = sheet.stats.firstWhere((stat) => stat.id == id)..ascend();
-    if (stat == sheet.combat) sheet.resetAttributes();
+    sheet.stats.firstWhere((stat) => stat.id == id)..ascend();
+    if (sheet.totalPoints < sheet.spentPoints) sheet.resetAttributes();
   }
 
   List<Map<String, dynamic>> bosses() => List.from(_stageDolls.values
@@ -476,6 +479,13 @@ class Session extends OnlineObject {
     if (Config.debug) {
       // Debug commands.
 
+      if (input == '/up') {
+        account.sheet.stats.forEach((stat) =>
+            stat.experience += stat.experienceFromLevel(Stat.maxLevel));
+
+        return;
+      }
+
       if ('$input '.startsWith('/summon ')) {
         var targetName = input.replaceFirst('/summon', '').trim();
 
@@ -529,7 +539,7 @@ class Session extends OnlineObject {
     if (input == '/die') {
       // No lethal damage note is made for suicides.
 
-      account.doll.health = 0;
+      account.doll.health = BigInt.zero;
       return;
     }
 
@@ -931,6 +941,8 @@ class Session extends OnlineObject {
       ..abilities.clear()
       ..abilities['examine'] = true
       ..abilities['teleport'] = true
+      ..abilities['teleport up'] = true
+      ..abilities['teleport down'] = true
       ..abilities['trade'] = true
       ..abilities['summon pet'] = true
       ..abilities['dismiss pet'] = true
@@ -986,9 +998,7 @@ class Session extends OnlineObject {
 
     // Stats.
 
-    account.sheet
-      ..stats
-          .forEach((stat) => stat.setExperienceWithoutSplat(stat.experience));
+    account.sheet..stats.forEach((stat) => stat.recalculate());
 
     _deleteMissingItems();
 
@@ -1349,7 +1359,7 @@ class Session extends OnlineObject {
     return account.setPassword(oldPassword, newPassword);
   }
 
-  void teleport(num floor, [bool procedural = false]) {
+  void teleport(num floor, [bool procedural = false, bool up = true]) {
     if (account.doll.dead) return;
     floor = min(floor, maxFloor);
     if (floor <= 50) procedural = false;
@@ -1374,12 +1384,15 @@ class Session extends OnlineObject {
           onError: (error, trace) {
         // The +1 undoes the -1 from before.
 
-        if (!procedural) teleport(floor + 1, true);
+        if (!procedural) teleport(floor + 1, true, up);
       });
 
       if (stage != null) {
-        var entrance = entrances[stage?.id];
-        if (stageName == 'dungeon0') entrance = Point(16, 118);
+        var entrance = up
+            ? stage.stairsDown?.currentLocation
+            : stage.stairsUp?.currentLocation;
+
+        if (up && stageName == 'dungeon0') entrance = Point(16, 118);
 
         // A player can die while waiting for a floor to generate.
 
@@ -1437,10 +1450,12 @@ class Session extends OnlineObject {
       replaceMap(
           goodItemSources,
           nearbyDolls.fold({}, (map, doll) {
-            if (doll.goodResource(account)) map[doll.id] = true;
+            var type = doll.goodResource(account);
+            if (type > 0) map[doll.id] = type;
             return map;
           }));
 
+      replaceMap(stageFlags, account.doll.stage.flags);
       replaceMap(recentChests, account.recentChests);
 
       replaceMap(internal['view'] ??= ObservableMap(),

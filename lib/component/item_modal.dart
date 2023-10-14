@@ -45,9 +45,12 @@ class ItemModal implements OnDestroy {
   }
 
   String get autoHeal {
-    var result = ClientGlobals.session.options['auto heal'] ?? 0;
-    result = min<int>(trillion - 1, result);
-    return result == 0 ? 'disabled' : '${formatCurrency(result, false)} health';
+    var result = big(ClientGlobals.session.options['auto heal'] ?? 0);
+    result = BigIntUtil.min(result, maxInput);
+
+    return result == BigInt.zero
+        ? 'disabled'
+        : '${formatCurrency(result, false)} health';
   }
 
   String get autoPotion {
@@ -66,10 +69,12 @@ class ItemModal implements OnDestroy {
       .where((item) => !item.upgradesIncreaseEvasion)
       .fold(defenseBonus, (result, item) => result + item.bonus / 10));
 
-  List<String> get defensiveEgos => List.from(_nonWeapons
-      .expand((item) => item.egos)
-      .map((ego) => Ego.longDescriptions[ego] ?? 'error'))
-    ..sort();
+  List<String> get defensiveEgos {
+    Iterable<String> egoDescriptions(Item item) =>
+        item.egos.map((ego) => Ego.longDescriptionFor(item, ego) ?? 'error');
+
+    return List.from(_nonWeapons.expand(egoDescriptions))..sort();
+  }
 
   Iterable<Item> get displayedItems => filteredItems.where((item) =>
       item.displayTextWithoutAmount
@@ -106,9 +111,10 @@ class ItemModal implements OnDestroy {
   }
 
   List<String> get primaryEgos {
-    var egos = ClientGlobals.session.primaryWeapon?.egos ?? const [];
+    var weapon = primaryWeapon, egos = weapon?.egos ?? const [];
 
-    return List.from(egos.map((ego) => Ego.longDescriptions[ego] ?? 'error'))
+    return List.from(
+        egos.map((ego) => Ego.longDescriptionFor(weapon, ego) ?? 'error'))
       ..sort();
   }
 
@@ -127,9 +133,10 @@ class ItemModal implements OnDestroy {
   }
 
   List<String> get secondaryEgos {
-    var egos = ClientGlobals.session.secondaryWeapon?.egos ?? const [];
+    var weapon = secondaryWeapon, egos = secondaryWeapon?.egos ?? const [];
 
-    return List.from(egos.map((ego) => Ego.longDescriptions[ego] ?? 'error'))
+    return List.from(
+        egos.map((ego) => Ego.longDescriptionFor(weapon, ego) ?? 'error'))
       ..sort();
   }
 

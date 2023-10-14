@@ -20,8 +20,6 @@ class Doll extends OnlineObject {
 
   int _created,
       _poisonCycle = 0,
-      _poisonDamage = 0,
-      _charmDamage = 0,
       messageTime = 0,
       lastCombatTime = -25,
       lastPlayerCombatTime = -25,
@@ -32,13 +30,15 @@ class Doll extends OnlineObject {
       _wanderingRange = 10,
       _petSpawningTime;
 
-  Map<Symbol, int> _delays = {};
+  BigInt _charmDamage = BigInt.zero, _poisonDamage = BigInt.zero;
 
+  Map<Symbol, int> _delays = {};
   Point<int> targetLocation, spawnLocation;
 
   Doll _targetDoll, masterDoll;
 
   final Set<Effect> effects = Set();
+  final Set<Doll> _inCombatWith = Set();
 
   bool spawning = false, stuck = false, summoned = false, _noReward = false;
 
@@ -83,13 +83,6 @@ class Doll extends OnlineObject {
       var copy = value.copy;
       adjustedEquipment[key] = copy;
     });
-
-    // All bosses have regen.
-
-    if (boss) {
-      var item = Item('natural armor', 1, [Ego.regen]);
-      adjustedEquipment[item.id] = item;
-    }
 
     internal['boss level'] = level;
   }
@@ -177,7 +170,7 @@ class Doll extends OnlineObject {
   }
 
   DollCustomization get customization {
-    if (['human', 'newbie shop', 'gozag', 'random shop'].contains(infoName)) {
+    if (['human', 'newbie shop', 'random shop'].contains(infoName)) {
       if (_customization == null)
         _customization =
             json.decode(randomHumanJson(id), reviver: mapWrapperDecoder);
@@ -194,7 +187,7 @@ class Doll extends OnlineObject {
       return _customization;
     }
 
-    if (infoName == 'chad' || infoName == 'popped collar chad') {
+    if (infoName == 'chad' || infoName == 'giga chad') {
       if (_customization == null)
         _customization = json.decode(
             '{"_t":"DollCustomization","id":"1a88-173da0fcf52-5476f491","_override":"DollCustomization","hair":{"_t":"CustomizationLayer","id":"1a89-173da0fcf53-bb244086","_override":"CustomizationLayer","type":"0","h":37,"s":68,"l":115,"c":100},"top":{"_t":"CustomizationLayer","id":"1a90-173da0fcf54-39ea616f","_override":"CustomizationLayer","type":"3","h":282,"s":78,"l":170,"c":122},"gender":"male","base":{"_t":"CustomizationLayer","id":"1a8a-173da0fcf53-db9f76ed","_override":"CustomizationLayer","type":"0","h":0,"s":100,"l":100,"c":100},"back":{"_t":"CustomizationLayer","id":"1a8b-173da0fcf53-46e906d2","_override":"CustomizationLayer","type":"0","h":37,"s":68,"l":115,"c":100},"bottom":{"_t":"CustomizationLayer","id":"1a8c-173da0fcf53-22e7c039","_override":"CustomizationLayer","type":"2","h":245,"s":10,"l":360,"c":282},"eyes":{"_t":"CustomizationLayer","id":"1a8d-173da0fcf53-1a305c00","_override":"CustomizationLayer","type":"0","h":119,"s":98,"l":100,"c":100},"face":{"_t":"CustomizationLayer","id":"1a8e-173da0fcf53-e1929718","_override":"CustomizationLayer","type":"0","h":0,"s":100,"l":100,"c":100},"shoes":{"_t":"CustomizationLayer","id":"1a8f-173da0fcf54-d04e083e","_override":"CustomizationLayer","type":"0","h":0,"s":100,"l":100,"c":100}}',
@@ -219,7 +212,7 @@ class Doll extends OnlineObject {
     internal['cust'] = value;
   }
 
-  bool get dead => health <= 0 && maxHealth > 0;
+  bool get dead => health <= BigInt.zero && maxHealth > BigInt.zero;
 
   int get defense =>
       equipped.values.fold(0, (result, item) => result + item.defense);
@@ -254,12 +247,6 @@ class Doll extends OnlineObject {
 
   bool get dropsSecretRare => boss && (difficulty ?? 0) > 50;
 
-  int get energy => internal['mp'] ??= maxEnergy;
-
-  void set energy(int value) {
-    internal['mp'] = value;
-  }
-
   Map<int, int> get equipmentEgos =>
       equipped.values.expand((item) => item.egos).fold({}, (result, ego) {
         increase(result, ego);
@@ -271,7 +258,7 @@ class Doll extends OnlineObject {
 
   int get evasion => calculateEvasion(this);
 
-  int get experience => max(1, maxHealth ~/ 10);
+  BigInt get experience => BigIntUtil.max(BigInt.one, maxHealth ~/ big(10));
 
   bool get expired {
     if (account != null ||
@@ -315,10 +302,11 @@ class Doll extends OnlineObject {
         list.every((weapon) => weapon.egos.contains(Ego.healing));
   }
 
-  int get health => maxHealth - totalDamageTaken;
+  BigInt get health => maxHealth - totalDamageTaken;
 
-  void set health(int value) {
-    internal['dmg'] = max(0, maxHealth - value);
+  void set health(BigInt value) {
+    var damage = BigIntUtil.max(BigInt.zero, maxHealth - value);
+    internal['dmg'] = '$damage';
   }
 
   Item get helmet {
@@ -341,7 +329,15 @@ class Doll extends OnlineObject {
   /// Combat lasts 25 ticks (including the tick it started). This is about 5
   /// seconds.
 
-  bool get inCombat => Clock.time < lastCombatTime + 25;
+  bool get inCombat {
+    if (account != null && inCombatWith.any((doll) => doll.inCombat))
+      return true;
+
+    return Clock.time < lastCombatTime + 25;
+  }
+
+  Set<Doll> get inCombatWith =>
+      _inCombatWith..retainWhere((doll) => doll.inCombat);
 
   DollInfo get info =>
       account?.info ?? _dollInfo[internal['info']] ?? _dollInfo['missing'];
@@ -355,6 +351,10 @@ class Doll extends OnlineObject {
 
   bool get interacting => targetDoll?.info?.interaction != null;
 
+  bool get isStairsDown => infoName == 'down stairs';
+
+  bool get isStairsUp => infoName == 'up stairs';
+
   int get level => internal['level'] ?? 1;
 
   void set level(int level) {
@@ -365,14 +365,19 @@ class Doll extends OnlineObject {
 
   int get maxEnergy => internal['mmp'] ?? 0;
 
-  int get maxHealth {
+  BigInt get maxHealth {
     // The internal value is needed client side.
 
-    if (vitality == 0) return internal['mhp'] ?? 0;
+    if (vitality == 0) return big(internal['mhp'] ?? 0);
 
     // This code should only be needed server side.
 
-    return _vitalityToHealth(vitality);
+    BigInt multiplier = BigInt.one;
+
+    if (equipped.values.any((item) => item.egos.contains(Ego.health)))
+      multiplier = BigInt.two;
+
+    return _vitalityToHealth(vitality) * multiplier;
   }
 
   bool get missingInfo => info == _dollInfo['missing'];
@@ -425,7 +430,8 @@ class Doll extends OnlineObject {
     return iterable.first;
   }
 
-  int get regenAmount => max(1, _vitalityToHealth(_vitality) ~/ 20);
+  BigInt get regenAmount =>
+      BigIntUtil.max(BigInt.one, _vitalityToHealth(_vitality) ~/ big(20));
 
   bool get regenerating =>
       buffs.containsKey('regen') || equipmentEgos.containsKey(Ego.regen);
@@ -452,7 +458,7 @@ class Doll extends OnlineObject {
 
   bool get shop {
     if (player) return false;
-    return infoName?.endsWith('shop') == true || infoName == 'gozag';
+    return infoName?.endsWith('shop') == true;
   }
 
   Iterable<Splat> get splats =>
@@ -462,13 +468,11 @@ class Doll extends OnlineObject {
 
   Stage<Doll> get stage => _stage;
 
-  bool get stairs => !player && (infoName?.startsWith('portal') ?? false);
-
   int get stealth {
     if (account == null) return 0;
     num result = account.sheet.crime.level;
     result += result * stealthItems / 4;
-    if (account?.god == 'dithmenos') result += result / 2;
+    if (account?.god == 'dithmenos') result *= 2;
     result += result * thievingBonus / 100;
     return result.floor();
   }
@@ -500,6 +504,10 @@ class Doll extends OnlineObject {
   void set temporary(bool value) => internal['temporary'] = value;
 
   int get thievingBonus =>
+
+      // Having multiple +25% stealth items makes up for not having something
+      // like a mining helmet for stealth.
+
       equipped?.values
           ?.where((item) => item.egos.contains(Ego.thieving))
           ?.fold(0, (result, item) => result + item.bonus) ??
@@ -511,7 +519,7 @@ class Doll extends OnlineObject {
     return result;
   }
 
-  int get totalDamageTaken => internal['dmg'] ?? 0;
+  BigInt get totalDamageTaken => big(internal['dmg'] ?? 0);
 
   int get vitality => _vitality;
 
@@ -560,7 +568,7 @@ class Doll extends OnlineObject {
     if (account != null) {
       // A player's temporary invisibility is lost when they target something.
 
-      if (_hasTarget) _lastTeleport = 0;
+      if (_hasTarget) _lastTeleport = -25;
 
       // Keeps track of bonus experience and drops for being offline.
 
@@ -771,11 +779,9 @@ class Doll extends OnlineObject {
         return;
       }
 
-      var pickpocketing = ability == 'pickpocket' && canPickpocket(targetDoll),
-          charming = ability == 'charm' && targetDoll.tamableBy(this);
+      var pickpocketing = ability == 'pickpocket' && canPickpocket(targetDoll);
 
-      if ((pickpocketing || charming) &&
-          chessDistanceTo(targetDoll.currentLocation) > 1)
+      if (pickpocketing && chessDistanceTo(targetDoll.currentLocation) > 1)
         walk(targetDoll.currentLocation);
       else
         prepareAttack(targetDoll, attackRange(false));
@@ -870,21 +876,14 @@ class Doll extends OnlineObject {
 
   /// Reduces [damage].
 
-  int applyDefense(int damage, [List<int> egos]) {
-    if (damage <= 0) return 0;
+  BigInt applyDefense(BigInt damage, [List<int> egos]) {
+    if (damage <= BigInt.zero) return BigInt.zero;
     egos ??= const [];
-    if (egos.contains(Ego.healing)) return damage;
+
+    // Healing and charming ignores defense.
+
+    if (egos.contains(Ego.healing) || egos.contains(Ego.charm)) return damage;
     var resists = resistances;
-
-    // Like other resistances, ballistic resistance does not stack.
-
-    if (egos.contains(Ego.ballistic) &&
-        resists.containsKey(Ego.resistBallistic)) damage ~/= 2;
-
-    // Like other resistances, magic resistance does not stack.
-
-    if (egos.contains(Ego.magic) && resists.containsKey(Ego.resistMagic))
-      damage ~/= 2;
 
     var bonus = nonWeaponEquipment
         .where((item) => !item.upgradesIncreaseEvasion)
@@ -901,19 +900,33 @@ class Doll extends OnlineObject {
       shields.clear();
       spirits.clear();
       bonus = 0;
+    } else {
+      // Acid also ignores magic resistance and ballistic resistance.
+
+      if (egos.contains(Ego.ballistic) &&
+          resists.containsKey(Ego.resistBallistic))
+        damage ~/= BigInt.one << resists[Ego.resistBallistic];
+
+      if (egos.contains(Ego.magic) && resists.containsKey(Ego.resistMagic))
+        damage ~/= BigInt.one << resists[Ego.resistMagic];
     }
 
-    if (!shields.isEmpty) damage = (damage * pow(.5, shields.length)).floor();
-    if (!spirits.isEmpty) damage = (damage * pow(.75, spirits.length)).floor();
+    if (!shields.isEmpty)
+      damage = BigIntUtil.multiplyByDouble(damage, pow(.5, shields.length));
+
+    if (!spirits.isEmpty)
+      damage = BigIntUtil.multiplyByDouble(damage, pow(.75, spirits.length));
 
     // Weapon bonuses increase damage and armor bonuses decrease damage.
 
-    var adjustedDamageReductionPercent = damageReductionPercent(bonus);
+    num adjustedDamageReductionPercent = damageReductionPercent(bonus);
 
     if (bonus > 0)
-      damage = damage * (100 - adjustedDamageReductionPercent) ~/ 100;
+      damage = BigIntUtil.multiplyByDouble(
+              damage, 100 - adjustedDamageReductionPercent) ~/
+          big(100);
 
-    return max(0, damage);
+    return BigIntUtil.max(BigInt.zero, damage);
   }
 
   void applyEffects() {
@@ -1004,7 +1017,12 @@ class Doll extends OnlineObject {
         if ((_delays[symbol] -= amount) <= 0) _delays.remove(symbol);
       });
 
-  void enterCombat() {
+  void enterCombat(Doll target) {
+    // [inCombatWith] is only used for players fighting non-players.
+
+    if (target != null && account != null && target.account == null)
+      inCombatWith.add(target);
+
     if (!inCombat) combatStartTime = Clock.time;
     lastCombatTime = Clock.time;
   }
@@ -1070,11 +1088,18 @@ class Doll extends OnlineObject {
 
   bool getDebuff(int ego) => buffs.keys.contains(_debuffs[ego]);
 
-  bool goodResource(Account player) {
-    if (info?.resource != true || const ['chest', 'dummy'].contains(infoName))
-      return false;
+  /// Returns 0 for normal resources, 1 for good resources, and 2 for great
+  /// resources.
 
-    return digest('$id-$daysSinceEpoch').hashCode % 5 == 0;
+  int goodResource(Account player) {
+    if (info?.resource != true || const ['chest', 'dummy'].contains(infoName))
+      return 0;
+
+    var hash = digest('$id-$daysSinceEpoch').hashCode;
+    if (hash % 10 == 0) return 1;
+    if (hash % 10 == 1) return 2;
+    if (hash % 10 == 2) return 3;
+    return 0;
   }
 
   /// Moves like a king in chess.
@@ -1089,8 +1114,9 @@ class Doll extends OnlineObject {
       return false;
   }
 
-  bool heal(int amount, [bool limit = false]) {
-    assert(amount >= 0);
+  bool heal(dynamic amount, [bool limit = false]) {
+    amount = big(amount);
+    assert(amount >= BigInt.zero);
 
     if (limit && inCombat) {
       if (full) return false;
@@ -1099,34 +1125,37 @@ class Doll extends OnlineObject {
 
     // A doll can't heal while dead or burned.
 
-    if (health <= 0) return true;
+    if (health <= BigInt.zero) return true;
 
     if (burned) {
       splat('0', 'heal-text');
       return true;
     }
 
-    amount = max(1, amount);
+    amount = BigIntUtil.max(BigInt.one, amount);
     health += amount;
     splat('$amount', 'heal-text');
     return true;
   }
 
-  void hurt(Doll damageSource, int amount, [String message, String classes]) {
-    assert(amount >= 0);
-    if (info?.interaction != null) return;
-    if (account?.god == 'elyvilon') amount ~/= 2;
-    amount = max(1, amount);
+  void hurt(Doll damageSource, dynamic amount,
+      [String message, String classes]) {
+    if (info?.interaction != null || health <= BigInt.zero) return;
+    amount = big(amount);
+    if (account?.god == 'elyvilon') amount ~/= BigInt.two;
+    amount = BigIntUtil.max(BigInt.one, amount);
     health -= amount;
 
     splat(message != null ? '$amount ($message)' : '$amount',
         classes ?? 'damage-text');
 
-    // Extra life.
+    // Extra lives. Players should never have more than one extra life because
+    // extra lives are too strong.
 
-    if (health <= 0 &&
+    if (health <= BigInt.zero &&
         equipmentEgos.containsKey(Ego.life) &&
         buffs['extra life'] == null) {
+      splat('extra life', 'effect-text');
       health = maxHealth;
 
       // Prevents losing multiple lives to a single burst attack.
@@ -1138,8 +1167,8 @@ class Doll extends OnlineObject {
       if (buffs.isNotEmpty) buffs.clear();
       buffs['extra life'] = Buff();
       foodEaten = 0;
-      _poisonDamage = 0;
-      _charmDamage = 0;
+      _poisonDamage = BigInt.zero;
+      _charmDamage = BigInt.zero;
       _poisonCycle = 0;
     }
 
@@ -1147,9 +1176,9 @@ class Doll extends OnlineObject {
 
     while (account != null &&
         account.autoHeal > 0 &&
-        health > 0 &&
+        health > BigInt.zero &&
         health < maxHealth &&
-        health < account.autoHeal &&
+        health < big(account.autoHeal) &&
         foodEaten < _healLimit &&
         !burned) {
       // Automatically uses the food that heals the least.
@@ -1163,7 +1192,7 @@ class Doll extends OnlineObject {
       if (items.isEmpty || !_useItem(items.first)) break;
     }
 
-    if (health <= 0) account?.noteLethalDamage(damageSource, amount);
+    if (health <= BigInt.zero) account?.noteLethalDamage(damageSource, amount);
   }
 
   void informationPrompt(String message) => account?.informationPrompt(message);
@@ -1172,10 +1201,19 @@ class Doll extends OnlineObject {
       equipped.values.where((item) => item.info?.slot == symbol));
 
   void jump(Stage<Doll> newStage,
-      [Point<int> newLocation, bool showSplat = false, heal = true]) {
+      [Point<int> newLocation, bool showSplat = false, heal = false]) {
+    // Enemies do not continue to target players or pets after they jump.
+
+    if (account != null || playerPet)
+      stage?.dolls?.values?.forEach((doll) {
+        if (doll.targetDoll?.id == id) doll.targetDoll = null;
+      });
+
     if (newLocation == null)
       newLocation =
           newStage?.randomTraversableLocation(this) ?? const Point(0, 0);
+    else
+      newLocation = _handleStairs(newStage, newLocation);
 
     var pet = account?.pet?.masterIsVisible == true;
     targetDoll = null;
@@ -1199,12 +1237,17 @@ class Doll extends OnlineObject {
     if (heal) {
       leaveCombat();
       updateLastTeleportTime();
+    } else {
+      // Even if a teleport doesn't heal a player, it begins the process of
+      // leaving combat.
+
+      inCombatWith.clear();
     }
   }
 
   void killWithNoReward() {
     _noReward = true;
-    health = 0;
+    health = BigInt.zero;
 
     informationPrompt('You have been killed by a death attack. ' +
         'Equip a wooden charm to resist death attacks.');
@@ -1213,6 +1256,7 @@ class Doll extends OnlineObject {
   void leaveCombat() {
     combatStartTime = null;
     lastCombatTime = -25;
+    inCombatWith.clear();
   }
 
   void pickpocket(Doll target) {
@@ -1221,10 +1265,16 @@ class Doll extends OnlineObject {
     // The same formulas are used for gathering and pickpocketing.
     // 1 item is worth 10 wei.
 
-    var amount = stealth / 2,
-        bigAmount = big(max(10, amount.floor())) +
-            extraResources(target.level, amount.floor()),
-        experience = bigAmount;
+    var amount = stealth ~/ 20,
+        bigAmount = big(max(1, amount.floor())) +
+            extraResources(target.level, amount.floor());
+
+    bigAmount *= big(10);
+
+    // This is correct. The experience is later multiplied by the time bonus in
+    // the [gainExperience] method.
+
+    var experience = bigAmount;
 
     // A player gets extra experience and loot for being offline.
 
@@ -1271,13 +1321,12 @@ class Doll extends OnlineObject {
         luckyItems = looter.doll?.equipmentEgos[Ego.lucky] ?? 0;
 
     looterSlayingLevel += looterSlayingLevel * luckyItems / 4;
-    if (looter.god == 'gozag') looterSlayingLevel += looterSlayingLevel / 2;
+    if (looter.god == 'gozag') looterSlayingLevel += looterSlayingLevel / 4;
     looterSlayingLevel = looterSlayingLevel.floor();
 
     num amount = looterSlayingLevel / 20;
 
-    // Unlike gathering, luck doesn't have tools. Therefore, an implied tool is
-    // used, based on the target's level.
+    // An implied tool is used.
 
     amount += amount * level / 100;
     amount = amount.floor();
@@ -1388,7 +1437,7 @@ class Doll extends OnlineObject {
 
     internal
       ..['speed'] = walkingCoolDown
-      ..['mhp'] = maxHealth;
+      ..['mhp'] = '$maxHealth';
 
     _handleDeath();
     account?.sessions?.forEach((session) => session.updateClient());
@@ -1402,8 +1451,8 @@ class Doll extends OnlineObject {
       // [Doll]s are healed after combat.
 
       foodEaten = 0;
-      _poisonDamage = 0;
-      _charmDamage = 0;
+      _poisonDamage = BigInt.zero;
+      _charmDamage = BigInt.zero;
       _poisonCycle = 0;
 
       removeAllBut(buffs, const [
@@ -1441,13 +1490,13 @@ class Doll extends OnlineObject {
       if (regenerating && health < maxHealth) {
         var count = equipmentEgos[Ego.regen] ?? 0;
         if (buffs.containsKey('regen')) count++;
-        heal(regenAmount * count);
+        heal(regenAmount * big(count));
       }
 
       // Handles poison. Poison hits every 25 ticks (5 seconds).
 
       if (poisoned) {
-        var amount = max(1, _poisonDamage ~/ 4);
+        var amount = BigIntUtil.max(BigInt.one, _poisonDamage ~/ big(4));
         hurt(this, amount, 'poison', 'poison-text');
       }
     }
@@ -1569,8 +1618,6 @@ class Doll extends OnlineObject {
   }
 
   void _applyEffect(Effect effect) {
-    int healthBeforeDamage = health;
-
     // Prevents missiles from the previous stage from working.
 
     if (effect.source?.stage != stage || Clock.time - _lastTeleport < 25)
@@ -1580,8 +1627,6 @@ class Doll extends OnlineObject {
       splat('no effect', 'effect-text');
       return;
     }
-
-    // todo: a lot of this code can be moved into the Ego class
 
     var healing = effect.egos.contains(Ego.healing),
         charming = effect.egos.contains(Ego.charm);
@@ -1610,8 +1655,8 @@ class Doll extends OnlineObject {
 
       // Both enter combat at the same time.
 
-      enterCombat();
-      effect.source.enterCombat();
+      enterCombat(effect.source);
+      effect.source.enterCombat(this);
     }
 
     // Causes non-players to retaliate to attacks if they don't already have a
@@ -1638,18 +1683,22 @@ class Doll extends OnlineObject {
       targetDoll = effect.source;
     }
 
-    var resists = resistances, accuracy = effect.accuracy;
+    // FIXME BIG HP: BigInt.toDouble might cause problems.
+
+    var resists = resistances, accuracy = effect.accuracy?.toDouble();
 
     // Only effects that deal damage can be critical.
 
-    var critical = !healing && effect.damage > 0 && random(20) == 0;
+    var critical =
+        !healing && !charming && effect.damage > BigInt.zero && random(20) == 0;
 
-    // Handles misses. Healing and electric attacks ignore defense and evasion.
+    // Handles misses. Healing, charming, and electric attacks ignore evasion.
 
     if (!effect.egos.contains(Ego.electric) ||
         resists
             .containsKey(Ego.resistElectric)) if (!critical &&
         accuracy != null &&
+        !charming &&
         !healing &&
         !calculateHit(this, accuracy, evasion)) return;
 
@@ -1658,9 +1707,9 @@ class Doll extends OnlineObject {
 
     if (parries > 0) {
       // With 2 swords, a player has a 43.75% chance of parrying.
-      // With Okawaru and 2 swords, a player has a 93.75% chance of parrying.
+      // With Okawaru and 2 swords, a player has a 75% chance of parrying.
 
-      if (randomDouble > pow(account?.god == 'okawaru' ? .25 : .75, parries)) {
+      if (randomDouble > pow(account?.god == 'okawaru' ? .25 : .5, parries)) {
         splat('parry', 'effect-text');
         return;
       }
@@ -1669,19 +1718,24 @@ class Doll extends OnlineObject {
     // Handles damage.
 
     if (effect.damage != null) {
-      assert(effect.damage >= 0);
+      assert(effect.damage >= BigInt.zero);
 
-      // Critical hits never miss and deal maximum damage.
+      // Critical hits never miss and deal maximum damage. Healing and charming
+      // effects always deal maximum damage.
 
-      var maxDamage = applyDefense(effect.damage, effect.egos),
-          damage = effect.egos.contains(Ego.maximumDamage) || critical
+      BigInt maxDamage = applyDefense(effect.damage, effect.egos),
+          damage = effect.egos.contains(Ego.maximumDamage) ||
+                  critical ||
+                  healing ||
+                  charming
               ? maxDamage
-              : random(maxDamage + 1);
+              : BigIntUtil.random(maxDamage + BigInt.one);
 
       // Extra ego damage to make up for being resisted (not including blood
       // or ballistic).
 
-      var base = damage, blood = 0;
+      BigInt base = damage;
+      int blood = 0;
 
       const [
         // +500%
@@ -1710,9 +1764,10 @@ class Doll extends OnlineObject {
       // Berserk, like burst, does not stack.
 
       if (effect.egos.contains(Ego.berserk) ||
-          effect.sourceNonWeaponEgos.keys.contains(Ego.berserk)) damage *= 3;
+          effect.sourceNonWeaponEgos.keys.contains(Ego.berserk))
+        damage *= big(3);
 
-      var rebase = damage;
+      BigInt rebase = damage;
 
       // Handles egos from the source's armor.
 
@@ -1720,7 +1775,7 @@ class Doll extends OnlineObject {
         if (ego == Ego.blood) blood += amount;
 
         if (ego == Ego.arcane && effect.egos.contains(Ego.magic))
-          damage += rebase * amount;
+          damage += rebase * big(amount);
       });
 
       if (healing) {
@@ -1748,11 +1803,13 @@ class Doll extends OnlineObject {
         // There is no need for Elyvilon to reduce charm damage, because players
         // can't be charmed.
 
-        damage = max(1, damage);
-        _charmDamage += damage;
+        damage = BigIntUtil.max(BigInt.one, damage);
+        _charmDamage += big(damage);
 
-        var percentage = min(100, _charmDamage * 100 ~/ maxHealth),
-            text = '$percentage% tamed';
+        BigInt percentage =
+            BigIntUtil.min(big(100), _charmDamage * big(100) ~/ maxHealth);
+
+        var text = '$percentage% tamed';
 
         splat(critical ? '$damage ($text, critical)' : '$damage ($text)',
             'charm-text');
@@ -1773,18 +1830,22 @@ class Doll extends OnlineObject {
 
       if (effect.egos.contains(Ego.gravity) &&
           !equipmentEgos.containsKey(Ego.resistGravity))
-        hurt(this, max(1, health ~/ 40), 'gravity', 'gravity-text');
+        hurt(effect.source, BigIntUtil.max(BigInt.one, health ~/ big(40)),
+            'gravity', 'gravity-text');
 
       if (effect.source != null && !healing && !charming) {
         var reflections = equipmentEgos[Ego.reflection] ?? 0;
 
         if (reflections > 0) {
-          var reflectedDamage = calculateReflectedDamage(this);
+          BigInt reflectedDamage = calculateReflectedDamage(this);
 
-          // Reflected damage is not affected by gods or equipment.
+          // Like gravity damage, reflected damage is not affected by gods or
+          // equipment like power gloves or power boots.
 
           reflectedDamage = effect.source.applyDefense(reflectedDamage);
-          reflectedDamage = max(1, random(reflectedDamage + 1));
+
+          reflectedDamage = BigIntUtil.max(
+              BigInt.one, BigIntUtil.random(reflectedDamage + BigInt.one));
 
           effect.source
               .hurt(this, reflectedDamage, 'reflection', 'reflection-text');
@@ -1808,8 +1869,8 @@ class Doll extends OnlineObject {
       // Blood attacks are considered evil.
 
       if (blood > 0 && !equipmentEgos.containsKey(Ego.resistEvil))
-        effect.source
-            ?.heal(max(1, min<int>(healthBeforeDamage, damage) * blood ~/ 4));
+        effect.source?.heal(
+            BigIntUtil.max(BigInt.one, big(damage) * big(blood) ~/ big(4)));
 
       if (effect.egos.contains(Ego.poison) &&
           !equipmentEgos.containsKey(Ego.resistPoison)) {
@@ -2106,9 +2167,10 @@ class Doll extends OnlineObject {
 
               Future.delayed(Duration(seconds: 1), () {
                 if (looter.sessions.isNotEmpty &&
-                    looter.currentFloor < unlocked &&
+                    looter.currentFloor < looter.adjustedHighestFloor &&
                     looter.currentFloor < Session.maxFloor)
-                  looter.sessions.first.teleport(unlocked, false);
+                  looter.sessions.first
+                      .teleport(looter.adjustedHighestFloor, false);
               });
             }
           }
@@ -2134,6 +2196,27 @@ class Doll extends OnlineObject {
   void _handlePlayerLoot() {
     if (account == null) return;
     alert('You die.');
+  }
+
+  Point<int> _handleStairs(Stage stage, Point<int> location) {
+    // Only players can use stairs.
+
+    if (account == null ||
+        stage == null ||
+        stage.id == ServerGlobals.playerSpawnStage.id) return location;
+
+    // Stairs allow players to teleport on top of other dolls, but not obstacles
+    // like resources.
+
+    var points = List<Point>.from(adjacent(location)
+        .where((point) => stage.traversable(this, point, Terrain.doll)));
+
+    if (points.isEmpty)
+      return stage.randomTraversableLocation(this) ?? const Point(0, 0);
+
+    // TODO: Make stairs more deterministic.
+
+    return randomValue(points);
   }
 
   void _idle() {
@@ -2183,10 +2266,10 @@ class Doll extends OnlineObject {
 
   void _rewardExperience() =>
       playersInRange.where((looter) => looter.canLoot(this)).forEach((looter) {
-        var result = experience;
+        BigInt result = experience;
         if (looter.hasCrystalPrimaryWeapon) result += experience;
         if (looter.hasCrystalSecondaryWeapon) result += experience;
-        result += looter.doll.crystalShields * experience;
+        result += big(looter.doll.crystalShields) * experience;
         var mode = looter.options['xp mode'];
 
         if (mode == 'summoning')
@@ -2226,17 +2309,16 @@ class Doll extends OnlineObject {
 
     // Bosses always attack players.
 
-    return (boss && !Config.debug) ||
-        target.account.options['stealth'] == false;
+    return boss || target.account.options['stealth'] == false;
   }
 
-  int _vitalityToHealth(int vitality) {
-    var result = vitality * 10;
+  BigInt _vitalityToHealth(int vitality) {
+    var result = big(vitality) * big(10);
 
     // Non-players have additional health to make up for not having food.
 
-    if (account == null) result += result * level ~/ 100;
-    return max(1, result);
+    if (account == null) result += result * big(level) ~/ big(100);
+    return BigIntUtil.max(BigInt.one, result);
   }
 
   int _weaponAttribute([Item weapon]) {

@@ -2,7 +2,7 @@ part of util;
 
 class Effect {
   final Doll source;
-  final int damage, accuracy;
+  final BigInt damage, accuracy;
   List<int> egos;
   Map<int, int> sourceNonWeaponEgos = {};
   int delay;
@@ -21,11 +21,6 @@ class Effect {
             sourceNonWeaponEgos[ego] ??= 0;
             sourceNonWeaponEgos[ego]++;
           }));
-  }
-
-  bool causesPvP(Doll doll) {
-    if (source?.player == true && doll.player) return true;
-    return false;
   }
 
   bool causesRetaliation(Doll doll) {

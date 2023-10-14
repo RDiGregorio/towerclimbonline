@@ -26,6 +26,14 @@ class Stage<T extends Doll> extends OnlineObject {
 
   Map<String, T> get dolls => UnmodifiableMapView(_dollsByName);
 
+  Map<String, dynamic> get flags => internal['flags'] ?? {};
+
+  Doll get stairsDown =>
+      dolls.values.firstWhere((doll) => doll.isStairsDown, orElse: () => null);
+
+  Doll get stairsUp =>
+      dolls.values.firstWhere((doll) => doll.isStairsUp, orElse: () => null);
+
   int get timestamp => _timestamp ?? 0;
 
   void set timestamp(int value) => _timestamp = value;

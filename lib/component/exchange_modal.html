@@ -14,7 +14,7 @@
                         Browse
                     </button>
                 </div>
-                <!-- form autocomplete="off" onsubmit="return false" class="form-inline">
+                <!-- form autocomplete="off" (ngSubmit)="false" class="form-inline">
                     <label>
                         <select class="form-control input exchange-item-input input-sm"
                                 [(ngModel)]="exchangeMode"
@@ -25,7 +25,7 @@
                         </select>
                     </label>
                 </form -->
-                <form autocomplete="off" onsubmit="return false" *ngIf="mode != 'browse'"
+                <form autocomplete="off" (ngSubmit)="false" *ngIf="mode != 'browse'"
                       class="form-inline">
                     <div *ngIf="mode == 'buy'">
                         <label>

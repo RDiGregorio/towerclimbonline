@@ -340,7 +340,7 @@
         </label>
     </div>
     <div *ngIf="debug">
-        <textarea type="text"
+        <textarea [attr.type]="'text'"
                   class="debug-textarea"
                   [(ngModel)]="debugText">
         </textarea>

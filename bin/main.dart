@@ -37,6 +37,11 @@ import 'package:towerclimbonline/util.dart';
 // FIXME: somehow a player got an item with an amount of 0
 // he max updated a stack he bought from the exchange
 // FIXME: autocomplete on login prevent login
+// FIXME: you can stair dance to heal while bossing with multiple accounts
+// FIXME BIG HP: problems caused by using big ints for hp
+//**********************************************************************
+// TODO: possible god that disables berserk/burst (snail god?)
+// TODO: best pet would have burst berserk electric poison attack and life
 
 void main() {
   Logger.root
@@ -96,13 +101,15 @@ Future<dynamic> _main() async {
   Future(() async {
     var secretConfig = await secret,
         playerSpawnStageName = 'dungeon0',
-        playerSpawnStage = Stage(playerSpawnStageName, 100, 100),
         playerSpawnLocation = const Point(36, 163);
+
+    ServerGlobals.playerSpawnStage = Stage(playerSpawnStageName, 100, 100);
 
     // Stages and terrain sections must have unique names.
     // [playerSpawnStage] is filled with content later in the code.
 
-    var stages = {playerSpawnStageName: playerSpawnStage}, locks = {};
+    var stages = {playerSpawnStageName: ServerGlobals.playerSpawnStage},
+        locks = {};
 
     // Allows procedural generation in a session.
 
@@ -256,11 +263,44 @@ Future<dynamic> _main() async {
               account.lootItem(Item('leash'));
 
               if (Config.debug) {
-                account.lootItem(Item('level up potion', maxFinite));
-                account.lootItem(Item('fast potion', maxFinite));
-                account.lootItem(Item('nuclear bomb', maxFinite));
-                account.lootItem(Item('puzzle box', maxFinite));
-                account.lootItem(Item('leash')..bonus = 100000);
+                account.sheet.stats.forEach((stat) {
+                  stat.ascensions = 29;
+                  stat.experience = stat.experienceFromLevel(Stat.maxLevel);
+                });
+
+                account.equipped.clear();
+                var upgrades = 150000;
+
+                [
+                  Item.fromDisplayText('+$upgrades burst demon energy wrath'),
+                  Item.fromDisplayText('+$upgrades burst demon energy wrath'),
+                  Item.fromDisplayText('+$upgrades defense life amulet'),
+                  Item.fromDisplayText('+$upgrades spirit power boots'),
+                  Item.fromDisplayText('+$upgrades spirit power gloves'),
+                  Item.fromDisplayText('+$upgrades spirit meteorite crown'),
+                  Item.fromDisplayText('+$upgrades spirit super resist ring'),
+                  Item.fromDisplayText('+$upgrades spirit distortion robe'),
+                  Item.fromDisplayText('+$upgrades spirit distortion cloak')
+                ].forEach((item) {
+                  account.lootItem(item);
+                  account.doll.equip(item);
+                });
+
+                account.sheet
+                  ..healthBuffs = upgrades
+                  ..dexterityBuffs = upgrades
+                  ..agilityBuffs = upgrades
+                  ..strengthBuffs = upgrades
+                  ..intelligenceBuffs = upgrades;
+
+                account
+                  ..lootItem(Item('+$upgrades pizza', 1000))
+                  ..lootItem(Item('fast potion', 1000))
+                  ..lootItem(Item('strength potion', 1000))
+                  ..lootItem(Item('dexterity potion', 1000))
+                  ..lootItem(Item('agility potion', 1000))
+                  ..lootItem(
+                      Item.fromDisplayText('+$upgrades crystal pickaxe'));
 
                 // Elyvilon is not found in the temple.
 

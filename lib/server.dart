@@ -159,12 +159,18 @@ Future<Map<Point<int>, int>> newCollisionMap(
     Stage stage, String name, Point<int> offset) async {
   // FIXME: this is poorly named, as it adds dolls, sets a timestamp, etc.
 
-  var dolls = 0, chests = 0, procedural;
+  var dolls = 0, chests = 0, procedural = false;
 
   List<dynamic> tilesFromEditor(String string) {
     var data = json.decode(string), cells = data['cells'], result = [];
-    procedural = data['flags'].contains('procgen');
     stage.timestamp = data['timestamp'] ?? 0;
+
+    if (data['flags'] is List) {
+      procedural = data['flags'].contains('procgen');
+
+      stage.internal['flags'] =
+          ObservableMap(mapFromList(List<String>.from(data['flags'])));
+    }
 
     for (var x = 0; x < cells.length; x++) {
       result.add([]);
@@ -192,6 +198,9 @@ Future<Map<Point<int>, int>> newCollisionMap(
           '_${tile.x}_${tile.y}_' +
           sanitizeName(spawn, -1);
 
+      // Fixes portals from older stages.
+
+      spawn = _fixPortals(spawn);
       var doll = Doll(spawn, id, false, procedural ? stageToFloor(name) : null);
 
       dolls++;
@@ -203,21 +212,27 @@ Future<Map<Point<int>, int>> newCollisionMap(
     return section;
   });
 
-  // Each terrain section should have the same number of non-player dolls for
-  // smooth dungeon progression.
+  if (!stage.flags.containsKey('procgen')) {
+    // Each terrain section should have the same number of non-player dolls for
+    // smooth dungeon progression.
 
-  var ignore = const ['tutorial0_0_0', 'bonus2_0_0'];
+    var ignore = const ['tutorial0_0_0', 'bonus2_0_0'];
 
-  if (dolls != 100 && dolls != 0 && !ignore.contains(name))
-    Logger.root.info('warning: $name has an invalid object count of $dolls');
+    if (dolls != 100 && dolls != 0 && !ignore.contains(name))
+      Logger.root.info('warning: $name has an invalid object count of $dolls');
 
-  if (chests != 5 && chests != 0 && !ignore.contains(name))
-    Logger.root.info('warning: $name has an invalid chest count of $chests');
+    if (chests != 5 && chests != 0 && !ignore.contains(name))
+      Logger.root.info('warning: $name has an invalid chest count of $chests');
+  }
 
   return Map<Point<int>, int>.from(result);
 }
 
 Future<ResourceManager> newPostgresResourceManager(String table) async {
+  // FIXME: I need to use a new database library. This is a temporary hack just
+  // to get the project running again locally.
+  return newMockResourceManager();
+
   await (await postgresConnection)
       .execute('CREATE SCHEMA IF NOT EXISTS tables');
 
@@ -262,6 +277,15 @@ void output(dynamic message) {
 
 Future<Stream<Row>> query(String query) async =>
     (await postgresConnection).query(query);
+
+String _fixPortals(String infoName) {
+  if (infoName.startsWith('portal')) {
+    int index = int.parse(infoName.replaceFirst('portal', ''));
+    return index.isEven ? 'up stairs' : 'down stairs';
+  }
+
+  return infoName;
+}
 
 void _host(WebSocket socket, Wrapper<ObservableMap> function(WebSocket socket),
     void onError(dynamic error, StackTrace trace)) {

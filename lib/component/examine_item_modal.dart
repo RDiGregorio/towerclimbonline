@@ -53,14 +53,14 @@ class ExamineItemModal {
     var egos = item?.egos ?? const [];
 
     return List.from(egos
-        .map((ego) => Ego.longDescriptions[ego])
+        .map((ego) => Ego.longDescriptionFor(item, ego))
         .where((value) => value != null))
       ..sort();
   }
 
   String get evasionBonus => formatNumber(calculateEvasionPercentBonus([item]));
 
-  String get examineText => item.examineText ?? '';
+  String get examineText => item.examineText(ClientGlobals.session.sheet) ?? '';
 
   Set<String> get ingredientFor => Crafting.craftedFrom(item.comparisonText);
 

@@ -71,15 +71,12 @@ class Theme {
       bosses: const [
         'ancient one',
         'storm dragon',
-        'kraken',
-        'giant death robot'
+        'kraken'
       ],
       resources: const [
         'shellfish',
         'rock'
       ]);
-
-  // TODO: use flags for backgrounds (lava background)
 
   static Theme lava =
       Theme(floor: 'midnightblue', wall: 'red', water: 'orange', dolls: const [
@@ -96,38 +93,39 @@ class Theme {
     'demogorgon',
     'yeenoghu'
   ], resources: const [
+    'no fish',
     'herb',
     'rock'
   ]);
 
-  // TODO: use flags for the backgrounds (sky background)
+  static Theme angel = Theme(
+      flags: ['background-color: lightskyblue'],
+      floor: 'pink',
+      water: 'blue',
+      dolls: const [
+        'sacred cow',
+        'fallen angel',
+        'golden jelly',
+        'fairy',
+        'cockatrice',
+        'star',
+        'storm turtle',
+        'ice turtle'
+      ],
+      bosses: const [
+        'blessed dragon',
+        'dark star',
+        'cosmic turtle',
 
-  static Theme angel = Theme(floor: 'pink', water: 'blue', dolls: const [
-    'sacred cow',
-    'fallen angel',
-    'golden jelly',
-    'fairy',
-    'cockatrice',
-    'star',
-    'storm turtle',
-    'ice turtle'
-  ], bosses: const [
-    'blessed dragon',
-    'dark star',
-    'cosmic turtle',
+        // Added for thematic reasons.
 
-    // Added for thematic reasons.
-
-    'gatekeeper',
-    'gabriel',
-    'stacy',
-    'popped collar chad',
-    'odin'
-  ], resources: const [
-    'stardust fish',
-    'stardust rock',
-    'magic tree'
-  ]);
+        'gatekeeper',
+        'gabriel',
+        'stacy',
+        'giga chad',
+        'odin'
+      ],
+      resources: const ['stardust fish', 'stardust rock', 'magic tree']);
 
   static Theme space = Theme(floor: 'indigo', water: 'black', dolls: const [
     'eye',
@@ -147,7 +145,6 @@ class Theme {
     'envoy of the beginning',
     'void dragon',
     'death',
-    'spirit griffin',
     'cosmic horror'
   ], resources: const [
     'stardust fish',
@@ -155,27 +152,30 @@ class Theme {
     'stardust rock'
   ]);
 
-  static Theme snake =
-      Theme(floor: 'midnightblue', wall: 'green', water: 'blue', dolls: const [
-    'snake',
-    'naga',
-    'leech',
-    'ice naga',
-    'fire naga',
-    'acid wasp',
-    'ghost moth'
-  ], bosses: const [
-    'mothra',
-    'acid dragon',
-    'poison dragon',
-    'pestilence',
-    'lord baal',
-    'golden scarab'
-  ], resources: const [
-    'uranium',
-    'shark',
-    'herb'
-  ]);
+  static Theme snake = Theme(
+      floor: 'midnightblue',
+      wall: 'green',
+      water: 'blue',
+      dolls: const [
+        'snake',
+        'naga',
+        'leech',
+        'ice naga',
+        'fire naga',
+        'acid wasp',
+        'ghost moth'
+      ],
+      bosses: const [
+        'mothra',
+        'acid dragon',
+        'poison dragon',
+        'pestilence'
+      ],
+      resources: const [
+        'uranium',
+        'shark',
+        'herb'
+      ]);
 
   static Theme ocean = Theme(floor: 'darkblue', wall: 'darkblue', dolls: const [
     'crab', 'mermaid', 'whirlpool', 'sea cow',
@@ -212,35 +212,115 @@ class Theme {
     'uranium'
   ]);
 
-  static Theme random(int floor) {
-    // Floor x (as displayed in the game) has a [floor] of x - 1.
+  static Theme sand =
+      Theme(floor: 'yellow', water: 'blue', wall: 'brown', flags: [
+    'background-color: lightskyblue'
+  ], dolls: const [
+    'arcane monolith',
+    'dark fallen angel',
+    'griffin',
+    'cyclops',
+    'mermaid',
+    'blue crab'
+  ], bosses: const [
+    'king crab',
+    'ascended crab',
+    'spirit griffin'
+  ], resources: const [
+    'rock',
+    'seaweed'
+  ]);
 
-    var result = [dungeon, haunted, jungle];
+  static Theme pyramid = Theme(
+      floor: 'yellow',
+      water: 'blue',
+      wall: 'brown',
+      dolls: const [
+        'mummy',
+        'mummy priest',
+        'scorpion',
+        'scarab',
+        'egyptian kitten',
+        'frog'
+      ],
+      bosses: const [
+        'royal mummy',
+        'golden scarab',
+        'medusa',
+        'lord baal'
+      ]);
 
-    // Unlocked themes.
+  static Theme machine = Theme(
+      floor: 'gray',
+      wall: 'gray',
+      water: 'black',
+      dolls: const [
+        'mecha dragon',
+        'juggernaut',
+        'robot',
+        'oil',
+        'fire elemental',
+        'flamethrower'
+      ],
+      bosses: const [
+        'giant death robot',
+        'demogorgon',
+        'djinn'
+      ],
+      resources: const [
+        'no fish'
+      ]);
 
-    if (floor >= 15) result.add(ice);
-    if (floor >= 20) result.add(lava);
-    if (floor >= 25) result.add(angel);
-    if (floor >= 30) result.add(space);
-    if (floor >= 35) result.add(snake);
-    if (floor >= 40) result.add(ocean);
-    if (floor >= 45) result.add(blood);
+  // Has the hardest boss.
 
-    // Todo: add "ascended" and "desert" themes.
-
-    return randomValue(result);
-  }
+  static Theme endgame =
+      Theme(floor: 'indigo', water: 'black', wall: 'darkblue', dolls: const [
+    'ghost warrior',
+    'rainbow elephant',
+    'shadow',
+    'creeper',
+    'ghost moth',
+    'kirin',
+    'mind flayer'
+  ], bosses: const [
+    'enryu'
+  ], resources: const [
+    'gold',
+    'seaweed'
+  ]);
 
   String floor, wall, water;
-
-  List<String> dolls, bosses, resources;
+  List<String> dolls, bosses, resources, flags;
 
   Theme(
       {this.floor,
       this.wall,
       this.water,
-      this.dolls,
-      this.bosses,
-      this.resources});
+      this.flags: const [],
+      this.dolls: const [],
+      this.bosses: const [],
+      this.resources: const []});
+
+  static Theme random(int floor) {
+    // Floor x (as displayed in the game) has a [floor] of x - 1.
+
+    var result = [
+      dungeon,
+      haunted,
+      jungle,
+      ice,
+      lava,
+      angel,
+      space,
+      snake,
+      ocean,
+      blood,
+      sand,
+      machine,
+      pyramid,
+      endgame
+    ];
+
+    return randomValue(result);
+  }
 }

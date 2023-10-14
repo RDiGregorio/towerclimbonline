@@ -14,8 +14,8 @@ void registerItems(Map<String, Stage<Doll>> stages) {
               doll.account.sheet.healthBuffs = item.bonus;
 
             return doll.heal(
-                min(doll.maxHealth,
-                    percent(doll.maxHealth, item.healingAmount).floor()),
+                BigIntUtil.min(doll.maxHealth,
+                    BigIntUtil.percent(doll.maxHealth, item.healingAmount)),
                 true);
           },
           egos: const [Ego.food]));
@@ -66,83 +66,12 @@ void registerItems(Map<String, Stage<Doll>> stages) {
               consumed: true,
               egos: egos,
               use: (Doll doll, Item item) {
-                if (buff == 'level up') {
-                  if (Config.debug)
-                    doll.account.sheet.stats.forEach((stat) => stat
-                        .experience += stat.experienceFromLevel(Stat.maxLevel));
-
-                  return true;
-                }
-
                 // 5 minutes in game ticks. Each +1 adds 1%.
 
                 var duration = 1500 + item.bonus * 15;
 
-                if (buff == 'super resist') {
-                  doll.buffs['resist fire'] =
-                      Buff(duration: duration, egos: const [Ego.resistFire]);
-
-                  doll.buffs['resist ice'] =
-                      Buff(duration: duration, egos: const [Ego.resistIce]);
-
-                  doll.buffs['resist electric'] = Buff(
-                      duration: duration, egos: const [Ego.resistElectric]);
-
-                  return true;
-                }
-
-                if (buff == 'resist fire') {
-                  doll.buffs['resist fire'] =
-                      Buff(duration: duration, egos: const [Ego.resistFire]);
-
-                  return true;
-                }
-
-                if (buff == 'resist ice') {
-                  doll.buffs['resist ice'] =
-                      Buff(duration: duration, egos: const [Ego.resistIce]);
-
-                  return true;
-                }
-
-                if (buff == 'resist electric') {
-                  doll.buffs['resist electric'] = Buff(
-                      duration: duration, egos: const [Ego.resistElectric]);
-
-                  return true;
-                }
-
-                if (buff == 'resist poison') {
-                  doll.buffs['resist poison'] =
-                      Buff(duration: duration, egos: const [Ego.resistPoison]);
-
-                  return true;
-                }
-
-                if (buff == 'resist gravity') {
-                  doll.buffs['resist gravity'] =
-                      Buff(duration: duration, egos: const [Ego.resistGravity]);
-
-                  return true;
-                }
-
-                if (buff == 'resist acid') {
-                  doll.buffs['resist acid'] =
-                      Buff(duration: duration, egos: const [Ego.resistAcid]);
-
-                  return true;
-                }
-
                 if (buff == 'regen') {
                   doll.regenerate(duration);
-                  return true;
-                }
-
-                if (buff == 'elixir') {
-                  doll.buffs['agi+'] = Buff(duration: duration);
-                  doll.buffs['dex+'] = Buff(duration: duration);
-                  doll.buffs['int+'] = Buff(duration: duration);
-                  doll.buffs['str+'] = Buff(duration: duration);
                   return true;
                 }
 
@@ -177,13 +106,6 @@ void registerItems(Map<String, Stage<Doll>> stages) {
   registerPotion('regen potion', 'regen', [Ego.regen]);
   registerPotion('fast potion', 'spd+', [Ego.fast]);
 
-  // Unobtainable potions.
-  // TODO: remove elixir and super resist potion
-
-  registerPotion('elixir potion', 'elixir');
-  registerPotion('super resist potion', 'super resist');
-  registerPotion('level up potion', 'level up');
-
   // Weapons.
 
   // Daggers, bows, and whips have an accuracy bonus, but only 10 base damage.
@@ -203,7 +125,7 @@ void registerItems(Map<String, Stage<Doll>> stages) {
           damage: 10,
           accuracy: 100,
           coolDown: CoolDown.average,
-          egos: const [Ego.metal, Ego.demon],
+          egos: const [Ego.demon],
           slot: #weapon));
 
   registerItemInfo(
@@ -220,6 +142,17 @@ void registerItems(Map<String, Stage<Doll>> stages) {
 
   registerWeaponInfo('book', 50, 'image/missile/white_bolt.png',
       const [Ego.twoHanded, Ego.magic, Ego.shield]);
+
+  registerWeaponInfo(
+      'annihilation book', 50, 'image/missile/white_bolt.png', const [
+    Ego.twoHanded,
+    Ego.magic,
+    Ego.shield,
+    Ego.fire,
+    Ego.ice,
+    Ego.electric,
+    Ego.gravity
+  ]);
 
   registerWeaponInfo(
       'supernova book', 50, 'image/missile/white_bolt.png', const [
@@ -257,8 +190,10 @@ void registerItems(Map<String, Stage<Doll>> stages) {
 
   registerWeaponInfo('spear', 50, null, const [Ego.metal, Ego.stun]);
 
-  registerWeaponInfo('gungnir', 50, null,
-      const [Ego.metal, Ego.berserk, Ego.electric, Ego.gravity, Ego.stun]);
+  // A burst berserk spear.
+
+  registerWeaponInfo(
+      'gungnir', 50, null, const [Ego.metal, Ego.burst, Ego.berserk, Ego.stun]);
 
   // Burst weapons.
 
@@ -362,6 +297,7 @@ void registerItems(Map<String, Stage<Doll>> stages) {
 
   // Hats crafted from fabrics.
 
+  registerArmorInfo('silk hat', null, #helmet, 5, 0, const [Ego.resistMagic]);
   registerArmorInfo('ghostly hat', null, #helmet, 5, 0, const [Ego.spirit]);
   registerArmorInfo('distortion hat', null, #helmet, 5, 25);
 
@@ -556,11 +492,11 @@ void registerItems(Map<String, Stage<Doll>> stages) {
 
   // God items.
 
-  registerArmorInfo(
-      'asprika', null, #cloak, 0, 75, const [Ego.regen, Ego.experience]);
+  registerArmorInfo('asprika', null, #cloak, 0, 75,
+      const [Ego.regen, Ego.reflection, Ego.experience]);
 
-  registerArmorInfo(
-      'brynhild', null, #body, 30, 0, const [Ego.power, Ego.experience]);
+  registerArmorInfo('brynhild', null, #body, 30, 0,
+      const [Ego.health, Ego.resistBallistic, Ego.resistMagic]);
 
   // Thrown.
 
@@ -572,7 +508,7 @@ void registerItems(Map<String, Stage<Doll>> stages) {
           use: (doll, item) =>
               doll.targetDoll != null && doll.useAbility(ability)));
 
-  // Thrown egos are only used when examining the item. Actual effects arr from
+  // Thrown egos are only used when examining the item. Actual effects are from
   // the related ability.
 
   registerThrown('fire scroll', 'fire scroll', [Ego.magic, Ego.fire]);
@@ -700,7 +636,17 @@ void registerItems(Map<String, Stage<Doll>> stages) {
   registerWeaponInfo('fishing rod', 0, 'image/missile/white_bolt.png',
       const [Ego.ballistic, Ego.twoHanded, Ego.fishing]);
 
+  // Leashes are treated like a charming tool.
+
   registerWeaponInfo('leash', 0, null, const [Ego.twoHanded, Ego.charm]);
+
+  // Crafting tools.
+
+  // TODO: design and implement these
+
+  // registerItemInfo('kitchen knife', ItemInfo());
+  // registerItemInfo('anvil', ItemInfo());
+  // registerItemInfo('crafting table', ItemInfo());
 
   // Resources.
 

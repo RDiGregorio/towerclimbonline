@@ -36,6 +36,7 @@ part 'src/util/effect.dart';
 part 'src/util/ego.dart';
 part 'src/util/exchange.dart';
 part 'src/util/exchange_offer.dart';
+part 'src/util/experience_curve.dart';
 part 'src/util/experience_rate.dart';
 part 'src/util/idler.dart';
 part 'src/util/item.dart';
@@ -46,6 +47,7 @@ part 'src/util/observable_event.dart';
 part 'src/util/observable_map.dart';
 part 'src/util/online_object.dart';
 part 'src/util/path_finder.dart';
+part 'src/util/random_shop.dart';
 part 'src/util/recovery_attempt.dart';
 part 'src/util/resource_manager.dart';
 part 'src/util/scores.dart';
@@ -75,7 +77,6 @@ const int millisecondsPerDay = 86400000,
     maxInt = 4294967296;
 
 Map<Symbol, String> alerts = {
-  #bored: 'You\'re bored and want to explore.',
   #no: 'You can\'t do that right now.',
   #noCombat: 'You can\'t do that while fighting.',
   #noPlayerCombat: 'You can\'t do that while fighting a player.',
@@ -85,21 +86,26 @@ Map<Symbol, String> alerts = {
   #nothingHappens: 'Nothing happens.',
   #capped: 'You\'ve reached your daily resource limit.',
   #tooPoor: 'You can\'t afford that.',
-  #tooManyOffers: 'You can only have 10 exchange offers at a time.',
+  #tooManyOffers: 'You can only have ' +
+      '${Account.maxExchangeOffers} exchange offers at a time.',
   #notUnlocked: 'You haven\'t unlocked that floor yet.',
   #tradeComplete: 'You finish trading.',
   #updateApp: 'Please update your app.'
 };
 
-final Map<String, Point<int>> entrances = {};
 final int maxFinite = double.maxFinite.floor();
 final BigInt maxInput = big(100000) * big('1X') - BigInt.one;
-final String missingItemName = '????';
+final String missingItemName = '????',
+
+    // Thin spaces are the international standard for digit grouping.
+
+    separator = '\u{202F}';
 
 RegExp numberPattern = RegExp(r'^\d+[kmgtpezyx]?$'),
+    _nonAlphaNumeric = RegExp(r'[^a-zA-Z0-9]+'),
     _upgradePattern = RegExp(r'^\+\d+'),
     _splitDigits = RegExp(r'\d{3}'),
-    _trailingComma = RegExp(r',$');
+    _trailingSeparator = RegExp('$separator\$');
 
 List<int> performanceCheckpoints = [];
 int timeOffset = 0, _count = 0;
@@ -138,30 +144,37 @@ Item get secretRare {
   String info = randomValue(randomValue([
     // Weapons:
 
-    ['smg', 'katana', 'supernova book', 'rainbow undecimber'],
+    [
+      'smg',
+      'katana',
+      'wrath',
+      'rainbow undecimber',
+      'annihilation book',
+      'supernova book'
+    ],
 
     // Helmets.
 
-    ['super resist hat', 'dream crown', 'meteorite crown', 'halo', 'umbra'],
+    [
+      'super resist hat',
+      'meteorite crown',
+      'dream crown',
+      'distortion hat',
+      'umbra'
+    ],
 
     // Armor.
 
     [
-      'cosmic dragon armor',
-      'shadow dragon armor',
       'aegis armor',
+      'stardust dragon armor',
+      'shadow dragon armor',
       'distortion robe'
     ],
 
     // Cloaks.
 
-    [
-      'cosmic dragon cloak',
-      'shadow dragon cloak',
-      'distortion cloak',
-      'angel wings',
-      'demon wings'
-    ],
+    ['stardust dragon cloak', 'shadow dragon cloak', 'distortion cloak'],
 
     // Boots.
 
@@ -178,7 +191,7 @@ Item get secretRare {
 
     // Shields.
 
-    ['cosmic turtle shell', 'aegis shield', 'spirit shield'],
+    ['aegis shield', 'spirit shield'],
 
     // Amulets.
 
@@ -229,13 +242,7 @@ Item get secretRare {
 
       Ego.crystal, Ego.reflection, Ego.regen, Ego.arcane, Ego.spirit
     ].where((ego) => !item.egos.contains(ego)));
-  else if ([#helmet, #body, #cloak].contains(item.info.slot))
-    egos.addAll([
-      // Universal armor egos.
-
-      Ego.experience, Ego.reflection, Ego.regen, Ego.arcane, Ego.spirit
-    ].where((ego) => !item.egos.contains(ego)));
-  else if (item.info.slot == #gloves)
+  else if ([#helmet, #body, #cloak, #gloves].contains(item.info.slot))
     egos.addAll([
       // Universal armor egos.
 
@@ -349,13 +356,15 @@ BigInt big(dynamic value) {
   throw ArgumentError(value);
 }
 
-int calculateAccuracy(Doll doll, [Item weapon]) {
+BigInt calculateAccuracy(Doll doll, [Item weapon]) {
+  // FIXME BIG HP: This doesn't look safe! The double could become too large!
+
   var result = doll.dexterity +
       doll.dexterity *
           calculateAccuracyPercentBonus(weapon, doll.nonWeaponEquipment) /
           100;
 
-  return (result + result * doll.accuracyItems ~/ 4).floor();
+  return big(result) + big(result) * big(doll.accuracyItems) ~/ big(4);
 }
 
 int calculateAccuracyPercentBonus(
@@ -369,48 +378,53 @@ int calculateAccuracyPercentBonus(
 }
 
 int calculateCharmAttribute(Doll doll, Item weapon) {
-  num result = 10 + triangleNumber(doll.modifiedSummoningLevel) / 5;
+  // Presumes all points are put into the charming attribute, so the result is
+  // not divided by 5 like as with similar calculations.
+
+  num result = 50 + triangleNumber(doll.modifiedSummoningLevel);
   return (result + result * weapon.bonus / 100).floor();
 }
 
 int calculateCoolDown(Doll doll, [Item weapon]) =>
     weapon == null ? CoolDown.average : weapon.info.coolDown;
 
-int calculateDamage(Doll doll, [Item weapon]) {
-  var damage = 0, bonus = 0;
+BigInt calculateDamage(Doll doll, [Item weapon]) {
+  BigInt damage = BigInt.zero;
+  int bonus = 0;
 
   if (weapon != null) {
-    damage = weapon.damage;
+    damage = big(weapon.damage);
     bonus = weapon.bonus;
   }
 
   // Each +1 on a weapon increases damage (including from attributes like
   // strength).
 
-  var charm = weapon?.egos?.contains(Ego.charm) == true,
-      attribute = charm
-          ? calculateCharmAttribute(doll, weapon)
-          : doll._weaponAttribute(weapon);
+  var charm = weapon?.egos?.contains(Ego.charm) == true;
 
-  var result = percent(
-      doll.nonWeaponEquipment
-          .fold(attribute + damage, (damage, item) => damage + item.damage),
+  BigInt attribute = charm
+      ? big(calculateCharmAttribute(doll, weapon))
+      : big(doll._weaponAttribute(weapon));
+
+  BigInt result = BigIntUtil.percent(
+      doll.nonWeaponEquipment.fold(
+          attribute + damage, (damage, item) => damage + big(item.damage)),
       100 + damageIncreasePercent(bonus));
 
-  if (doll?.account?.god == 'trog') result *= 2;
+  if (doll?.account?.god == 'trog') result *= BigInt.two;
 
   // Power items are done last because of the division.
 
-  var sourcePowerItems = doll?.powerItems ?? 0;
-  result += result * sourcePowerItems ~/ 4;
+  BigInt sourcePowerItems = big(doll?.powerItems ?? 0);
+  result += result * sourcePowerItems ~/ big(4);
 
   if (doll?.account == null) {
     // Non-players deal extra damage to compensate for the damage reduction from
     // player equipment. Note that damage reduction can't be symmetrical because
     // that would make acid attacks disproportionally powerful.
 
-    var level = doll?.level ?? 0;
-    result += result * level ~/ 100;
+    BigInt level = big(doll?.level ?? 0);
+    result += result * level ~/ big(100);
   }
 
   return result;
@@ -423,9 +437,15 @@ int calculateDropBonus(int level, dynamic amount) {
   return bonusPerUpgrade * (amount.bitLength - 1);
 }
 
-int calculateEvasion(Doll doll) => (doll.agility +
-        doll.agility * calculateEvasionPercentBonus(doll.equipped.values) / 100)
-    .floor();
+int calculateEvasion(Doll doll) =>
+
+// FIXME BIG HP: This may not be safe with large numbers.
+
+    (doll.agility +
+            doll.agility *
+                calculateEvasionPercentBonus(doll.equipped.values) /
+                100)
+        .floor();
 
 int calculateEvasionPercentBonus(Iterable<dynamic> equipment) {
   var base = 100;
@@ -438,13 +458,6 @@ int calculateEvasionPercentBonus(Iterable<dynamic> equipment) {
 
   return base + base * increasePercent ~/ 100 - 100;
 }
-
-/// Calculates if gathering is successful or not.
-
-bool calculateGatheringHit(Doll doll, int accuracy, int evasion,
-        [num rateMultiplier = 1]) =>
-    calculateHit(doll, levelToGatheringPower(accuracy),
-        levelToGatheringPower(evasion), rateMultiplier);
 
 /// Calculates if an attack hits or not.
 
@@ -471,24 +484,29 @@ int calculateLevel(Doll doll) {
   return level;
 }
 
-int calculateReflectedDamage(Doll doll) {
-  if (doll == null) return 0;
+BigInt calculateReflectedDamage(Doll doll) {
+  if (doll == null) return BigInt.zero;
+
+  // Non-player's don't have items with upgrades, so their level is used
+  // instead.
+
+  int upgrades(Item item) => doll.account != null ? item.bonus : doll.level;
 
   // The average bonus of the reflect items is treated like a weapon bonus.
 
   var equipped = List<Item>.from(doll.equipped.values
           .where((item) => item.egos.contains(Ego.reflection))),
-      bonus = equipped.fold(0, (result, item) => result + item.bonus) ~/
+      bonus = equipped.fold(0, (result, item) => result + upgrades(item)) ~/
           equipped.length;
 
   // Reflection uses vitality for damage.
 
-  var attribute = doll.vitality;
-  var result = attribute + attribute * bonus ~/ 100;
+  BigInt attribute = big(doll.vitality),
+      result = attribute + attribute * big(bonus) ~/ big(100);
 
   // Reflection deals 25% damage.
 
-  return result * equipped.length ~/ 4;
+  return result * big(equipped.length) ~/ big(4);
 }
 
 /// Capitalizes the first letter of [string].
@@ -520,6 +538,8 @@ int coinFlips(int coinFlips) {
   for (num i = 0; i < coinFlips; i += speed) if (randomBool) heads++;
   return (heads * speed).floor();
 }
+
+String compactFormatInteger(dynamic amount) => formatCurrency(amount, false);
 
 int compareItemNames(String first, String second) {
   var firstWithoutBonus = first.replaceFirst(_upgradePattern, '').trim(),
@@ -563,9 +583,9 @@ int dollLevel(int difficulty, bool boss) {
   num result = max(1, difficulty);
   result *= boss ? 6 : 5;
 
-  // There is a jump in difficulty at the "haunted" floors.
+  // The first few floors are easy to help new players.
 
-  if (difficulty > 5) result *= 2 * pow(1.01, difficulty / 2);
+  result *= min(1 + difficulty / 5, 2) * pow(1.01, difficulty / 2);
   return result.floor();
 }
 
@@ -597,17 +617,25 @@ bool examine(Doll source, Doll target, bool showLocation) {
       else if (item == 'dummy') item = 'punching bag';
 
       messages.add('item: $item');
+
+      if (item.contains('fish') || item.contains('shark')) {
+        var hats =
+            ['fishing hat', 'lumberjack hat', 'mining helmet'].join(', ');
+
+        messages.add('rare: $hats');
+      }
+
       source.informationPrompt(messages.join('<br>'));
       return false;
     }
 
     var id = target.infoName ?? target.internal['display'] ?? '',
-        level = formatNumber(target.level),
-        agi = formatNumber(target.agility),
-        dex = formatNumber(target.dexterity),
-        intel = formatNumber(target.intelligence),
-        str = formatNumber(target.strength),
-        vit = formatNumber(target.vitality);
+        level = compactFormatInteger(target.level),
+        agi = compactFormatInteger(target.agility),
+        dex = compactFormatInteger(target.dexterity),
+        intel = compactFormatInteger(target.intelligence),
+        str = compactFormatInteger(target.strength),
+        vit = compactFormatInteger(target.vitality);
 
     var gear =
         '${List.from(target.equipped.values.map((item) => item.displayTextWithoutAmount))}';
@@ -632,7 +660,7 @@ bool examine(Doll source, Doll target, bool showLocation) {
     messages
       ..add('name: $id')
       ..add('level: $level')
-      ..add('health: ${formatNumber(health)}')
+      ..add('health: ${compactFormatInteger(health)}')
       ..add('speed: ${formatWalkingCoolDown(target.walkingCoolDown)}');
 
     if (targetAccount == null) messages.add('+$level% damage');
@@ -641,16 +669,16 @@ bool examine(Doll source, Doll target, bool showLocation) {
       ..add('attributes: $agi agi, $dex dex, $intel int, $str str, $vit vit');
 
     if (targetAccount != null) {
-      messages.add('skills: ${formatNumber(targetAccount.sheet.combat.level)} combat, ' +
-          '${formatNumber(targetAccount.sheet.summoning.level)} summoning, ' +
-          '${formatNumber(targetAccount.sheet.slaying.level)} luck, ' +
-          '${formatNumber(targetAccount.sheet.fishing.level)} fishing, ' +
-          '${formatNumber(targetAccount.sheet.mining.level)} mining, ' +
-          '${formatNumber(targetAccount.sheet.woodcutting.level)} gathering, ' +
-          '${formatNumber(targetAccount.sheet.cooking.level)} cooking, ' +
-          '${formatNumber(targetAccount.sheet.metalworking.level)} metalworking, ' +
-          '${formatNumber(targetAccount.sheet.crafting.level)} crafting, ' +
-          '${formatNumber(targetAccount.sheet.crime.level)} stealth');
+      messages.add('skills: ${compactFormatInteger(targetAccount.sheet.combat.level)} combat, ' +
+          '${compactFormatInteger(targetAccount.sheet.summoning.level)} summoning, ' +
+          '${compactFormatInteger(targetAccount.sheet.slaying.level)} luck, ' +
+          '${compactFormatInteger(targetAccount.sheet.fishing.level)} fishing, ' +
+          '${compactFormatInteger(targetAccount.sheet.mining.level)} mining, ' +
+          '${compactFormatInteger(targetAccount.sheet.woodcutting.level)} gathering, ' +
+          '${compactFormatInteger(targetAccount.sheet.cooking.level)} cooking, ' +
+          '${compactFormatInteger(targetAccount.sheet.metalworking.level)} metalworking, ' +
+          '${compactFormatInteger(targetAccount.sheet.crafting.level)} crafting, ' +
+          '${compactFormatInteger(targetAccount.sheet.crime.level)} stealth');
 
       messages.add('god: ${godName(targetAccount?.god)}');
     }
@@ -680,8 +708,9 @@ bool examine(Doll source, Doll target, bool showLocation) {
   return false;
 }
 
-BigInt extraResources(int level, int amount) =>
-    big(amount) * big(triangleNumber(level)) ~/ big(1000);
+BigInt extraResources(int level, int amount) {
+  return big(max(1, amount)) * big(triangleNumber(level)) ~/ big(1000);
+}
 
 Map<dynamic, dynamic> filterMap(
     Map<dynamic, dynamic> map, bool filter(dynamic key, dynamic value)) {
@@ -694,14 +723,13 @@ Map<dynamic, dynamic> filterMap(
   return result;
 }
 
-int floorToExperience(int floor) =>
-    Doll(null, null, false, floor ?? 1).experience;
+/// Returns the boss level of the current floor.
 
 int floorToLevel(int floor) => Doll(null, null, false, floor ?? 1).level;
 
 String formatBigInt(BigInt value) => reverseString(reverseString('$value')
-    .replaceAllMapped(_splitDigits, (match) => '${match.group(0)},')
-    .replaceFirst(_trailingComma, ''));
+    .replaceAllMapped(_splitDigits, (match) => '${match.group(0)}$separator')
+    .replaceFirst(_trailingSeparator, ''));
 
 String formatCurrency(dynamic amount, [bool prefix = true]) {
   var suffix = '';
@@ -825,8 +853,6 @@ void kick(dynamic session) {
     ..logout(true);
 }
 
-num levelToGatheringPower(int level) => safeLog(10 + triangleNumber(level) / 5);
-
 Map<Point<int>, int> listKeyMapToPointKeyMap(Map<List<int>, int> map) {
   var result = {};
   map.forEach((list, value) => result[Point(list[0], list[1])] = value);
@@ -834,6 +860,12 @@ Map<Point<int>, int> listKeyMapToPointKeyMap(Map<List<int>, int> map) {
 }
 
 num log2(num value) => log(value) / ln2;
+
+Map<String, bool> mapFromList(List<String> list) {
+  var result = <String, bool>{};
+  list.forEach((key) => result[key] = true);
+  return result;
+}
 
 dynamic mapWrapperDecoder(dynamic key, dynamic value,
     {dynamic safety(dynamic key, dynamic value)}) {
@@ -904,7 +936,7 @@ ResourceManager newMockResourceManager([Map<dynamic, dynamic> map]) {
 
 BigInt parseBigInteger(String integer) {
   if (integer == null) return null;
-  integer = integer.trim().toLowerCase().replaceAll(',', '');
+  integer = integer.trim().toLowerCase().replaceAll(_nonAlphaNumeric, '');
   var negative = integer.startsWith('-');
   if (negative) integer = integer.substring(1);
   if (!integer.contains(numberPattern)) return null;
@@ -921,7 +953,7 @@ BigInt parseBigInteger(String integer) {
 }
 
 BigInt parseFormattedBigInt(String text) =>
-    BigInt.parse(text.replaceAll(',', ''));
+    BigInt.parse(text.replaceAll(_nonAlphaNumeric, ''));
 
 /// Parses [integer]. Can handle values like 1K, 1M, 1G, 1T, 1P, and 1E.
 
@@ -941,37 +973,31 @@ Map<List<int>, int> pointKeyMapToListKeyMap(Map<Point<int>, int> map) {
 
 /// Used to create portals.
 
-DollInfo portal(Stage<Doll> targetStage, int targetX, int targetY, String image,
-    [List<String> requiredFlags = const []]) {
-  assert(targetStage != null);
+DollInfo portal(String image) => DollInfo(
+    image: image,
+    preventsPvP: true,
 
-  // fixme: this is a bit of a hack
+    // Prevents players from moving over a portal and preventing another
+    // player from using it.
 
-  if (image.endsWith('up_stairs.png'))
-    entrances[targetStage.id] = Point(targetX, targetY);
+    canPassThis: Terrain.obstacles,
+    interaction: (Account account, Doll doll) {
+      var up = doll?.isStairsUp ?? false;
 
-  return DollInfo(
-      image: image,
-      preventsPvP: true,
+      if (account.adjustedHighestFloor <= stageToFloor(doll?.stage?.id) && up) {
+        account.alert('Defeating a boss on this floor unlocks the next floor.');
+        if (!Config.debug) return;
+      }
 
-      // Prevents players from moving over a portal and preventing another
-      // player from using it.
+      var offset = up ? 1 : -1;
 
-      canPassThis: Terrain.obstacles,
-      interaction: (Account account, Doll doll) {
-        var up = doll?.image?.contains('up_stairs') ?? false;
+      if (account.sessions.isNotEmpty)
+        account.sessions.first
+            .teleport(account.currentFloor + offset, false, up);
 
-        if (account.adjustedHighestFloor <= stageToFloor(doll?.stage?.id) &&
-            up) {
-          account
-              .alert('Defeating a boss on this floor unlocks the next floor.');
-
-          return;
-        }
-
-        account.doll.jump(targetStage, Point(targetX, targetY));
-      });
-}
+      //var targetDoll = up ? targetStage.stairsDown : targetStage.stairsUp;
+      //account.doll.jump(targetStage, targetDoll?.currentLocation);
+    });
 
 bool primitive(dynamic value) =>
     value == null || value is bool || value is num || value is String;
@@ -981,10 +1007,9 @@ bool primitiveList(dynamic value) => value is List && value.every(primitive);
 /// Returns a random number between 0 (inclusive) and [max] or 4,294,967,296
 /// (exclusive). Some precision is lost if [max] is greater than 4,294,967,296.
 
-int random([int max = maxInt]) {
-  if (max > maxInt) return random(max ~/ 2) * 2;
-  return _random.nextInt(max);
-}
+int random([int max = maxInt]) => max > maxInt
+    ? random(max ~/ 2) * 2 + _random.nextInt(2)
+    : _random.nextInt(max);
 
 BigInt randomBigDivideByTwo(BigInt value) {
   if (value.isEven || randomBool) return value >> 1;
@@ -997,18 +1022,6 @@ String randomDigits(int count) {
   var result = '';
   for (var i = 0; i < count; i++) result += '${random(10)}';
   return result;
-}
-
-/// Divides [value] by [divideBy], randomly rounding up or down to an [int].
-
-int randomDivide(int value, int divideBy) {
-  var result = value ~/ divideBy;
-
-  // FIXME: instead of a coin flip, something like 2.25 should round down 75%
-  // of the time and round up 25% of the time.
-
-  if (value % divideBy == 0 || randomBool) return result;
-  return result + 1;
 }
 
 String randomHumanJson(String id) {

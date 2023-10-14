@@ -707,6 +707,10 @@ button.close {
     margin-bottom: 10px;
 }
 
+.stat-buttons {
+    margin-bottom: 10px;
+}
+
 .wide-equip-button {
     width: 128px;
     height: 32px;

@@ -56,7 +56,7 @@ class Dungeon {
     _dungeonWidth = size;
     _dungeonHeight = size;
 
-    _floors = Array2D<int>(_dungeonWidth, _dungeonHeight);
+    _floors = Array2D<int>(_dungeonWidth, _dungeonHeight, null);
     reset();
     while (update());
     _carveWalls();

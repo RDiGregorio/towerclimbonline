@@ -62,7 +62,8 @@ class MiniMapComponent {
 
     if (doll?.altar == true ||
         doll?.shop == true ||
-        doll?.stairs == true ||
+        doll?.isStairsUp == true ||
+        doll?.isStairsDown == true ||
         doll?.infoName == 'tutorial' ||
         doll?.infoName == 'gravestone') color = 'gold';
 

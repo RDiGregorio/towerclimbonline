@@ -87,10 +87,6 @@ class Item extends OnlineObject {
     if (infoName == null || getAmount() <= BigInt.zero) return false;
     if (food) return true;
     if (equipment) return info.slot != #thrown;
-
-    // Level up potions only exist in debug mode.
-
-    if (infoName == 'level up potion') return false;
     if (potion) return true;
 
     return const ['nuclear reactor', 'philosopher\'s stone', 'puzzle box']
@@ -191,58 +187,6 @@ class Item extends OnlineObject {
 
   int get evasion => info?.evasion ?? 0;
 
-  String get examineText {
-    if (food) return 'heals ${healingAmount.toStringAsFixed(2)}% health';
-
-    if (thrown)
-      return 'attacks target ' +
-          'with +1% damage and accuracy for each of your combat levels';
-
-    if (infoName == 'agility potion') return '+50% agility';
-    if (infoName == 'strength potion') return '+50% strength';
-    if (infoName == 'dexterity potion') return '+50% dexterity';
-    if (infoName == 'intelligence potion') return '+50% intelligence';
-    if (infoName == 'puzzle box') return 'a mesmerizing puzzle box';
-    if (infoName == 'level up potion') return 'only used for testing';
-
-    if (infoName == 'philosopher\'s stone') {
-      var gold = formatNumberWithPrecision(1 + safeLog(bonus));
-      return 'converts 1 blood potion to $gold gold';
-    }
-
-    if (infoName == 'nuclear reactor') {
-      var energy = formatNumberWithPrecision(1 + safeLog(bonus));
-      return 'converts 1 uranium to $energy energy';
-    }
-
-    if (infoName == 'nuclear bomb')
-      return 'kills all targets without reward' +
-          ' except for bosses, players, and pets';
-
-    if (egos.contains(Ego.fishing)) {
-      var modifier = bonus;
-      return '+${formatNumber(modifier)}% fishing';
-    }
-
-    if (egos.contains(Ego.mining)) {
-      var modifier = bonus;
-      return '+${formatNumber(modifier)}% mining';
-    }
-
-    if (egos.contains(Ego.gathering)) {
-      var modifier = bonus;
-      return '+${formatNumber(modifier)}% gathering';
-    }
-
-    if (egos.contains(Ego.thieving)) {
-      var modifier = bonus;
-
-      return '+${formatNumber(modifier)}% stealth';
-    }
-
-    return null;
-  }
-
   bool get food => egos.contains(Ego.food);
 
   num get healingAmount => min<num>(100, info.heal + info.heal * bonus / 100);
@@ -291,13 +235,13 @@ class Item extends OnlineObject {
 
   bool get potion => displayTextWithoutAmount.contains('potion');
 
-  int get price => _basePrice;
+  BigInt get price => big(internal['price'] ?? _basePrice);
 
   bool get scroll => displayTextWithoutAmount.contains('scroll');
 
   int get sellingPrice {
     if (!tradable) return 0;
-    return price ~/ 2;
+    return _basePrice ~/ 2;
   }
 
   Map<String, String> get style => const {};
@@ -337,6 +281,60 @@ class Item extends OnlineObject {
     });
 
     return result;
+  }
+
+  String examineText(CharacterSheet sheet) {
+    if (food) return 'heals ${healingAmount.toStringAsFixed(2)}% health';
+
+    if (thrown) {
+      var intBuffs = sheet.intelligenceBuffs, dexBuffs = sheet.dexterityBuffs;
+      return 'attacks target with +$intBuffs% damage and +$dexBuffs% accuracy';
+    }
+
+    if (infoName == 'agility potion') return '+50% agility';
+    if (infoName == 'strength potion') return '+50% strength';
+    if (infoName == 'dexterity potion') return '+50% dexterity';
+    if (infoName == 'intelligence potion') return '+50% intelligence';
+    if (infoName == 'puzzle box') return 'a mesmerizing puzzle box';
+
+    if (infoName == 'philosopher\'s stone') {
+      var gold = formatNumberWithPrecision(1 + safeLog(bonus));
+      return 'converts 1 blood potion to $gold gold';
+    }
+
+    if (infoName == 'nuclear reactor') {
+      var energy = formatNumberWithPrecision(1 + safeLog(bonus));
+      return 'converts 1 uranium to $energy energy';
+    }
+
+    if (infoName == 'nuclear bomb')
+      return 'kills all targets without reward' +
+          ' except for bosses, players, and pets';
+
+    if (egos.contains(Ego.fishing)) {
+      var modifier = bonus;
+      return '+${formatNumber(modifier)}% fishing';
+    }
+
+    if (egos.contains(Ego.mining)) {
+      var modifier = bonus;
+      return '+${formatNumber(modifier)}% mining';
+    }
+
+    if (egos.contains(Ego.gathering)) {
+      var modifier = bonus;
+      return '+${formatNumber(modifier)}% gathering';
+    }
+
+    if (egos.contains(Ego.thieving)) {
+      // Having multiple +25% stealth items makes up for not having something
+      // like a mining helmet for stealth.
+
+      var modifier = bonus;
+      return '+${formatNumber(modifier)}% stealth';
+    }
+
+    return null;
   }
 
   /// Returns a [BigInt].

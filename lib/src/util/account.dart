@@ -4,6 +4,7 @@ part of util;
 
 class Account extends OnlineObject {
   static RegExp _scroll = RegExp(r'\bscroll\b');
+  static final int maxExchangeOffers = 100;
   final Set<Session> sessions = Set();
   bool tradeAccepted = false, _pvp = false;
   ItemContainer _tradeOffer;
@@ -320,8 +321,8 @@ class Account extends OnlineObject {
 
     // Nothing should be free.
 
-    if (item.price <= 0) return;
-    var newAmount = BigIntUtil.min(money ~/ big(item.price), amount);
+    if (item.price <= BigInt.zero) return;
+    var newAmount = BigIntUtil.min(money ~/ item.price, amount);
 
     if (newAmount != amount) {
       alert(alerts[#tooPoor]);
@@ -329,7 +330,7 @@ class Account extends OnlineObject {
     }
 
     if (amount <= BigInt.zero) return;
-    money -= big(item.price) * amount;
+    money -= item.price * amount;
 
     // A copy is used here to prevent obscure bugs caused by the shop item and
     // inventory item being the same.
@@ -354,7 +355,8 @@ class Account extends OnlineObject {
 
     var floor = max(1, stageToFloor(doll.stage.id)),
         item,
-        extraItem,
+        secondItem,
+        thirdItem,
 
         // Gathering experience is increased to balance it with crafting
         // experience.
@@ -394,7 +396,7 @@ class Account extends OnlineObject {
 
     num adjustedLevel() {
       num result = skill.level;
-      if (god == 'fedhas') result = result * 3 / 2;
+      if (god == 'fedhas') result *= 2;
       var bonus = 0;
       if (hasCorrectTool()) bonus += doll.primaryWeapon.bonus;
       if (hasCorrectHelmet()) bonus += doll.helmet.bonus;
@@ -427,7 +429,7 @@ class Account extends OnlineObject {
         break;
       case 'tentacles':
         item = 'tentacle';
-        extraItem = 'blood potion';
+        secondItem = 'blood potion';
         skill = sheet.woodcutting;
         baseAmount = calculateAmount();
         break;
@@ -475,6 +477,12 @@ class Account extends OnlineObject {
         item = randomValue(
             const ['sapphire', 'ruby', 'emerald', 'diamond', 'onyx']);
 
+        secondItem = randomValue(
+            const ['sapphire', 'ruby', 'emerald', 'diamond', 'onyx']);
+
+        thirdItem = randomValue(
+            const ['sapphire', 'ruby', 'emerald', 'diamond', 'onyx']);
+
         skill = sheet.mining;
         baseAmount = calculateAmount();
         break;
@@ -506,25 +514,20 @@ class Account extends OnlineObject {
             ],
             items = List.from([food, gems, scrolls].expand((list) => list));
 
-        // Creates 3 to 5 stacks.
-
-        var map = {};
-
-        for (var i = 0, j = random(3) + 3; i < j; i++) {
-          var key = randomValue(items);
-          map[key] ??= BigInt.zero;
-          var baseAmount = doll.stealth ~/ 20;
-
-          map[key] += big(max(1, baseAmount)) +
-              extraResources(floorToLevel(floor), baseAmount);
-        }
+        // Chests are 30 times better than nodes.
 
         BigInt total = BigInt.zero;
 
-        map.forEach((key, amount) {
+        for (var i = 0; i < 3; i++) {
+          var key = randomValue(items),
+              baseAmount = doll.stealth ~/ 20,
+              amount = big(max(1, baseAmount)) +
+                  extraResources(floorToLevel(floor), baseAmount);
+
+          amount *= big(10);
           total += amount;
           lootResource(Item(key)..setAmount(amount));
-        });
+        }
 
         if (hasCrystalGloves) experienceMultiplier *= 2;
         gainExperience(total * big(experienceMultiplier), 'crime');
@@ -533,10 +536,10 @@ class Account extends OnlineObject {
       case 'dummy':
         // Gives the same experience as a level 1 enemy.
 
-        var reward = Doll('human').experience, result = reward;
+        BigInt reward = Doll('human').experience, result = reward;
         if (hasCrystalPrimaryWeapon) result += reward;
         if (hasCrystalSecondaryWeapon) result += reward;
-        result += doll.crystalShields * reward;
+        result += big(doll.crystalShields) * reward;
         var skill = options['xp mode'];
         if (skill == 'slaying') skill = 'slay';
         if (skill == null || skill == 'default') skill = 'combat';
@@ -547,7 +550,7 @@ class Account extends OnlineObject {
     // Extra items from fishing.
 
     if (skill == sheet.fishing && random(100) == 0)
-      extraItem =
+      secondItem =
           randomValue(['fishing hat', 'lumberjack hat', 'mining helmet']);
 
     BigInt amount = big(max(1, baseAmount.floor()));
@@ -562,15 +565,15 @@ class Account extends OnlineObject {
       // Good resources give double.
 
       var goodResource = source.goodResource(this);
-      if (goodResource) amount *= BigInt.two;
+      if (goodResource > 0) amount *= big(1 << goodResource);
 
       // *** After this point in the code, [amount] should not change! ***
 
       lootResource(Item(item)..setAmount(amount));
 
-      if (extraItem != null) {
-        experienceMultiplier *= 2;
-        var extraLoot = Item.fromDisplayText(extraItem);
+      if (secondItem != null) {
+        if (thirdItem == null) experienceMultiplier *= 2;
+        var extraLoot = Item.fromDisplayText(secondItem);
 
         // Gods and tools do not increase [skill.level] used for
         // [calculateDropBonus], because it is treated as a crafting skill.
@@ -580,6 +583,15 @@ class Account extends OnlineObject {
             ? extraLoot.bonus = calculateDropBonus(skill.level, amount)
             : extraLoot.setAmount(amount);
 
+        lootResource(extraLoot);
+      }
+
+      if (thirdItem != null) {
+        // Only used for gem rocks.
+
+        experienceMultiplier *= 3;
+        var extraLoot = Item.fromDisplayText(thirdItem);
+        extraLoot.setAmount(amount);
         lootResource(extraLoot);
       }
 
@@ -782,7 +794,8 @@ class Account extends OnlineObject {
       Exchange exchange, String key, BigInt price, BigInt amount, int bonus) {
     if (amount <= BigInt.zero) return;
 
-    if (exchangeBuyOffers.length + exchangeSellOffers.length >= 10) {
+    if (exchangeBuyOffers.length + exchangeSellOffers.length >=
+        maxExchangeOffers) {
       alert(alerts[#tooManyOffers]);
       return;
     }
@@ -831,7 +844,8 @@ class Account extends OnlineObject {
 
   void exchangeSell(Exchange exchange, String key, BigInt price, BigInt amount,
       Item soldItem) {
-    if (exchangeBuyOffers.length + exchangeSellOffers.length >= 10) {
+    if (exchangeBuyOffers.length + exchangeSellOffers.length >=
+        maxExchangeOffers) {
       alert(alerts[#tooManyOffers]);
       return;
     }
@@ -862,7 +876,7 @@ class Account extends OnlineObject {
           BigInt.from(4);
 
     if (god == 'ashenzari' && ['combat', 'summoning', 'slay'].contains(key))
-      experience = experience * BigInt.from(3) ~/ BigInt.two;
+      experience = experience * BigInt.two;
 
     Future(() {
       experience = BigIntUtil.max(BigInt.one, experience);
@@ -911,10 +925,10 @@ class Account extends OnlineObject {
     lootItem(copy);
   }
 
-  void noteLethalDamage(Doll damageSource, int damage) {
+  void noteLethalDamage(Doll damageSource, BigInt damage) {
     internal['floor note'] = currentFloor;
     internal['source note'] = damageSource?.sanitizedName;
-    internal['damage note'] = damage;
+    internal['damage note'] = '$damage';
   }
 
   void openTrade(Account target) {

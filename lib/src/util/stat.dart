@@ -1,7 +1,7 @@
 part of util;
 
 class Stat extends OnlineObject {
-  static const int maxLevelExperience = 25450468793770, maxLevel = 600;
+  static const int maxLevelExperience = 19483731487981, maxLevel = 999;
   BigInt _cache = BigInt.zero;
   int _levelAfterAscension;
 
@@ -58,9 +58,13 @@ class Stat extends OnlineObject {
     return true;
   }
 
-  BigInt experienceFromLevel(int level) {
-    var result = pow(exp(level - 1), 1 / 25) * 1000 - 1000;
-    return big(result.ceil()) * ascensionMultiplier;
+  BigInt experienceFromLevel(int level) =>
+      ExperienceCurve.experienceFromLevel(level) * ascensionMultiplier;
+
+  void recalculate() {
+    var previousLevel = _level;
+    setExperienceWithoutSplat(experience);
+    if (_level < previousLevel) setLevel(previousLevel);
   }
 
   void setExperienceWithoutSplat(BigInt value) => _setExperience(value, false);
@@ -68,13 +72,8 @@ class Stat extends OnlineObject {
   void setLevel(int value) =>
       _setExperience(experienceFromLevel(min(value, maxLevel)), false);
 
-  int _levelFromExperience(BigInt experience) {
-    num result = (experience ~/ ascensionMultiplier).toInt();
-    if (result <= 0) return 1;
-    if (result >= maxLevelExperience) return maxLevel;
-    result = pow((result + 1000) / 1000, 25);
-    return log(result).floor() + 1;
-  }
+  int _levelFromExperience(BigInt experience) =>
+      ExperienceCurve.levelFromExperience(experience ~/ ascensionMultiplier);
 
   void _setExperience(BigInt value, bool showSplat) {
     var previousLevel = _level,

@@ -60,10 +60,11 @@ class Ego {
       rainbow = 53,
       demon = 54,
       spirit = 55,
-      melee = 56;
+      melee = 56,
+      health = 57;
 
   static const Map<int, String> longDescriptions = {
-    acid: 'acid attack (+100% damage; ignores target defense)',
+    acid: 'acid attack (+100% damage; ignores target damage reduction)',
     fire: 'fire attack (+100% damage; prevents target healing)',
     ice: 'ice attack (+100% damage; prevents target movement)',
     electric: 'electric attack (+100% damage; ignores target evasion)',
@@ -91,7 +92,7 @@ class Ego {
     // Energy can't be resisted.
 
     energy: 'energy attack (+100% damage)',
-    crystal: 'made of crystal (+100% skill experience)',
+    crystal: 'made of crystal (+100% {skill} experience)',
     fishing: 'increases fishing',
     mining: 'increases mining',
     gathering: 'increases gathering',
@@ -109,8 +110,8 @@ class Ego {
     resistPoison: 'resists poison attacks',
     resistGravity: 'resists gravity attacks',
     resistEvil: 'resists evil (blood, death, and debuff) attacks',
-    resistBallistic: 'resists ballistic attacks (½ damage)',
-    resistMagic: 'resists magic attacks (½ damage)',
+    resistBallistic: '50% ballistic damage reduction',
+    resistMagic: '50% magic damage reduction',
     regen: 'heals user 5% of max health every 5 seconds',
     stealth: '+25% stealth',
     reflection: 'reflection ' +
@@ -126,6 +127,7 @@ class Ego {
 
     shield: '50% damage reduction',
     spirit: '25% damage reduction',
+    health: '+100% health',
     rainbow: 'rainbow',
     demon: 'demon',
     melee: 'melee weapon (uses strength for damage)'
@@ -185,7 +187,12 @@ class Ego {
     shield: 'defense',
     rainbow: 'rainbow',
     demon: 'demon',
-    spirit: 'spirit'
+
+    // Spirit is not called ghostly because ghostly is a material type, while
+    // spirit is an effect type.
+
+    spirit: 'spirit',
+    health: 'health'
   };
 
   static const Map<int, int> resistedBy = {
@@ -198,9 +205,40 @@ class Ego {
 
     // Blood attacks are considered evil.
 
-    blood: resistEvil,
-    ballistic: resistBallistic
+    blood: resistEvil
   };
+
+  static Map<int, String> image = {
+    Ego.fire: 'image/missile/red_bolt.png',
+    Ego.ice: 'image/missile/cyan_bolt.png',
+    Ego.electric: 'image/missile/yellow_bolt.png',
+    Ego.acid: 'image/missile/brown_bolt.png',
+    Ego.poison: 'image/missile/green_bolt.png',
+    Ego.gravity: 'image/missile/black_bolt.png',
+    Ego.blood: 'image/missile/red_bolt.png',
+    Ego.energy: 'image/missile/white_bolt.png'
+  };
+
+  static String longDescriptionFor(Item item, int ego) {
+    if (item.egos.contains(Ego.crystal)) {
+      if (item.egos.contains(Ego.mining))
+        return longDescriptions[ego].replaceFirst('{skill}', 'mining');
+
+      if (item.egos.contains(Ego.fishing))
+        return longDescriptions[ego].replaceFirst('{skill}', 'fishing');
+
+      if (item.egos.contains(Ego.gathering))
+        return longDescriptions[ego].replaceFirst('{skill}', 'gathering');
+
+      if (item.egos.contains(Ego.thieving))
+        return longDescriptions[ego].replaceFirst('{skill}', 'stealth');
+
+      return longDescriptions[ego]
+          .replaceFirst('{skill}', 'combat, luck, and taming');
+    }
+
+    return longDescriptions[ego];
+  }
 
   static List<int> parse(String string) {
     for (List<int> result = [];;) {

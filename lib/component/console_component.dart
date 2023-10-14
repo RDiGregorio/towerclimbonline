@@ -317,8 +317,8 @@ class ConsoleComponent {
     throw ArgumentError(option);
   }
 
-  void handleSubmit() {
-    if (input == null || input.isEmpty) return;
+  bool handleSubmit() {
+    if (input == null || input.isEmpty) return false;
     var id = querySelector('.console-left .active').id, list = id.split('-');
 
     // Handles commands
@@ -326,13 +326,13 @@ class ConsoleComponent {
     if (input.startsWith('/')) {
       ClientGlobals.session.remote(#command, [input]);
       input = null;
-      return;
+      return false;
     }
 
     if (list[0] == 'alert') {
       ClientGlobals.session.remote(#messagePublic, [input]);
       input = null;
-      return;
+      return false;
     }
 
     if (list[0] == 'chat') if (list[1].isEmpty)
@@ -354,6 +354,7 @@ class ConsoleComponent {
       ClientGlobals.session.remote(#messageChannel, [input]);
 
     input = null;
+    return false;
   }
 
   void increaseUnreadPrivate(String key) {

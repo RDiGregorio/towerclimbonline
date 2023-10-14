@@ -49,8 +49,17 @@ class ProceduralGenerator {
       'cells': []
     };
 
-    for (int i = 0; i < 100; i++) data['cells'].add(List(100));
     var traversable = [], theme = Theme.random(floor);
+    data['flags'].addAll(theme.flags);
+
+    List<dynamic> defaults(int count) {
+      if (theme.flags.contains('background-color: lightskyblue'))
+        return List.filled(count, [null, null, 'blue']);
+      else
+        return List(count);
+    }
+
+    for (int i = 0; i < 100; i++) data['cells'].add(defaults(100));
 
     Dungeon().tiles.forEach((point, value) {
       switch (value) {
@@ -59,7 +68,9 @@ class ProceduralGenerator {
           data['cells'][point.x][point.y] = [null, null, theme.floor];
           break;
         case Dungeon.TILE_WALL:
-          data['cells'][point.x][point.y] = ['#', theme.wall, null];
+          if (theme.wall != null)
+            data['cells'][point.x][point.y] = ['#', theme.wall, null];
+
           break;
       }
     });
@@ -93,8 +104,9 @@ class ProceduralGenerator {
             'ascended gunslinger',
             'ascended wizard',
             'ascended harambe',
-            'popped collar chad',
-            'stacy'
+            'stardust dragon',
+            'giga chad',
+            'stacy',
           ]);
         else
           doll = randomValue(theme.bosses);
@@ -118,26 +130,35 @@ class ProceduralGenerator {
           'okawaru altar',
           'qazlal altar'
         ]);
-      else if (i <= 16 && theme.resources.isNotEmpty)
+      else if (i == 7)
+        doll = 'down stairs';
+      else if (i == 8)
+        doll = 'up stairs';
+      else if (i <= 18 && theme.resources.isNotEmpty)
         doll = randomValue(theme.resources);
-      else
-        // A special doll appears about once every 12 floors.
+      else if (i == 19 && floor % 5 == 4) {
+        // Shops appear every 5 floors: F55, F60, F65, and so on.
 
-        doll = random(1000) == 0
+        doll = 'random shop';
+      } else
+        // Each special doll appears about once every 6 floors.
+
+        doll = random(500) == 0
             ? randomValue(['wanderer'])
             : randomValue(theme.dolls);
 
       if (traversable.isEmpty) continue;
       Point<int> point = traversable.removeAt(random(traversable.length));
 
-      if (const ['fish', 'shellfish', 'shark', 'stardust fish']
+      if (const ['fish', 'shellfish', 'shark', 'stardust fish', 'no fish']
           .contains(doll)) {
         var water = List.from(adjacent(point));
         water.retainWhere(traversable.contains);
         water.add(point);
 
-        // FIXME: water can be placed next to a wall, blocking a path or causing
-        //  unreachable fish.
+        // FIXME: water can be placed next to a wall with unreachable fish.
+        // Water can also block a path, forcing players to use the explore
+        // ability.
 
         if (water.every((point) => adjacent(point).every(set.contains))) {
           water.forEach((point) {
@@ -153,7 +174,7 @@ class ProceduralGenerator {
           doll = randomValue(theme.dolls);
       }
 
-      data['cells'][point.x][point.y][0] = '@$doll';
+      if (doll != 'no fish') data['cells'][point.x][point.y][0] = '@$doll';
     }
 
     return data;

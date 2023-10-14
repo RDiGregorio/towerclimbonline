@@ -235,7 +235,7 @@ class CameraComponent {
             ..['z-index'] = '1'
             ..['transform'] = 'scale($zoom, $zoom)';
 
-          var ratio = doll.maxHealth == null || doll.maxHealth == 0
+          var ratio = doll.maxHealth == null || doll.maxHealth == BigInt.zero
                   ? 0
                   : doll.health / doll.maxHealth,
               red = (255 - ratio * 255).floor();
@@ -302,7 +302,17 @@ class CameraComponent {
 
   Map<String, String> get backgroundStyle {
     var stage = ClientGlobals.session?.stage,
-        black = {'background-color': 'black'};
+        black = {'background-color': 'black'},
+        orange = {'background-color': 'rgb(255, 140, 0)'},
+        blue = {'background-color': 'lightskyblue'};
+
+    if (ClientGlobals.session?.stageFlags
+            ?.containsKey('background-color: orange') ==
+        true) return orange;
+
+    if (ClientGlobals.session?.stageFlags
+            ?.containsKey('background-color: lightskyblue') ==
+        true) return blue;
 
     if (stage == null || stage.startsWith('procgen')) return black;
 
@@ -339,13 +349,7 @@ class CameraComponent {
       'dungeon45',
       'dungeon46',
       'dungeon47',
-      'dungeon48',
-
-      // Bonus.
-
-      'bonus0',
-      'bonus1',
-      'bonus2'
+      'dungeon48'
     ].contains(stage)) return black;
 
     return const {};
@@ -410,21 +414,34 @@ class CameraComponent {
     return 32;
   }
 
-  Map<String, String> dollStyle(Doll doll) {
+  Map<String, String> dollStyle(Doll doll, [String flag]) {
     Map<String, String> result = {};
-    if (_groundedImage(doll)) return result;
-    result['margin-left'] = '-8.5px';
-    result['margin-top'] = '-16px';
+
+    // Yellow sparkles (4 × resources).
+
+    if (flag == 'sparkles' &&
+        ClientGlobals.session.goodItemSources[doll.id] == 2)
+      result['filter'] = 'sepia(1) saturate(10000%)';
+
+    // Cyan sparkles (8 × resources).
+
+    if (flag == 'sparkles' &&
+        ClientGlobals.session.goodItemSources[doll.id] == 3)
+      result['filter'] = 'brightness(0.5) sepia(1) saturate(10000%) invert(1)';
+
+    if (!_groundedImage(doll)) {
+      result['margin-left'] = '-8.5px';
+      result['margin-top'] = '-16px';
+    }
+
     return result;
   }
 
   String formatSplat(String splat) => splat.replaceAllMapped(
       RegExp('\\d+'), (match) => formatCurrency(int.parse(match[0]), false));
 
-  bool goodResource(Doll doll) {
-    if (doll?.infoName?.endsWith('ascension') == true) return true;
-    return ClientGlobals.session.goodItemSources.containsKey(doll.id);
-  }
+  bool goodResource(Doll doll) =>
+      ClientGlobals.session.goodItemSources.containsKey(doll.id);
 
   void handleClick(MouseEvent event, [Doll doll]) {
     event.preventDefault();
@@ -516,9 +533,11 @@ class CameraComponent {
     if (doll.infoName == 'scorpion') result['margin-top'] = '-2.75px';
     if (doll.infoName == 'lion') result['margin-top'] = '-2.75px';
     if (doll.infoName == 'crab') result['margin-top'] = '-2.75px';
+    if (doll.infoName == 'blue crab') result['margin-top'] = '-2.75px';
     if (doll.infoName == 'robot') result['margin-top'] = '-2.75px';
     if (doll.infoName == 'juggernaut') result['margin-top'] = '-2.75px';
     if (doll.infoName == 'king crab') result['margin-top'] = '-5.5px';
+    if (doll.infoName == 'ascended crab') result['margin-top'] = '-5.5px';
     if (doll.infoName == 'spider demon') result['margin-top'] = '-5.5px';
     if (doll.infoName == 'giant death robot') result['margin-top'] = '-2.75px';
     return result;

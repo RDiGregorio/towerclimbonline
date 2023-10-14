@@ -1,14 +1,15 @@
 <div class="window-body-message">
-    <div>
+    <p class="red-text bold">
+        Defeating enemies rewards experience in the skill you are practicing.<br>
+        Upgraded food and potions permanently increase combat attributes.
+    </p>
+    <div class="stat-buttons">
         <button type="button"
                 class="btn btn-default"
                 (click)="track()">
             Track experience rate
         </button>
         <span *ngIf="tracker != null">{{experiencePerHour}} experience per hour</span>
-    </div>
-    <div class="red-text bold">
-        Defeating enemies rewards experience in the skill you are practicing.
     </div>
     <div>
         practice:
@@ -343,7 +344,7 @@
     </tr>
 </table>
 <div class="modal-footer-buttons modal-buttons">
-    <form class="pull-left" onsubmit="return false">
+    <form class="pull-left" (ngSubmit)="false">
         <div class="btn-group">
             <button type="button"
                     (click)="step = -1"

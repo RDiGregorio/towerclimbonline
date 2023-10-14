@@ -41,7 +41,7 @@ class EditorComponent {
   Map<String, String> cellStyle(int x, int y) {
     var cell = _cell(x, y), color;
 
-    if (cell[0]?.startsWith('@portal') == true)
+    if (_isStairs(cell[0]))
       color = 'white';
     else if (cell[0]?.startsWith('@') == true)
       color = stringColor(cell[0]);
@@ -54,7 +54,7 @@ class EditorComponent {
   String cellText(int x, int y) {
     var result = _cell(x, y)[0];
     if (result == null || result.isEmpty) return '\n';
-    if (result.startsWith('@portal')) return '⚑';
+    if (_isStairs(result)) return '⚑';
     if (result[0] == '@') return '▲';
     return result[0];
   }
@@ -114,5 +114,13 @@ class EditorComponent {
       _fill(x, y - 1, oldCell, newCell);
       _fill(x, y + 1, oldCell, newCell);
     }
+  }
+
+  bool _isStairs(String value) {
+    if (value == null) return false;
+
+    return value == '@up stairs' ||
+        value == '@down stairs' ||
+        value.startsWith('@portal');
   }
 }

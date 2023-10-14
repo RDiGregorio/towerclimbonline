@@ -35,14 +35,14 @@
     <actions-component></actions-component>
     <div id="action-modal"
          class="modal default-cursor"
-         data-keyboard="false"
-         data-backdrop="static">
+         [attr.data-keyboard]="'false'"
+         [attr.data-backdrop]="'static'">
         <div class="modal-dialog">
             <div class="modal-content glass">
                 <div class="modal-header">
                     <button type="button"
                             class="close"
-                            data-dismiss="modal"
+                            [attr.data-dismiss]="'modal'"
                             (click)="handleClose()">
                         &times;
                     </button>
@@ -51,7 +51,6 @@
                     </h4>
                 </div>
                 <div class="modal-body">
-                    <ability-modal *ngIf="modal == 'abilities'"></ability-modal>
                     <action-modal *ngIf="modal == 'actions'"></action-modal>
                     <crafting-modal *ngIf="modal == 'crafting'"></crafting-modal>
                     <customize-modal *ngIf="modal == 'customize'"></customize-modal>
@@ -69,14 +68,14 @@
     </div>
     <div id="input-modal"
          class="modal default-cursor {{inputModalType == 'text' ? 'text-modal' : ''}}"
-         data-keyboard="false"
-         data-backdrop="static">
+         [attr.data-keyboard]="'false'"
+         [attr.data-backdrop]="'static'">
         <div class="modal-dialog modal-sm">
             <div class="modal-content glass">
                 <div class="modal-header">
                     <button type="button"
                             class="close"
-                            data-dismiss="modal">
+                            [attr.data-dismiss]="'modal'">
                         &times;
                     </button>
                     <h4 class="modal-title">

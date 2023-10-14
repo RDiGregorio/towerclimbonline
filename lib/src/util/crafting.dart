@@ -278,12 +278,13 @@ class Crafting {
 
     // Web.
 
-    add('silk robe', const ['web']);
-    add('silk cloak', const ['web']);
     add('resist ballistic vest', const ['web']);
 
     // Fabric.
 
+    add('silk robe', const ['web']);
+    add('silk cloak', const ['web']);
+    add('silk hat', const ['web']);
     add('ghostly robe', const ['ghostly fabric']);
     add('ghostly cloak', const ['ghostly fabric']);
     add('ghostly hat', const ['ghostly fabric']);
@@ -331,6 +332,14 @@ class Crafting {
     add('pickaxe', const ['iron']);
     add('hatchet', const ['iron']);
     add('fishing rod', const ['wood']);
+
+    // Crafting tools.
+
+    // TODO: design and implement these
+
+    // add('kitchen knife', const ['iron']);
+    // add('anvil', const ['iron']);
+    // add('crafting table', const ['wood']);
 
     // Crystal tools.
 

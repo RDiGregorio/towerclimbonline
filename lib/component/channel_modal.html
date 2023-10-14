@@ -11,14 +11,14 @@
 <div class="modal-body-buttons">
     <div class="pull-right">
         <button (click)="addChannelOwner()"
-                data-toggle="modal"
-                data-target="#input-modal"
+                [attr.data-toggle]="'modal'"
+                [attr.data-target]="'#input-modal'"
                 class="btn btn-default">
             Add
         </button>
         <button (click)="removeChannelOwner()"
-                data-toggle="modal"
-                data-target="#input-modal"
+                [attr.data-toggle]="'modal'"
+                [attr.data-target]="'#input-modal'"
                 class="btn btn-default">
             Remove
         </button>
@@ -37,14 +37,14 @@
 <div class="modal-footer-buttons modal-buttons">
     <div class="pull-right">
         <button (click)="addChannelMod()"
-                data-toggle="modal"
-                data-target="#input-modal"
+                [attr.data-toggle]="'modal'"
+                [attr.data-target]="'#input-modal'"
                 class="btn btn-default">
             Add
         </button>
         <button (click)="removeChannelMod()"
-                data-toggle="modal"
-                data-target="#input-modal"
+                [attr.data-toggle]="'modal'"
+                [attr.data-target]="'#input-modal'"
                 class="btn btn-default">
             Remove
         </button>

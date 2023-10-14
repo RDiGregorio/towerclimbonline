@@ -74,10 +74,8 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
           combat: false,
           use: (Doll source) {
             if (source?.stage != null)
-              source
-                ..ability = null
-                ..jump(source.stage,
-                    source.stage.randomTraversableLocation(source));
+              source.jump(
+                  source.stage, source.stage.randomTraversableLocation(source));
 
             source
               ..targetDoll = null
@@ -87,49 +85,38 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
           }));
 
   registerAbility(
-      'find boss',
+      'teleport up',
       Ability(
           combat: false,
           use: (Doll source) {
-            // This ability is can be easily abused by exploring (to heal) then
-            // immediately finding the boss again.
+            if (source?.stage != null &&
+                source.account.sessions.isNotEmpty &&
+                source.account.currentFloor < Session.maxFloor)
+              source.account.sessions.first
+                  .teleport(source.account.currentFloor + 1);
 
-            void jump(bosses, safety) {
-              if (bosses.isNotEmpty) {
-                var traversable = List.from(
-                    adjacent(randomValue(bosses).currentLocation).where(
-                        (point) => source.stage
-                            .traversable(source, point, Terrain.land)));
+            source
+              ..targetDoll = null
+              ..ability = null;
 
-                if (traversable.isNotEmpty)
-                  source.jump(
-                      source.stage, randomValue(traversable), false, safety);
+            return false;
+          }));
 
-                source
-                  ..targetDoll = null
-                  ..ability = null;
-              } else
-                // No bosses are found.
+  registerAbility(
+      'teleport down',
+      Ability(
+          combat: false,
+          use: (Doll source) {
+            if (source?.stage != null &&
+                source.account.sessions.isNotEmpty &&
+                source.account.currentFloor > 1)
+              source.account.sessions.first
+                  .teleport(source.account.currentFloor - 1);
 
-                source
-                  ..alert('There are no bosses on this floor.')
-                  ..targetDoll = null
-                  ..ability = null;
-            }
+            source
+              ..targetDoll = null
+              ..ability = null;
 
-            var visibleBosses = List.from(source
-                .search(ServerGlobals.sight * 2, ServerGlobals.sight * 2)
-                .where(
-                    (doll) => doll.boss && !doll.summoned && !doll.temporary));
-
-            var dolls = source?.stage?.dolls ?? const {},
-                bosses = List.from(dolls.values.where(
-                    (doll) => doll.boss && !doll.summoned && !doll.temporary));
-
-            // Combat does not end for a player that jumps to a boss while a
-            // boss is visible.
-
-            jump(bosses, visibleBosses.isEmpty);
             return false;
           }));
 
@@ -302,6 +289,18 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
     return true;
   }));
 
+  registerAbility('poison burst attack', Ability(use: (source) {
+    if (source.targetDoll == null) return false;
+
+    for (var i = 0; i < 3; i++)
+      source.targetDoll.effects.add(Effect(source,
+          damage: calculateDamage(source, source.primaryWeapon),
+          accuracy: calculateAccuracy(source, source.primaryWeapon),
+          egos: const [Ego.poison, Ego.burst]));
+
+    return true;
+  }));
+
   registerAbility('burst energy attack', Ability(use: (source) {
     if (source.targetDoll == null) return false;
 
@@ -326,6 +325,18 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
     return true;
   }));
 
+  registerAbility('acid burst attack', Ability(use: (source) {
+    if (source.targetDoll == null) return false;
+
+    for (var i = 0; i < 3; i++)
+      source.targetDoll.effects.add(Effect(source,
+          damage: calculateDamage(source, source.primaryWeapon),
+          accuracy: calculateAccuracy(source, source.primaryWeapon),
+          egos: const [Ego.acid, Ego.burst]));
+
+    return true;
+  }));
+
   registerAbility('explode', Ability(use: (Doll source) {
     if (source.targetDoll == null) return false;
 
@@ -333,7 +344,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
       ..targetDoll
           .effects
           .add(Effect(source, damage: source.health, egos: const [Ego.fire]))
-      ..health = 0;
+      ..health = BigInt.zero;
 
     return true;
   }));
@@ -452,15 +463,32 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
           range: 5,
           use: (source) {
             if (source.targetDoll == null) return false;
+            int count = egos.contains(Ego.burst) ? 3 : 1;
 
-            source.targetDoll.effects.add(Effect(source,
-                delay: source.fireMissile(image),
-                damage: damage ?? calculateDamage(source, source.primaryWeapon),
-                accuracy: calculateAccuracy(source, source.primaryWeapon),
-                egos: egos));
+            for (var i = 0; i < count; i++)
+              source.targetDoll.effects.add(Effect(source,
+                  delay: source.fireMissile(image),
+                  damage:
+                      damage ?? calculateDamage(source, source.primaryWeapon),
+                  accuracy: calculateAccuracy(source, source.primaryWeapon),
+                  egos: egos));
 
             return true;
           }));
+
+  [
+    Ego.fire,
+    Ego.ice,
+    Ego.electric,
+    Ego.gravity,
+    Ego.acid,
+    Ego.poison,
+    Ego.energy,
+    Ego.blood
+  ].forEach((ego) {
+    var text = Ego.descriptions[ego];
+    registerBolt('$text blast', Ego.image[ego], [ego, Ego.magic, Ego.burst]);
+  });
 
   registerBolt(
       'fire bolt', 'image/missile/red_bolt.png', const [Ego.magic, Ego.fire]);
@@ -480,6 +508,9 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
   registerBolt('poison bolt', 'image/missile/green_bolt.png',
       const [Ego.magic, Ego.poison]);
 
+  registerBolt('annihilation bolt', 'image/missile/white_bolt.png',
+      const [Ego.magic, Ego.fire, Ego.ice, Ego.electric, Ego.gravity]);
+
   registerBolt('curse', 'image/missile/black_bolt.png',
       const [Ego.magic, Ego.sickness, Ego.blindness, Ego.confusion]);
 
@@ -493,15 +524,20 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
             ? 3
             : 1,
 
-        // level is used to boost damage, making up for not using a weapon.
+        // Intelligence is used as the attribute for damage. Because scrolls
+        // have no upgrades, intelligence and dexterity buffs are used in their
+        // place instead.
 
-        weapon = Item('scroll')..bonus = source.level;
+        damageWeapon = Item('scroll')
+          ..bonus = source.account.sheet.intelligenceBuffs,
+        accuracyWeapon = Item('scroll')
+          ..bonus = source.account.sheet.dexterityBuffs;
 
     for (int i = 0; i < count; i++)
       source.targetDoll.effects.add(Effect(source,
           delay: source.fireMissile(image),
-          damage: calculateDamage(source, weapon),
-          accuracy: calculateAccuracy(source, weapon),
+          damage: calculateDamage(source, damageWeapon),
+          accuracy: calculateAccuracy(source, accuracyWeapon),
           egos: egos));
 
     return true;
@@ -576,16 +612,15 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
           combat: false,
           range: ServerGlobals.sight,
           use: (Doll source) {
-            if (!Config.debug) return false;
             var target = source.targetDoll;
             if (target == null) return false;
 
             target
-              ..health = 0
+              ..health = BigInt.zero
 
               // Handles life amulet.
 
-              ..health = 0;
+              ..health = BigInt.zero;
 
             source
               ..targetLocation = null

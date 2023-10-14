@@ -18,7 +18,7 @@ class ActionsComponent {
   final List<String> _actions = List.filled(100, null);
   final List<String> buffs = [];
   String _pressed = '';
-  int _hp = 0, _mp = 0, _maxHp = 0, _maxMp = 0;
+  BigInt _hp = BigInt.zero, _maxHp = BigInt.zero;
 
   final List<int> _keys = const [
     KeyCode.ONE,
@@ -141,24 +141,14 @@ class ActionsComponent {
 
   Map<String, String> get goldStyle => const {};
 
-  int get hp {
+  BigInt get hp {
     var result = ClientGlobals.session?.doll?.health;
     return result == null ? _hp : _hp = result;
   }
 
-  int get maxHp {
+  BigInt get maxHp {
     var result = ClientGlobals.session?.doll?.maxHealth;
     return result == null ? _maxHp : _maxHp = result;
-  }
-
-  int get maxMp {
-    var result = ClientGlobals.session?.doll?.maxEnergy;
-    return result == null ? _maxMp : _maxMp = result;
-  }
-
-  int get mp {
-    var result = ClientGlobals.session?.doll?.energy;
-    return result == null ? _mp : _mp = result;
   }
 
   List<String> get pendingActions => ClientGlobals.session.pendingActions;
@@ -268,7 +258,8 @@ class ActionsComponent {
   bool equipped(String action) =>
       ClientGlobals.session.equipped?.containsKey(action) == true;
 
-  String format(int value) => formatCurrency(max(0, value), false);
+  String format(BigInt value) =>
+      formatCurrency(BigIntUtil.max(BigInt.zero, value), false);
 
   String formatGold(dynamic value) => formatCurrency(value, true);
 

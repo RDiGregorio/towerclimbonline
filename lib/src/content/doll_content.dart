@@ -25,367 +25,10 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
   registerItemSource('herb', 'image/block/herb.png');
   registerItemSource('dummy', 'image/npc/dummy.png');
 
-  // Portals up.
+  // Portals.
 
-  registerDollInfo('tutorial up',
-      portal(stages['dungeon0'], 14, 19, 'image/block/up_stairs.png'));
-
-  registerDollInfo(
-      'portal0000',
-      portal(stages['dungeon1'], 45, 5, 'image/block/up_stairs.png',
-          const ['d0 boss']));
-
-  registerDollInfo(
-      'portal0002',
-      portal(stages['dungeon2'], 6, 91, 'image/block/up_stairs.png',
-          const ['d1 boss']));
-
-  registerDollInfo(
-      'portal0004',
-      portal(stages['dungeon3'], 11, 25, 'image/block/up_stairs.png',
-          const ['d2 boss']));
-
-  registerDollInfo(
-      'portal0006',
-      portal(stages['dungeon4'], 16, 7, 'image/block/up_stairs.png',
-          const ['d3 boss']));
-
-  registerDollInfo(
-      'portal0008',
-      portal(stages['dungeon5'], 23, 82, 'image/block/up_stairs.png',
-          const ['d4 boss']));
-
-  registerDollInfo(
-      'portal0010',
-      portal(stages['dungeon6'], 29, 72, 'image/block/up_stairs.png',
-          const ['d5 boss']));
-
-  registerDollInfo(
-      'portal0012',
-      portal(stages['dungeon7'], 93, 7, 'image/block/up_stairs.png',
-          const ['d6 boss']));
-
-  registerDollInfo(
-      'portal0014',
-      portal(stages['dungeon8'], 9, 11, 'image/block/up_stairs.png',
-          const ['d7 boss']));
-
-  registerDollInfo(
-      'portal0016',
-      portal(stages['dungeon9'], 2, 3, 'image/block/up_stairs.png',
-          const ['d8 boss']));
-
-  registerDollInfo(
-      'portal0018',
-      portal(stages['dungeon10'], 38, 29, 'image/block/up_stairs.png',
-          const ['d9 boss']));
-
-  registerDollInfo(
-      'portal0020',
-      portal(stages['dungeon11'], 95, 87, 'image/block/up_stairs.png',
-          const ['d10 boss']));
-
-  registerDollInfo(
-      'portal0022',
-      portal(stages['dungeon12'], 26, 7, 'image/block/up_stairs.png',
-          const ['d11 boss']));
-
-  registerDollInfo(
-      'portal0024',
-      portal(stages['dungeon13'], 2, 81, 'image/block/up_stairs.png',
-          const ['d12 boss']));
-
-  registerDollInfo(
-      'portal0026',
-      portal(stages['dungeon14'], 54, 18, 'image/block/up_stairs.png',
-          const ['d13 boss']));
-
-  registerDollInfo(
-      'portal0028',
-      portal(stages['dungeon15'], 25, 95, 'image/block/up_stairs.png',
-          const ['d14 boss']));
-
-  registerDollInfo(
-      'portal0030',
-      portal(stages['dungeon16'], 80, 80, 'image/block/up_stairs.png',
-          const ['d15 boss']));
-
-  registerDollInfo(
-      'portal0032',
-      portal(stages['dungeon17'], 19, 12, 'image/block/up_stairs.png',
-          const ['d16 boss']));
-
-  registerDollInfo(
-      'portal0034',
-      portal(stages['dungeon18'], 79, 19, 'image/block/up_stairs.png',
-          const ['d17 boss']));
-
-  registerDollInfo(
-      'portal0036',
-      portal(stages['dungeon19'], 35, 87, 'image/block/up_stairs.png',
-          const ['d18 boss']));
-
-  registerDollInfo(
-      'portal0038',
-      portal(stages['dungeon20'], 54, 9, 'image/block/up_stairs.png',
-          const ['d19 boss']));
-
-  registerDollInfo(
-      'portal0040',
-      portal(stages['dungeon21'], 39, 90, 'image/block/up_stairs.png',
-          const ['d20 boss']));
-
-  registerDollInfo(
-      'portal0042',
-      portal(stages['dungeon22'], 62, 15, 'image/block/up_stairs.png',
-          const ['d21 boss']));
-
-  registerDollInfo(
-      'portal0044',
-      portal(stages['dungeon23'], 59, 73, 'image/block/up_stairs.png',
-          const ['d22 boss']));
-
-  registerDollInfo(
-      'portal0046',
-      portal(stages['dungeon24'], 20, 24, 'image/block/up_stairs.png',
-          const ['d23 boss']));
-
-  registerDollInfo(
-      'portal0048',
-      portal(stages['dungeon25'], 45, 27, 'image/block/up_stairs.png',
-          const ['d24 boss']));
-
-  registerDollInfo(
-      'portal0050',
-      portal(stages['dungeon26'], 81, 48, 'image/block/up_stairs.png',
-          const ['d25 boss']));
-
-  registerDollInfo(
-      'portal0052',
-      portal(stages['dungeon27'], 27, 19, 'image/block/up_stairs.png',
-          const ['d26 boss']));
-
-  registerDollInfo(
-      'portal0054',
-      portal(stages['dungeon28'], 65, 33, 'image/block/up_stairs.png',
-          const ['d27 boss']));
-
-  registerDollInfo(
-      'portal0056',
-      portal(stages['dungeon29'], 42, 95, 'image/block/up_stairs.png',
-          const ['d28 boss']));
-
-  registerDollInfo(
-      'portal0058',
-      portal(stages['dungeon30'], 77, 51, 'image/block/up_stairs.png',
-          const ['d29 boss']));
-
-  registerDollInfo(
-      'portal0060',
-      portal(stages['dungeon31'], 40, 31, 'image/block/up_stairs.png',
-          const ['d30 boss']));
-
-  registerDollInfo(
-      'portal0062',
-      portal(stages['dungeon32'], 9, 97, 'image/block/up_stairs.png',
-          const ['d31 boss']));
-
-  registerDollInfo(
-      'portal0064',
-      portal(stages['dungeon33'], 53, 3, 'image/block/up_stairs.png',
-          const ['d32 boss']));
-
-  registerDollInfo(
-      'portal0066',
-      portal(stages['dungeon34'], 91, 13, 'image/block/up_stairs.png',
-          const ['d33 boss']));
-
-  registerDollInfo(
-      'portal0068',
-      portal(stages['dungeon35'], 41, 46, 'image/block/up_stairs.png',
-          const ['d34 boss']));
-
-  registerDollInfo(
-      'portal0070',
-      portal(stages['dungeon36'], 66, 72, 'image/block/up_stairs.png',
-          const ['d35 boss']));
-
-  registerDollInfo(
-      'portal0072',
-      portal(stages['dungeon37'], 74, 73, 'image/block/up_stairs.png',
-          const ['d36 boss']));
-
-  registerDollInfo(
-      'portal0074',
-      portal(stages['dungeon38'], 2, 31, 'image/block/up_stairs.png',
-          const ['d37 boss']));
-
-  registerDollInfo(
-      'portal0076',
-      portal(stages['dungeon39'], 30, 6, 'image/block/up_stairs.png',
-          const ['d38 boss']));
-
-  registerDollInfo(
-      'portal0078',
-      portal(stages['dungeon40'], 25, 89, 'image/block/up_stairs.png',
-          const ['d39 boss']));
-
-  registerDollInfo(
-      'portal0080',
-      portal(stages['dungeon41'], 2, 98, 'image/block/up_stairs.png',
-          const ['d40 boss']));
-
-  registerDollInfo(
-      'portal0082',
-      portal(stages['dungeon42'], 56, 32, 'image/block/up_stairs.png',
-          const ['d41 boss']));
-
-  registerDollInfo(
-      'portal0084',
-      portal(stages['dungeon43'], 37, 38, 'image/block/up_stairs.png',
-          const ['d42 boss']));
-
-  registerDollInfo(
-      'portal0086',
-      portal(stages['dungeon44'], 11, 11, 'image/block/up_stairs.png',
-          const ['d43 boss']));
-
-  // Portals down.
-
-  registerDollInfo('tutorial down',
-      portal(stages['tutorial0'], 7, 3, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0001',
-      portal(stages['dungeon0'], 73, 87, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0003',
-      portal(stages['dungeon1'], 23, 37, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0005',
-      portal(stages['dungeon2'], 30, 12, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0007',
-      portal(stages['dungeon3'], 84, 92, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0009',
-      portal(stages['dungeon4'], 29, 76, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0011',
-      portal(stages['dungeon5'], 11, 16, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0013',
-      portal(stages['dungeon6'], 40, 7, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0015',
-      portal(stages['dungeon7'], 32, 64, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0017',
-      portal(stages['dungeon8'], 67, 54, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0019',
-      portal(stages['dungeon9'], 37, 39, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0021',
-      portal(stages['dungeon10'], 41, 64, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0023',
-      portal(stages['dungeon11'], 26, 98, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0025',
-      portal(stages['dungeon12'], 86, 16, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0027',
-      portal(stages['dungeon13'], 87, 62, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0029',
-      portal(stages['dungeon14'], 36, 80, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0031',
-      portal(stages['dungeon15'], 76, 12, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0033',
-      portal(stages['dungeon16'], 49, 68, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0035',
-      portal(stages['dungeon17'], 3, 91, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0037',
-      portal(stages['dungeon18'], 10, 74, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0039',
-      portal(stages['dungeon19'], 72, 84, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0041',
-      portal(stages['dungeon20'], 98, 64, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0043',
-      portal(stages['dungeon21'], 22, 25, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0045',
-      portal(stages['dungeon22'], 14, 58, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0047',
-      portal(stages['dungeon23'], 86, 26, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0049',
-      portal(stages['dungeon24'], 67, 83, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0051',
-      portal(stages['dungeon25'], 48, 93, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0053',
-      portal(stages['dungeon26'], 9, 70, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0055',
-      portal(stages['dungeon27'], 38, 55, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0057',
-      portal(stages['dungeon28'], 25, 52, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0059',
-      portal(stages['dungeon29'], 40, 12, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0061',
-      portal(stages['dungeon30'], 24, 27, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0063',
-      portal(stages['dungeon31'], 44, 31, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0065',
-      portal(stages['dungeon32'], 92, 32, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0067',
-      portal(stages['dungeon33'], 8, 29, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0069',
-      portal(stages['dungeon34'], 95, 13, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0071',
-      portal(stages['dungeon35'], 26, 79, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0073',
-      portal(stages['dungeon36'], 58, 56, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0075',
-      portal(stages['dungeon37'], 37, 57, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0077',
-      portal(stages['dungeon38'], 93, 85, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0079',
-      portal(stages['dungeon39'], 48, 14, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0081',
-      portal(stages['dungeon40'], 26, 21, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0083',
-      portal(stages['dungeon41'], 97, 3, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0085',
-      portal(stages['dungeon42'], 76, 39, 'image/block/down_stairs.png'));
-
-  registerDollInfo('portal0087',
-      portal(stages['dungeon43'], 70, 26, 'image/block/down_stairs.png'));
+  registerDollInfo('up stairs', portal('image/block/up_stairs.png'));
+  registerDollInfo('down stairs', portal('image/block/down_stairs.png'));
 
   // [Doll]s that a player can fight.
 
@@ -808,7 +451,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           aggro: true,
           difficulty: 25,
           image: 'image/npc/spider_demon.png',
-          abilities: const ['poison attack'],
+          abilities: const ['poison burst attack'],
           loot: DropTable()..addAlways(() => Item('web'))));
 
   registerDollInfo(
@@ -1336,7 +979,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           difficulty: 8,
           image: 'image/npc/acid_dragon.png',
           equipped: {'0': Item('acid dragon armor')},
-          abilities: const ['acid bolt', 'burst attack'],
+          abilities: const ['acid blast'],
           loot: DropTable()..addAlways(() => Item('acid dragon scales'))));
 
   registerDollInfo(
@@ -1346,7 +989,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           difficulty: 8,
           image: 'image/npc/poison_dragon.png',
           equipped: {'0': Item('poison dragon armor')},
-          abilities: const ['poison bolt', 'burst attack'],
+          abilities: const ['poison blast'],
           loot: DropTable()..addAlways(() => Item('poison dragon scales'))));
 
   registerDollInfo(
@@ -1358,7 +1001,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           image: 'image/npc/mummy.png',
           loot: DropTable()
             ..addUncommon(() => Item('accuracy gloves'))
-            ..addAlways(() => Item('poison potion'))));
+            ..addAlways(() => Item('miasma potion'))));
 
   registerDollInfo(
       'lich king',
@@ -1384,7 +1027,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           difficulty: 11,
           image: 'image/npc/fire_dragon.png',
           equipped: {'0': Item('fire dragon armor')},
-          abilities: const ['fire bolt', 'burst attack'],
+          abilities: const ['fire blast'],
           loot: DropTable()..addAlways(() => Item('fire dragon scales'))));
 
   registerDollInfo(
@@ -1396,21 +1039,9 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           equipped: {
             '0': Item('natural armor', 1, const [Ego.resistAcid])
           },
-          abilities: const ['acid attack'],
+          abilities: const ['acid burst attack'],
           image: 'image/npc/juiblex.png',
           loot: DropTable()..addAlways(() => Item('acid potion'))));
-
-  // Griffins have been removed.
-
-  registerDollInfo(
-      'griffin',
-      DollInfo(
-          boss: true,
-          difficulty: 12,
-          image: 'image/npc/griffin.png',
-          loot: DropTable()
-            ..addAlways(() => Item('regen potion'))
-            ..addUncommon(() => Item('hatchet', 1, const [Ego.crystal]))));
 
   registerDollInfo(
       'doom shroom',
@@ -1428,7 +1059,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           difficulty: 14,
           image: 'image/npc/ice_dragon.png',
           equipped: {'0': Item('ice dragon armor')},
-          abilities: const ['ice bolt', 'burst attack'],
+          abilities: const ['ice blast'],
           loot: DropTable()..addAlways(() => Item('ice dragon scales'))));
 
   registerDollInfo(
@@ -1446,7 +1077,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           boss: true,
           moves: false,
           difficulty: 16,
-          abilities: const ['ice bolt'],
+          abilities: const ['ice blast'],
           image: 'image/npc/white_whale.png',
           loot: DropTable()
             ..addAlways(() => Item('fish'))
@@ -1486,7 +1117,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           difficulty: 18,
           image: 'image/npc/storm_dragon.png',
           equipped: {'0': Item('storm dragon armor')},
-          abilities: const ['electric bolt', 'burst attack'],
+          abilities: const ['electric blast'],
           loot: DropTable()..addAlways(() => Item('storm dragon scales'))));
 
   registerDollInfo(
@@ -1560,7 +1191,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
       DollInfo(
           difficulty: 24,
           boss: true,
-          abilities: const ['fire bolt', 'ice bolt', 'electric bolt'],
+          abilities: const ['fire blast', 'ice blast', 'electric blast'],
           image: 'image/npc/yeenoghu.png',
           loot: DropTable()
             ..addRandom(() => Item('ruby'))
@@ -1683,7 +1314,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           difficulty: 32,
           image: 'image/npc/void_dragon.png',
           equipped: {'0': Item('void dragon armor')},
-          abilities: const ['gravity bolt', 'burst attack'],
+          abilities: const ['gravity blast'],
           loot: DropTable()..addAlways(() => Item('void dragon scales'))));
 
   registerDollInfo(
@@ -1700,6 +1331,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
       DollInfo(
           boss: true,
           difficulty: 34,
+          abilities: const ['burst attack'],
           equipped: {'0': Item('ghostly cloak')},
           image: 'image/npc/spirit_griffin.png',
           loot: DropTable()
@@ -1741,9 +1373,14 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           boss: true,
           image: 'image/npc/death.png',
           equipped: {
-            '0': Item('scythe', 1, [Ego.death])
+            '0': Item('scythe', 1, [Ego.death]),
+            '1': Item('ghostly robe'),
+            '2': Item('ghostly cloak'),
+            '3': Item('ghostly hat')
           },
-          loot: DropTable()..addAlways(() => Item('scythe', 1, [Ego.death]))));
+          loot: DropTable()
+            ..addAlways(() => Item('scythe', 1, [Ego.death]))
+            ..addAlways(() => Item('ghostly fabric', 3))));
 
   registerDollInfo(
       'pestilence',
@@ -1759,7 +1396,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
       DollInfo(
           boss: true,
           difficulty: 39,
-          abilities: const ['death attack', 'curse all'],
+          abilities: const ['death attack'],
           image: 'image/npc/frog.png',
           loot: DropTable()..addAlways(() => Item('philosopher\'s stone'))));
 
@@ -1814,7 +1451,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           boss: true,
           moves: false,
           difficulty: 43,
-          image: 'image/npc/monolith.png',
+          image: 'image/npc/arcane_monolith.png',
           equipped: {
             // It can dual wield weapons that players can't.
 
@@ -1856,18 +1493,18 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           difficulty: 45,
           image: 'image/npc/stacy.png',
           equipped: {
-            '0': Item('scepter', 1, const [Ego.electric]),
+            '0': Item('supernova book'),
             '1': Item('starlight robe'),
             '2': Item('meteorite ring', 1, const [Ego.burst])
           },
           loot: DropTable()
-            ..addAlways(() => Item('scepter', 1, const [Ego.electric]))
+            ..addAlways(() => Item('supernova book'))
             ..addAlways(() => Item('starlight robe'))
             ..addAlways(() => Item('meteorite ring', 1, const [Ego.burst]))
             ..addRare(() => Item('sleipnirs'))));
 
   registerDollInfo(
-      'popped collar chad',
+      'giga chad',
       DollInfo(
           difficulty: 45,
           boss: true,
@@ -1935,6 +1572,158 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
             ..addAlways(() => Item('chain mail'))
             ..addAlways(() => Item('crown', 1, const [Ego.experience]))));
 
+  // Extra themes.
+
+  registerDollInfo(
+      'ascended crab',
+      DollInfo(
+          boss: true,
+          aggro: true,
+          difficulty: 50,
+          image: 'image/npc/ascended_crab.png',
+          equipped: {
+            '0': Item('smg', 1, const [Ego.berserk, Ego.energy]),
+            '1': Item('smg', 1, const [Ego.berserk, Ego.energy]),
+            '2': Item('reflection amulet'),
+            '3': Item('dream crown', 1, const [Ego.experience])
+          },
+          loot: DropTable()
+            ..addAlways(() => Item('meat'))
+            ..addAlways(() => Item('reflection amulet'))
+            ..addAlways(() => Item('dream crown', 1, const [Ego.experience]))
+            ..addAlways(
+                () => Item('smg', 2, const [Ego.berserk, Ego.energy]))));
+
+  registerDollInfo(
+      'blue crab',
+      DollInfo(
+          aggro: true,
+          difficulty: 50,
+          image: 'image/npc/blue_crab.png',
+          equipped: {
+            '0': Item('smg', 1, const [Ego.gravity, Ego.electric]),
+            '1': Item('smg', 1, const [Ego.gravity, Ego.electric]),
+            '2': Item('life amulet')
+          },
+          loot: DropTable()
+            ..addAlways(() => Item('meat'))
+            ..addAlways(() => Item('life amulet'))
+            ..addAlways(
+                () => Item('smg', 2, const [Ego.gravity, Ego.electric]))));
+
+  registerDollInfo(
+      'arcane monolith',
+      DollInfo(
+          moves: false,
+          difficulty: 50,
+          image: 'image/npc/arcane_monolith.png',
+          equipped: {
+            // It can dual wield weapons that players can't.
+
+            '0': Item('scepter', 1, const [Ego.crystal, Ego.energy]),
+            '1': Item('scepter', 1, const [Ego.crystal, Ego.energy]),
+
+            // It is like a robot made of meteorite.
+
+            '2': Item('chain mail', 1,
+                const [Ego.resistGravity, Ego.resistAcid, Ego.resistPoison])
+          },
+          loot: DropTable()
+            ..addAlways(
+                () => Item('scepter', 2, const [Ego.crystal, Ego.energy]))
+            ..addAlways(() => Item('meteorite'))));
+
+  registerDollInfo(
+      'griffin',
+      DollInfo(
+          difficulty: 50,
+          abilities: const ['burst attack'],
+          image: 'image/npc/griffin.png',
+          loot: DropTable()
+            ..addAlways(() => Item('regen potion'))
+            ..addUncommon(() => Item('hatchet', 1, const [Ego.crystal]))));
+
+  registerDollInfo(
+      'ghost warrior',
+      DollInfo(
+          aggro: true,
+          difficulty: 50,
+          equipped: {
+            '0': Item('ghostly cloak'),
+            '1': Item('shield', 1, const [Ego.crystal, Ego.spirit]),
+            '2': Item('katana', 1, const [Ego.berserk, Ego.energy])
+          },
+          image: 'image/npc/whisper.png',
+          loot: DropTable()
+            ..addAlways(
+                () => Item('shield', 1, const [Ego.crystal, Ego.spirit]))
+            ..addAlways(
+                () => Item('katana', 1, const [Ego.berserk, Ego.energy]))
+            ..addAlways(() => Item('ghostly fabric'))));
+
+  registerDollInfo(
+      'rainbow elephant',
+      DollInfo(
+          difficulty: 50,
+          abilities: const ['annihilation bolt'],
+          image: 'image/npc/yeenoghu.png',
+          loot: DropTable()
+            ..addRare(() => Item('annihilation book', 1, [Ego.crystal]))));
+
+  registerDollInfo(
+      'oil',
+      DollInfo(
+          difficulty: 12,
+          walkingCoolDown: 600,
+          abilities: const ['blindness attack'],
+          image: 'image/npc/oil.png',
+          loot: DropTable()
+            ..addAlways(() => Item('blindness potion'))
+            ..addUncommon(() => Item('invisibility boots'))));
+
+  registerDollInfo(
+      'mummy',
+      DollInfo(
+          difficulty: 50,
+          image: 'image/npc/mummy.png',
+          loot: DropTable()..addUncommon(() => Item('miasma potion'))));
+
+  registerDollInfo(
+      'mummy priest',
+      DollInfo(
+          difficulty: 50,
+          abilities: const ['curse'],
+          image: 'image/npc/mummy_priest.png',
+          loot: DropTable()..addUncommon(() => Item('miasma potion'))));
+
+  registerDollInfo(
+      'scarab',
+      DollInfo(
+          difficulty: 50,
+          image: 'image/npc/scarab.png',
+          loot: DropTable()
+            ..addRandom(() => Item('ruby'))
+            ..addRandom(() => Item('sapphire'))
+            ..addRandom(() => Item('diamond'))
+            ..addRandom(() => Item('emerald'))));
+
+  registerDollInfo(
+      'frog',
+      DollInfo(
+          difficulty: 50,
+          abilities: const ['death attack'],
+          image: 'image/npc/small_frog.png',
+          loot: DropTable()..addRare(() => Item('crown'))));
+
+  // An aggressive kitten for the pyramid theme.
+
+  registerDollInfo(
+      'egyptian kitten',
+      DollInfo(
+          image: 'image/npc/kitten.png',
+          difficulty: 50,
+          abilities: const ['burst attack']));
+
   // Bonus enemies.
 
   registerDollInfo(
@@ -1955,7 +1744,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           difficulty: 50,
           image: 'image/npc/cosmic_dragon.png',
           equipped: {'0': Item('cosmic dragon armor')},
-          abilities: const ['meteor storm', 'burst attack'],
+          abilities: const ['meteor storm'],
           loot: DropTable()
             ..addAlways(() => Item('spear', 1, const [Ego.crystal]))
             ..addAlways(() => Item('cosmic dragon scales'))));
@@ -1973,11 +1762,12 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
   registerDollInfo(
       'stardust dragon',
       DollInfo(
+          boss: true,
           aggro: true,
-          difficulty: Session.maxFloor,
-          image: 'image/npc/stardust_dragon.png',
+          difficulty: 50,
+          image: 'image/npc/ascended_dragon.png',
           equipped: {'0': Item('stardust dragon armor')},
-          abilities: const ['supernova', 'burst energy attack'],
+          abilities: const ['burst energy attack'],
           loot: DropTable()..addAlways(() => Item('stardust dragon scales'))));
 
   registerDollInfo(
@@ -2034,7 +1824,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
             '0': Item('aegis shield'),
             '1': Item('katana', 1, const [Ego.crystal, Ego.energy]),
             '2': Item('meteorite crown', 1, const [Ego.experience]),
-            '3': Item('asprika'),
+            '3': Item('asprika')
           },
           loot: DropTable()
             ..addAlways(() => Item('aegis shield'))
@@ -2165,7 +1955,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           difficulty: 50,
           boss: true,
           equipped: {
-            '0': Item('scepter', 1, const [Ego.crystal, Ego.fire]),
+            '0': Item('annihilation book'),
             '1': Item('robe', 1, [Ego.arcane]),
             '2': Item('starlight cloak'),
             '3': Item('dream crown', 1, const [Ego.experience]),
@@ -2176,7 +1966,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           },
           image: 'image/npc/ascended_wizard.png',
           loot: DropTable()
-            ..addAlways(() => Item('scepter', 1, const [Ego.crystal, Ego.fire]))
+            ..addAlways(() => Item('annihilation book'))
             ..addAlways(() => Item('robe', 1, [Ego.arcane]))
             ..addAlways(() => Item('starlight cloak'))
             ..addAlways(() => Item('dream crown', 1, const [Ego.experience]))
@@ -2186,7 +1976,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
             ..addAlways(
                 () => Item('ring', 1, const [Ego.burst, Ego.experience]))));
 
-  // The hardest possible boss.
+  // The hardest boss.
 
   registerDollInfo(
       'enryu',
@@ -2268,7 +2058,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           image: 'image/block/fedhas_altar.png',
           canPassThis: Terrain.obstacles,
           interaction: (account, doll) => _altar(account, doll, 'fedhas',
-              '1.5 × your fishing, mining, and gathering level')));
+              '2 × your fishing, mining, and gathering level')));
 
   registerDollInfo(
       'makhleb altar',
@@ -2294,7 +2084,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           image: 'image/block/dithmenos_altar.png',
           canPassThis: Terrain.obstacles,
           interaction: (account, doll) =>
-              _altar(account, doll, 'dithmenos', '1.5 × your stealth level')));
+              _altar(account, doll, 'dithmenos', '2 × your stealth level')));
 
   registerDollInfo(
       'trog altar',
@@ -2318,7 +2108,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           image: 'image/block/gozag_altar.png',
           canPassThis: Terrain.obstacles,
           interaction: (account, doll) =>
-              _altar(account, doll, 'gozag', '1.5 × your luck level')));
+              _altar(account, doll, 'gozag', '1.25 × your luck level')));
 
   registerDollInfo(
       'ashenzari altar',
@@ -2326,7 +2116,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           image: 'image/block/ashenzari_altar.png',
           canPassThis: Terrain.obstacles,
           interaction: (account, doll) => _altar(account, doll, 'ashenzari',
-              '1.5 × combat, luck, and taming experience')));
+              '2 × combat, luck, and taming experience')));
 
   registerDollInfo(
       'qazlal altar',
@@ -2342,7 +2132,7 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           image: 'image/block/okawaru_altar.png',
           canPassThis: Terrain.obstacles,
           interaction: (account, doll) => _altar(account, doll, 'okawaru',
-              '3 × your chance of parrying with swords and katanas')));
+              '2 × your chance of parrying with swords and katanas')));
 
   registerDollInfo(
       'xom altar',
@@ -2456,9 +2246,9 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
                     'on higher floors give more items' +
                     '<br>';
 
-                message +=
-                    '🞄 sparkling resource nodes give double items' + '<br>';
-
+                message += '🞄 white resource nodes give 2 × items' + '<br>';
+                message += '🞄 yellow resource nodes give 4 × items' + '<br>';
+                message += '🞄 cyan resource nodes give 8 × items' + '<br>';
                 message += '<b>crafting:</b>' + '<br>';
 
                 message += '🞄 recepies are in the "items" window ' +
@@ -2507,27 +2297,8 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           canPassThis: Terrain.obstacles,
           overheadText: 'item shop',
           image: 'image/npc/shop.png',
-          interaction: (account, doll) {
-            // TODO: random shops
-
-            account.shop([]);
-          }));
-
-  registerDollInfo(
-      'gozag',
-      DollInfo(
-          canPassThis: Terrain.obstacles,
-          overheadText: 'item shop',
-          image: 'image/npc/shop.png',
-          interaction: (account, doll) => account.shop([
-                // Only gems that can be mined are included.
-
-                Item('ruby'),
-                Item('emerald'),
-                Item('sapphire'),
-                Item('diamond'),
-                Item('onyx')
-              ])));
+          interaction: (account, doll) =>
+              account.shop(RandomShop.generate(account, doll))));
 
   registerDollInfo(
       'newbie shop',
@@ -2535,8 +2306,13 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           canPassThis: Terrain.obstacles,
           overheadText: 'item shop',
           image: 'image/npc/shop.png',
-          interaction: (account, doll) =>
-              account.shop([Item('wood'), Item('iron'), Item('hide')])));
+          interaction: (account, doll) => account.shop([
+                Item('wood'),
+                Item('iron'),
+                Item('hide'),
+                Item('fast potion'),
+                Item('regen potion')
+              ])));
 
   registerDollInfo(
       'trapper shop',
@@ -2544,8 +2320,13 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           canPassThis: Terrain.obstacles,
           overheadText: 'item shop',
           image: 'image/npc/trapper.png',
-          interaction: (account, doll) =>
-              account.shop([Item('gunpowder'), Item('web'), Item('fur')])));
+          interaction: (account, doll) => account.shop([
+                Item('gunpowder'),
+                Item('web'),
+                Item('fur'),
+                Item('gold'),
+                Item('unicorn horn')
+              ])));
 
   registerDollInfo(
       'dragon shop',
@@ -2554,15 +2335,15 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
           overheadText: 'item shop',
           image: 'image/npc/gunslinger.png',
           interaction: (account, doll) => account.shop([
-                // Only scales that give resistances are included.
+                // Only scales that give resistances, except for blessed dragon
+                // scales, are included.
 
                 Item('fire dragon scales'),
                 Item('ice dragon scales'),
                 Item('storm dragon scales'),
                 Item('void dragon scales'),
                 Item('acid dragon scales'),
-                Item('poison dragon scales'),
-                Item('blessed dragon scales')
+                Item('poison dragon scales')
               ])));
 
   registerDollInfo(
