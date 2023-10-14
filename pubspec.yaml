@@ -1,13 +1,13 @@
 name: towerclimbonline
 
 environment:
-  sdk: '>=2.1.0 <3.0.0'
+  sdk: '2.10.5'
 
 dependencies:
   angular: any
   angular_forms: any
   crypto: any
-  image: any
+  image: 2.1.13
   intl: any
   logging: any
   mailer: any

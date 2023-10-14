@@ -262,7 +262,7 @@ Future<dynamic> _main() async {
 
               account.lootItem(Item('leash'));
 
-              if (Config.debug) {
+              if (false && Config.debug) {
                 account.sheet.stats.forEach((stat) {
                   stat.ascensions = 29;
                   stat.experience = stat.experienceFromLevel(Stat.maxLevel);
