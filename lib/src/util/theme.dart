@@ -296,10 +296,10 @@ class Theme {
       {this.floor,
       this.wall,
       this.water,
-      this.flags: const [],
-      this.dolls: const [],
-      this.bosses: const [],
-      this.resources: const []});
+      this.flags = const [],
+      this.dolls = const [],
+      this.bosses = const [],
+      this.resources = const []});
 
   static Theme random(int floor) {
     // Floor x (as displayed in the game) has a [floor] of x - 1.
