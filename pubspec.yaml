@@ -15,7 +15,6 @@ dependencies:
   piecemeal: any
   postgresql2: any
   quiver: any
-  resource: any
   r_tree: any
   yaml: any
 

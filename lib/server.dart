@@ -13,13 +13,14 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:piecemeal/piecemeal.dart';
 import 'package:postgresql2/postgresql.dart';
-import 'package:resource/resource.dart';
 import 'package:towerclimbonline/config.dart';
 import 'package:towerclimbonline/util.dart';
 import 'package:yaml/yaml.dart';
 
 part 'src/server/dungeon.dart';
+
 part 'src/server/image_generator.dart';
+
 part 'src/server/procedural_generator.dart';
 
 final Map<WebSocket, String> addresses = {};
@@ -182,10 +183,9 @@ Future<Map<Point<int>, int>> newCollisionMap(
     return result;
   }
 
-  var result =
-      tilesFromEditor((await Resource('dat/$name.json').readAsString()))
-          .expand((tiles) => tiles)
-          .fold({}, (section, tile) {
+  var result = tilesFromEditor((await File('dat/$name.json').readAsString()))
+      .expand((tiles) => tiles)
+      .fold({}, (section, tile) {
     var point = Point<int>(tile.x, tile.y),
         value = tile.properties['value'] ?? -1,
         spawn = tile.properties['spawn'];
@@ -266,7 +266,7 @@ Future<ResourceManager> newPostgresResourceManager(String table) async {
 void output(dynamic message) {
   if (Config.debug) {
     print(message);
-    return;
+    //return;
   }
 
   Future(() async {
