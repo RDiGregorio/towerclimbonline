@@ -42,7 +42,7 @@ class ConsoleComponent {
 
       // The width is set this way because of issues with iOS devices.
 
-      chatStyle['width'] = '${window.innerWidth! - 152}px';
+      chatStyle['width'] = '${window.innerWidth - 152}px';
 
       if (ClientGlobals.currentModal != null)
         document.body.classes.add('modal-open');

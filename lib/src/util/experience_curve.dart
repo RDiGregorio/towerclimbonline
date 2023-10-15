@@ -11,7 +11,7 @@ class ExperienceCurve {
   static int levelFromExperience(BigInt experience) {
     _populate();
 
-    return _table.keys.firstWhere((level) => _table[level]! > experience,
+    return _table.keys.firstWhere((level) => _table[level] > experience,
             orElse: () => Stat.maxLevel + 1) -
         1;
   }

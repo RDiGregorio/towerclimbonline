@@ -1,7 +1,7 @@
 name: towerclimbonline
 
 environment:
-  sdk: '2.19.6'
+  sdk: '>=2.10.5 <=2.19.6'
 
 dependencies:
   angular: ^7.0.2

@@ -1573,7 +1573,7 @@ class Session extends OnlineObject {
             .where((item) => item.canUpgrade && item.equipment))
         .forEach((Item item) {
       if (map.containsKey(item.comparisonText))
-        map[item.comparisonText] = map[item.comparisonText]! + item.getAmount();
+        map[item.comparisonText] = map[item.comparisonText] + item.getAmount();
       else {
         map[item.comparisonText] = item.getAmount();
         result.add(item);
@@ -1581,7 +1581,7 @@ class Session extends OnlineObject {
     });
 
     return List<Item>.from(result.where((item) =>
-        map[item.comparisonText]! > big(_remainingAfterCleanup(item))));
+        map[item.comparisonText] > big(_remainingAfterCleanup(item))));
   }
 
   bool _contactable(String user) {

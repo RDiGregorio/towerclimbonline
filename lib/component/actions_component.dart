@@ -117,7 +117,7 @@ class ActionsComponent {
 
       // Actions are reduced for performance.
 
-      _actions.take(window.innerWidth! ~/ 70);
+      _actions.take(window.innerWidth ~/ 70);
 
   bool get canPvP => ClientGlobals.session.canPvP ?? false;
 

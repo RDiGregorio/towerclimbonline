@@ -552,9 +552,9 @@ class CameraComponent {
         size = zoom * tileSize;
 
     return Point(
-        ((serverPoint.x - point.x) * size + (window.innerWidth! - size) / 2)
+        ((serverPoint.x - point.x) * size + (window.innerWidth - size) / 2)
             .floor(),
-        ((serverPoint.y - point.y) * size + (window.innerHeight! - size) / 2)
+        ((serverPoint.y - point.y) * size + (window.innerHeight - size) / 2)
             .floor());
   }
 
@@ -600,8 +600,8 @@ class CameraComponent {
         size = zoom * tileSize;
 
     var result = Point(
-        ((clientPoint.x - window.innerWidth! / 2 + size / 2) / size + point.x),
-        ((clientPoint.y - marginTop - window.innerHeight! / 2 + size / 2) /
+        ((clientPoint.x - window.innerWidth / 2 + size / 2) / size + point.x),
+        ((clientPoint.y - marginTop - window.innerHeight / 2 + size / 2) /
                 size +
             point.y));
 
