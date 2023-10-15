@@ -1255,7 +1255,7 @@ class Session extends OnlineObject {
 
   void removeTradeGold(String gold) {
     if (_validTradeState && !youFinalizedTrade && !theyFinalizedTrade)
-      account!.tradeGold -= parseBigInteger(gold)!;
+      account!.tradeGold = account!.tradeGold! - parseBigInteger(gold)!;
   }
 
   void removeTradeItem(String itemId, String amount) {

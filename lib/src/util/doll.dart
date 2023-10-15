@@ -1014,7 +1014,7 @@ class Doll extends OnlineObject {
       .first;
 
   void coolDown([int amount = 1]) => List.from(_delays.keys).forEach((symbol) {
-        if ((_delays[symbol] -= amount) <= 0) _delays.remove(symbol);
+        if ((_delays[symbol] = _delays[symbol]! - amount) <= 0) _delays.remove(symbol);
       });
 
   void enterCombat(Doll target) {
