@@ -68,7 +68,7 @@ Future<Connection> get postgresConnection async {
   return (await _postgresConnection)!;
 }
 
-Future<Map<String, String>> get secret async => Map<String, String>.from(
+Future<Map<String?, String?>> get secret async => Map<String?, String?>.from(
     await loadYaml(await File('secret/secret.yaml').readAsString()));
 
 Iterable<FileSystemEntity> files(String path, String ext) =>

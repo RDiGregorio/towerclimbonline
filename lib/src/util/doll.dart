@@ -1488,7 +1488,7 @@ class Doll extends OnlineObject {
       value.tick(1);
     });
 
-    if (_poisonCycle++! % 25 == 0) {
+    if (_poisonCycle++ % 25 == 0) {
       // Regeneration is done before poison to make killing bosses with only
       // gravity and poison harder.
 

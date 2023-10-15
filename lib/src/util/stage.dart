@@ -73,8 +73,7 @@ class Stage<T extends Doll?> extends OnlineObject {
               map);
         });
     } else
-      doll!
-        ..spawnStage = this
+      doll..spawnStage = this
         ..spawnLocation = doll.currentLocation;
   }
 

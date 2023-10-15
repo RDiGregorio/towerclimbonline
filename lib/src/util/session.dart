@@ -9,7 +9,7 @@ class Session extends OnlineObject {
   static final Map<int, Completer<dynamic>> _completers = {};
   static final Map<String, Function> adminCommands = {};
   static final Map<String, RecoveryAttempt> recoveries = {};
-  static final Map<String, String> secret = {};
+  static final Map<String?, String?> secret = {};
   static late Function proceduralStage;
   static Function? sendEmail;
   static final Set<String> _users = Set<String>();
@@ -1630,7 +1630,7 @@ class Session extends OnlineObject {
 
   void _leaveChannel() {
     internal['channel name'] = (account!
-          ..sessions.forEach((session) => session.internal.remove('channel')))!
+          ..sessions.forEach((session) => session.internal.remove('channel')))
         .channel = null;
 
     internal

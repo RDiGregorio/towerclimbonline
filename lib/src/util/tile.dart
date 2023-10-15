@@ -8,13 +8,14 @@ class Tile {
 
   Tile(this.x, this.y, List<dynamic>? cell) {
     cell ??= const [null, null, null];
-    cell = List<String>.from(cell);
+    cell = List<String?>.from(cell);
 
     if (cell[0]?.startsWith('@') == true)
       _properties
         ..['spawn'] = cell[0].replaceFirst('@', '')
         ..['value'] = Terrain.land;
-    else if (const [null, ''].contains(cell[0]) && _traversable(cell as List<String>))
+    else if (const [null, ''].contains(cell[0]) &&
+        _traversable(cell as List<String?>))
       _properties['value'] = Terrain.land;
 
     if (cell[2] == 'blue' || cell[2] == 'orange')
@@ -24,7 +25,7 @@ class Tile {
 
   Map<String, dynamic> get properties => UnmodifiableMapView(_properties);
 
-  bool _traversable(List<String> cell) => const [
+  bool _traversable(List<String?> cell) => const [
         'darkred',
         'brown',
         'green',

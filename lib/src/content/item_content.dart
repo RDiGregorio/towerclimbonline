@@ -550,7 +550,7 @@ void registerItems(Map<String?, Stage<Doll?>?> stages) {
                 amount = big(uranium?.getAmount() ?? 0);
 
             amount = amount! +
-                BigIntUtil.multiplyByDouble(amount!, safeLog(reactor.bonus));
+                BigIntUtil.multiplyByDouble(amount, safeLog(reactor.bonus));
 
             if (amount > BigInt.zero)
               doll.account!
@@ -568,7 +568,7 @@ void registerItems(Map<String?, Stage<Doll?>?> stages) {
         amount = big(potions?.getAmount() ?? 0);
 
     amount =
-        amount! + BigIntUtil.multiplyByDouble(amount!, safeLog(stone.bonus));
+        amount! + BigIntUtil.multiplyByDouble(amount, safeLog(stone.bonus));
 
     if (amount > BigInt.zero)
       doll.account!
