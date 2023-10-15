@@ -129,8 +129,9 @@ class ActionsComponent {
         stage.startsWith('tutorial') ||
         stage.startsWith('bonus')) return 0;
 
-    return parseInteger(
-            RegExp(r'\d+').firstMatch(ClientGlobals.session!.stage!)!.group(0))! +
+    return parseInteger(RegExp(r'\d+')
+            .firstMatch(ClientGlobals.session!.stage!)!
+            .group(0))! +
         1;
   }
 
@@ -247,8 +248,9 @@ class ActionsComponent {
     if (hasAbility(action))
       result = action;
     else if (hasItem(action))
-      result =
-          ClientGlobals.session!.items!.getItem(action)!.displayTextWithoutAmount;
+      result = ClientGlobals.session!.items!
+          .getItem(action)!
+          .displayTextWithoutAmount;
 
     return addEllipsis(result!);
   }
@@ -316,7 +318,8 @@ class ActionsComponent {
     switch (action) {
       case 'logout':
         Future(() async {
-          if (await (ClientGlobals.session!.remote(#logout, const []) as FutureOr<bool>)) {
+          if (await (ClientGlobals.session!.remote(#logout, const [])
+              as FutureOr<bool>)) {
             window.localStorage
                 .remove('towerclimbonline/${ClientGlobals.username}');
 
@@ -373,7 +376,7 @@ class ActionsComponent {
   bool missingAction(String action) =>
       action == null || action == '' || !hasAbility(action) && !hasItem(action);
 
-  String _buffDescription(String key) {
+  String _buffDescription(String? key) {
     num remainingEstimate = ClientGlobals.session!.buffs[key]?.remainingMs ?? 0;
 
     Map<String, String> longDescription = {

@@ -22,10 +22,10 @@ class ConsoleComponent {
   bool _scroll = false;
   int unreadPublic = 0, unreadChannel = 0, unreadAlerts = 0, _messageCap = 20;
   final Map<String?, int> _unreadPrivate = {};
-  final Map<String?, Queue<Map<String, dynamic>?>> privateMessages = {};
+  final Map<String?, Queue<Map<String?, dynamic>?>> privateMessages = {};
   final Map<String, String> chatStyle = {};
 
-  final Queue<Map<String, dynamic>?> output = Queue(),
+  final Queue<Map<String?, dynamic>?> output = Queue(),
       _channelMessages = Queue(),
       alerts = Queue();
 
@@ -385,8 +385,8 @@ class ConsoleComponent {
     // Loads historic messages.
 
     Future(() async {
-      Map<String, dynamic> messageHistory =
-          await (ClientGlobals.session!.remote(#privateMessages, [user]) as FutureOr<Map<String, dynamic>>);
+      Map<String?, dynamic> messageHistory =
+          await (ClientGlobals.session!.remote(#privateMessages, [user]) as FutureOr<Map<String?, dynamic>>);
 
       messageHistory.forEach((key, data) {
         data['timestamp'] =

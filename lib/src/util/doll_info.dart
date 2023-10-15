@@ -3,7 +3,7 @@ part of util;
 class DollInfo extends OnlineObject {
   final Function? interaction, passive;
   final DropTable? loot;
-  final Map<String, dynamic> equipped = {};
+  final Map<String?, dynamic> equipped = {};
   final Symbol? source;
   final int attackRange, difficulty;
 
@@ -37,7 +37,7 @@ class DollInfo extends OnlineObject {
       this.tappedImage,
       this.loot,
       this.overheadText,
-      Map<String, dynamic>? equipped,
+      Map<String?, dynamic>? equipped,
       this.abilities = const [],
       this.killFlags = const [],
       void this.passive(Account account, Doll doll)?,

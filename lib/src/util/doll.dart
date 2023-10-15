@@ -112,7 +112,7 @@ class Doll extends OnlineObject {
       .where((Item item) => item.egos.contains(Ego.accuracy))
       .length;
 
-  Map<String, dynamic>? get adjustedEquipment => internal['adj equip'];
+  Map<String?, dynamic>? get adjustedEquipment => internal['adj equip'];
 
   /// Returns the age of this [Doll] in clock ticks.
 

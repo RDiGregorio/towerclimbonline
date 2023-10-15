@@ -25,10 +25,10 @@ class Account extends OnlineObject {
     internal['created'] ??= now;
   }
 
-  Map<String, dynamic> get abilities =>
+  Map<String?, dynamic> get abilities =>
       internal['abilities'] ??= ObservableMap();
 
-  Map<String, dynamic> get actions => internal['actions'] ??= ObservableMap();
+  Map<String?, dynamic> get actions => internal['actions'] ??= ObservableMap();
 
   int get adjustedHighestFloor {
     var result = highestFloor;
@@ -46,7 +46,7 @@ class Account extends OnlineObject {
 
   bool get autoPotion => options['auto potion'] ?? false;
 
-  Map<String, dynamic> get buffs => internal['buffs'] ??= ObservableMap();
+  Map<String?, dynamic> get buffs => internal['buffs'] ??= ObservableMap();
 
   bool get canPvP => _pvp;
 
@@ -56,9 +56,9 @@ class Account extends OnlineObject {
     internal['channel'] = channel;
   }
 
-  Map<String, dynamic> get contacts => internal['contacts'] ??= ObservableMap();
+  Map<String?, dynamic> get contacts => internal['contacts'] ??= ObservableMap();
 
-  Map<String, dynamic> get counters =>
+  Map<String?, dynamic> get counters =>
       internal['counters'] ??= ObservableMap(const {'gold': 0});
 
   int get created => internal['created'] ?? 0;
@@ -107,7 +107,7 @@ class Account extends OnlineObject {
   Map<String?, dynamic> get exchangeSellOffers =>
       internal['sell'] ??= ObservableMap();
 
-  Map<String, dynamic> get flags => internal['flags'] ??= ObservableMap();
+  Map<String?, dynamic> get flags => internal['flags'] ??= ObservableMap();
 
   String? get god => internal['god'];
 
@@ -136,7 +136,7 @@ class Account extends OnlineObject {
 
   void set highestFloor(int value) => internal['highest floor'] = value;
 
-  Map<String, dynamic> get ignore => internal['ignore'] ??= ObservableMap();
+  Map<String?, dynamic> get ignore => internal['ignore'] ??= ObservableMap();
 
   DollInfo? get info => internal['info'];
 
@@ -152,7 +152,7 @@ class Account extends OnlineObject {
 
   ObservableMap get loadouts => internal['loadouts'] ??= ObservableMap();
 
-  Map<String, dynamic>? get metrics {
+  Map<String?, dynamic>? get metrics {
     _updateHour();
     return internal['metrics'];
   }
@@ -173,7 +173,7 @@ class Account extends OnlineObject {
 
   Map<String?, dynamic> get openChats => internal['unread'] ??= ObservableMap();
 
-  Map<String, dynamic> get options => internal['options'] ??= ObservableMap();
+  Map<String?, dynamic> get options => internal['options'] ??= ObservableMap();
 
   String? get pendingEmail => _useNewEmail ? null : options['new email'];
 
@@ -218,7 +218,7 @@ class Account extends OnlineObject {
     return internal['chests'] ??= ObservableMap();
   }
 
-  Map<String, dynamic> get recentPickpockets {
+  Map<String?, dynamic> get recentPickpockets {
     _updateHour();
     return internal['pickpockets'] ??= ObservableMap();
   }
@@ -246,10 +246,10 @@ class Account extends OnlineObject {
   int get stageDifficulty =>
       int.parse(RegExp('\\d+').firstMatch(mostRecentStage!)![0]!);
 
-  Map<String, dynamic> get sweepingChangesApplied =>
+  Map<String?, dynamic> get sweepingChangesApplied =>
       internal['sweep'] ??= ObservableMap();
 
-  Map<String, dynamic> get tappedItemSources =>
+  Map<String?, dynamic> get tappedItemSources =>
       internal['tapped'] ??= ObservableMap();
 
   String? get terrainSection {

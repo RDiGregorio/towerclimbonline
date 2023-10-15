@@ -7,7 +7,7 @@ class ItemContainer extends OnlineObject {
 
   /// Items are stored by their display text without amounts.
 
-  Map<String, dynamic> get items => UnmodifiableMapView(internal['items']);
+  Map<String?, dynamic> get items => UnmodifiableMapView(internal['items']);
 
   /// The amount added is [item.amount * amountMultiplier].
 

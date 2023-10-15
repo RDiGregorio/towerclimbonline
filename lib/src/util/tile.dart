@@ -4,7 +4,7 @@ part of util;
 
 class Tile {
   final int x, y;
-  Map<String, dynamic> _properties = {};
+  Map<String?, dynamic> _properties = {};
 
   Tile(this.x, this.y, List<dynamic>? cell) {
     cell ??= const [null, null, null];
@@ -23,7 +23,7 @@ class Tile {
           max<int>(_properties['value'] ?? -1, Terrain.water);
   }
 
-  Map<String, dynamic> get properties => UnmodifiableMapView(_properties);
+  Map<String?, dynamic> get properties => UnmodifiableMapView(_properties);
 
   bool _traversable(List<String?> cell) => const [
         'darkred',

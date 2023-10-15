@@ -164,7 +164,7 @@ class Session extends OnlineObject {
     });
   }
 
-  Map<String, dynamic>? get abilities => internal['abilities'];
+  Map<String?, dynamic>? get abilities => internal['abilities'];
 
   Account? get account => _account;
 
@@ -179,11 +179,11 @@ class Session extends OnlineObject {
 
   ItemContainer? get bank => internal['bank'];
 
-  Map<String, dynamic> get buffs => internal['buffs'] ?? const {};
+  Map<String?, dynamic> get buffs => internal['buffs'] ?? const {};
 
   bool? get canPvP => internal['pvp'];
 
-  Map<String, dynamic>? get channel => internal['channel'];
+  Map<String?, dynamic>? get channel => internal['channel'];
 
   Iterable<String>? get channelMods => internal['mods']?.keys;
 
@@ -214,13 +214,13 @@ class Session extends OnlineObject {
   String? get email =>
       _useNewEmail ? options!['new email'] : options!['old email'];
 
-  Map<String, dynamic>? get equipped => internal['equip'];
+  Map<String?, dynamic>? get equipped => internal['equip'];
 
   Map<String?, dynamic>? get exchangeBuyOffers => internal['buy'];
 
   Map<String?, dynamic>? get exchangeSellOffers => internal['sell'];
 
-  Map<String, dynamic>? get flags => internal['flags'];
+  Map<String?, dynamic>? get flags => internal['flags'];
 
   String? get god => internal['god'];
 
@@ -231,7 +231,7 @@ class Session extends OnlineObject {
   Map<String?, dynamic> get goodItemSources =>
       internal['double res'] ??= ObservableMap();
 
-  Map<String, dynamic> get hiddenDolls => internal['kills'] ??= ObservableMap();
+  Map<String?, dynamic> get hiddenDolls => internal['kills'] ??= ObservableMap();
 
   int get highestFloor => internal['highest floor'] ?? 0;
 
@@ -250,7 +250,7 @@ class Session extends OnlineObject {
 
   Future<dynamic> get onLogout => _logoutCompleter.future;
 
-  Map<String, dynamic>? get options => internal['options'];
+  Map<String?, dynamic>? get options => internal['options'];
 
   Map<dynamic, dynamic> get peerAccounts => accountManager!.resources;
 
@@ -282,14 +282,14 @@ class Session extends OnlineObject {
 
   CharacterSheet? get sheet => internal['sheet'];
 
-  Map<String, dynamic> get shopItems => internal['shop'] ?? const {};
+  Map<String?, dynamic> get shopItems => internal['shop'] ?? const {};
 
   String? get stage => internal['stage'];
 
   Map<String?, dynamic> get stageFlags =>
       internal['stage flags'] ??= ObservableMap();
 
-  Map<String, dynamic> get tappedItemSources =>
+  Map<String?, dynamic> get tappedItemSources =>
       internal['tapped'] ??= ObservableMap();
 
   BigInt? get targetTradeGold => big(internal['their trade gold'] ?? 0);
@@ -317,7 +317,7 @@ class Session extends OnlineObject {
 
   String? get username => internal['display'];
 
-  Map<String, dynamic>? get view => internal.containsKey('view')
+  Map<String?, dynamic>? get view => internal.containsKey('view')
       ? UnmodifiableMapView(internal['view'])
       : null;
 
@@ -416,7 +416,7 @@ class Session extends OnlineObject {
     return false;
   }
 
-  List<Map<String, dynamic>> altars() => List.from(_stageDolls.values
+  List<Map<String?, dynamic>> altars() => List.from(_stageDolls.values
       .where((doll) => doll.infoName?.endsWith('altar') == true)
       .map((doll) => doll.internal));
 
@@ -427,11 +427,11 @@ class Session extends OnlineObject {
     if (sheet!.totalPoints < sheet!.spentPoints) sheet!.resetAttributes();
   }
 
-  List<Map<String, dynamic>> bosses() => List.from(_stageDolls.values
+  List<Map<String?, dynamic>> bosses() => List.from(_stageDolls.values
       .where((doll) => doll.boss && !doll.summoned)
       .map((doll) => doll.internal));
 
-  Future<Map<String, dynamic>?> browseExchange(String offerType,
+  Future<Map<String?, dynamic>?> browseExchange(String offerType,
       [String? filter]) async {
     var exchange = await _exchange;
     if (offerType == 'buy') return exchange.browseBuyOffers;
@@ -787,7 +787,7 @@ class Session extends OnlineObject {
       ..['owners'] = resource['owners'];
 
     resource['log'] ??= ObservableMap();
-    Map<String, dynamic> log = resource['log'];
+    Map<String?, dynamic> log = resource['log'];
 
     log.forEach((key, data) => internal.addEvent(ObservableEvent(
         type: 'channel chat', data: ObservableMap(data)..['historic'] = true)));
@@ -1116,7 +1116,7 @@ class Session extends OnlineObject {
     // Map keys are in the order that they're added to the map.
 
     resource['log'] ??= ObservableMap();
-    Map<String, dynamic> log = resource['log'];
+    Map<String?, dynamic> log = resource['log'];
     log[uuid()] = data;
     if (log.length > 100) log.remove(log.keys.first);
     return true;
@@ -1193,7 +1193,7 @@ class Session extends OnlineObject {
 
   int playersOnline() => peerAccounts.length;
 
-  Map<String, dynamic> privateMessages(String contact) =>
+  Map<String?, dynamic> privateMessages(String contact) =>
       account!.privateMessages[sanitizeName(contact)] ?? const {};
 
   /// The ranks are "owner" (can rank and kick), "mod" (can kick), and null.

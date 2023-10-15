@@ -30,10 +30,10 @@ class ShopModal implements OnDestroy {
           .contains(searchInput!.toLowerCase()) &&
       item.amount > 0);
 
-  Map<String, dynamic> get items =>
+  Map<String?, dynamic> get items =>
       ClientGlobals.session!.items?.items ?? const {};
 
-  Map<String, dynamic> get shopItems =>
+  Map<String?, dynamic> get shopItems =>
       ClientGlobals.session!.shopItems ?? const {};
 
   List<Item> get sortedShopItems =>

@@ -27,7 +27,7 @@ class TradeModal {
   String get itemClasses =>
       youFinalizedTrade && theyFinalizedTrade ? 'disabled' : '';
 
-  Map<String, dynamic> get items =>
+  Map<String?, dynamic> get items =>
       ClientGlobals.session!.items?.items ?? const {};
 
   Iterable<Item> get sortedItems =>

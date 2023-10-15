@@ -41,5 +41,5 @@ class ClientGlobals {
     }
   }
 
-  static Map<String, dynamic> get _options => session?.options ?? const {};
+  static Map<String?, dynamic> get _options => session?.options ?? const {};
 }

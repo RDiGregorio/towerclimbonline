@@ -26,7 +26,7 @@ class Stage<T extends Doll?> extends OnlineObject {
 
   Map<String?, T> get dolls => UnmodifiableMapView(_dollsByName);
 
-  Map<String, dynamic> get flags => internal['flags'] ?? {};
+  Map<String?, dynamic> get flags => internal['flags'] ?? {};
 
   Doll? get stairsDown =>
       dolls.values.firstWhereOrNull((doll) => doll!.isStairsDown);

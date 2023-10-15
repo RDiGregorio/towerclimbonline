@@ -23,7 +23,7 @@ Future<dynamic> _isolate(SendPort sendPort) async {
 }
 
 class ProceduralGenerator {
-  static Map<String, dynamic>? _placeholderData;
+  static Map<String?, dynamic>? _placeholderData;
 
   Future<dynamic> generate(int floor) async {
     // Floor x (as displayed in the game) has a [floor] of x - 1.
@@ -42,7 +42,7 @@ class ProceduralGenerator {
     return receivePort.first;
   }
 
-  static Map<String, dynamic> dungeon(int? floor) {
+  static Map<String?, dynamic> dungeon(int? floor) {
     var data = <String, dynamic>{
       'timestamp': DateTime.now().millisecondsSinceEpoch,
       'flags': ['procgen'],

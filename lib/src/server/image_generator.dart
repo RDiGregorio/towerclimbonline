@@ -6,7 +6,7 @@ class ImageGenerator {
   Image _image = Image(_size * 100, _size * 100),
       _foreground = Image(_size * 100, _size * 100);
 
-  final Map<String, dynamic>? _data;
+  final Map<String?, dynamic>? _data;
   Map<String, Image> _images = {};
 
   ImageGenerator(this._data);
