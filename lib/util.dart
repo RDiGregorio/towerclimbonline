@@ -498,7 +498,7 @@ int calculateEvasionPercentBonus(Iterable<dynamic> equipment) {
   var base = 100;
 
   var increasePercent = damageIncreasePercent(equipment.fold(0, (result, item) {
-    base += item.evasion;
+    base += item.evasion as int;
     if (item.upgradesIncreaseEvasion) return result + item.bonus as int;
     return result;
   }));
@@ -858,7 +858,7 @@ String getName(Symbol symbol) {
   return string.substring(8, string.length - 2);
 }
 
-String godName(String? value) => value == null ? 'none' : capitalize(value);
+String? godName(String? value) => value == null ? 'none' : capitalize(value);
 
 /// Moves like a king in chess.
 

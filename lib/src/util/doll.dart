@@ -679,7 +679,7 @@ class Doll extends OnlineObject {
         now >= _petSpawningTime!) {
       _petSpawningTime = null;
       account!.pet?.spawning = false;
-      account!.pet?.health = account!.pet?.maxHealth!;
+      account!.pet?.health = account!.pet!.maxHealth!;
       account!.doll?.summon();
     }
 

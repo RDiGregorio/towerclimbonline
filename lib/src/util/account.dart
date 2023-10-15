@@ -487,7 +487,6 @@ class Account extends OnlineObject {
         baseAmount = calculateAmount();
         break;
       case 'chest':
-
         // Prevents a player from repeatedly attempting to open the same chest.
 
         if (doll?.targetDoll == source) doll?.targetDoll = null;
@@ -671,8 +670,9 @@ class Account extends OnlineObject {
       var location = doll!.currentLocation, stage = doll!.stage;
 
       conversationChoiceHandler = (choice) {
-        sessions.forEach(
-            (session) => session.internal..remove('conv')..remove('conv opts'));
+        sessions.forEach((session) => session.internal
+          ..remove('conv')
+          ..remove('conv opts'));
 
         // Prevents issues caused by moving while talking.
 
@@ -702,11 +702,12 @@ class Account extends OnlineObject {
 
     // If the input is null, then the player is crafting all.
 
-    amount = ingredientItems.fold(input == null ? null : amount,
+    amount = ingredientItems.fold(
+        input == null ? null : amount,
         (result, ingredient) {
-      if (result == null) return ingredient.getAmount();
-      return BigIntUtil.min(result, ingredient.getAmount());
-    } as BigInt Function(BigInt, dynamic));
+          if (result == null) return ingredient.getAmount();
+          return BigIntUtil.min(result, ingredient.getAmount());
+        } as BigInt? Function(BigInt?, dynamic))!;
 
     if (amount < BigInt.one) return;
 
@@ -790,8 +791,8 @@ class Account extends OnlineObject {
     loot(Item.fromDisplayText(key)..setAmount(amount));
   }
 
-  void exchangeBuy(
-      Exchange? exchange, String? key, BigInt? price, BigInt amount, int bonus) {
+  void exchangeBuy(Exchange? exchange, String? key, BigInt? price,
+      BigInt amount, int bonus) {
     if (amount <= BigInt.zero) return;
 
     if (exchangeBuyOffers.length + exchangeSellOffers.length >=
@@ -842,8 +843,8 @@ class Account extends OnlineObject {
     }
   }
 
-  void exchangeSell(Exchange? exchange, String? key, BigInt? price, BigInt? amount,
-      Item soldItem) {
+  void exchangeSell(Exchange? exchange, String? key, BigInt? price,
+      BigInt? amount, Item soldItem) {
     if (exchangeBuyOffers.length + exchangeSellOffers.length >=
         maxExchangeOffers) {
       alert(alerts[#tooManyOffers]);
@@ -994,7 +995,8 @@ class Account extends OnlineObject {
     var item = items.getItem(itemId);
     if (item == null) return;
     amount = BigIntUtil.max(BigInt.zero, amount);
-    _removeItem(items, item, amount = BigIntUtil.min(item.getAmount()!, amount));
+    _removeItem(
+        items, item, amount = BigIntUtil.min(item.getAmount()!, amount));
     var gold = big(item.sellingPrice)! * amount;
 
     if (gold > BigInt.zero) {
@@ -1026,8 +1028,8 @@ class Account extends OnlineObject {
     interactionStage = doll!.stage;
     interactionType = #shop;
 
-    sessions.forEach((session) =>
-        session.internal['shop'] = items.fold(ObservableMap(), (dynamic map, item) {
+    sessions.forEach((session) => session.internal['shop'] =
+            items.fold(ObservableMap(), (dynamic map, item) {
           assert(item.amount == 1);
           return map..[item.id] = item;
         }));

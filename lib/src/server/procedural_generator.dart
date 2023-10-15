@@ -56,7 +56,7 @@ class ProceduralGenerator {
       if (theme.flags.contains('background-color: lightskyblue'))
         return List.filled(count, [null, null, 'blue']);
       else
-        return List(count);
+        return List.filled(count, null, growable: false);
     }
 
     for (int i = 0; i < 100; i++) data['cells'].add(defaults(100));

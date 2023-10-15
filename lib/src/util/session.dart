@@ -44,24 +44,25 @@ class Session extends OnlineObject {
 
       if (account!.mostRecentStage != null) {
         if (!account!.mostRecentStage!.startsWith('procgen'))
-          (await stageManager!.getResource(
-                  null, account!.mostRecentStage, onLogout))
+          (await stageManager!
+                  .getResource(null, account!.mostRecentStage, onLogout))
               .addDoll(account!.doll);
         else {
           // Handles logging into procedurally generated floors.
 
           Stage? mostRecentStage =
               stageManager!.resources.containsKey(account!.mostRecentStage)
-                  ? await (stageManager!.getResource(
-                      null, account!.mostRecentStage, onLogout) as FutureOr<Stage<Doll?>?>)
+                  ? await (stageManager!
+                          .getResource(null, account!.mostRecentStage, onLogout)
+                      as FutureOr<Stage<Doll?>?>)
                   : null;
 
           mostRecentStage != null
               ? mostRecentStage.addDoll(account!.doll)
               : (mostRecentStage = await proceduralStage(
                       stageManager,
-                      int.parse(
-                          account!.mostRecentStage!.replaceFirst('procgen', '')),
+                      int.parse(account!.mostRecentStage!
+                          .replaceFirst('procgen', '')),
                       onLogout))
                   .addDoll(account!.doll);
 
@@ -340,8 +341,8 @@ class Session extends OnlineObject {
     Future(() async {
       await (removeChannelOwner(user = sanitizeName(user)));
 
-      (await channelManager!.getResource(
-          null, account!.channel, onLogout))['mods'][user] = true;
+      (await channelManager!
+          .getResource(null, account!.channel, onLogout))['mods'][user] = true;
     });
   }
 
@@ -611,8 +612,9 @@ class Session extends OnlineObject {
 
     decode(event) => json.decode(event.data,
         reviver: (key, value) => mapWrapperDecoder(key, value,
-            safety: (key, value) =>
-                value is Map ? ObservableMap(value as Map<String?, dynamic>) : value));
+            safety: (key, value) => value is Map
+                ? ObservableMap(value as Map<String?, dynamic>)
+                : value));
 
     _socket.onMessage.map(decode).forEach((value) {
       Logger.root.finest('${unwrap(value)}');
@@ -675,7 +677,8 @@ class Session extends OnlineObject {
 
   void exchangeBuy(String key, String price, String amount) {
     var bigPrice = big(price), bigAmount = big(amount);
-    if (key == null || bigPrice! < BigInt.one || bigAmount! < BigInt.one) return;
+    if (key == null || bigPrice! < BigInt.one || bigAmount! < BigInt.one)
+      return;
     key = key.trim().toLowerCase();
     key = setBonus(key, clamp(getBonus(key)!, 0, trillion - 1) as int);
     Item item = Item(key);
@@ -697,14 +700,19 @@ class Session extends OnlineObject {
     }
 
     Future(() async => account!.exchangeBuy(
-        await (_exchange as FutureOr<Exchange?>), item.comparisonText, bigPrice, bigAmount!, item.bonus));
+        await (_exchange as FutureOr<Exchange?>),
+        item.comparisonText,
+        bigPrice,
+        bigAmount!,
+        item.bonus));
   }
 
   void exchangeClose(String id) {
     if (id == null) return;
     var offer = exchangeBuyOffers!.remove(id) ?? exchangeSellOffers!.remove(id);
     if (offer == null) return;
-    Future(() async => account!.exchangeClose(await (_exchange as FutureOr<Exchange>), offer));
+    Future(() async =>
+        account!.exchangeClose(await (_exchange as FutureOr<Exchange>), offer));
   }
 
   void exchangeSell(String key, String price, String amount) {
@@ -728,7 +736,11 @@ class Session extends OnlineObject {
     if (bigAmount < BigInt.one || bigPrice! < BigInt.one) return;
 
     Future(() async => account!.exchangeSell(
-        await (_exchange as FutureOr<Exchange?>), item.comparisonText, bigPrice, bigAmount, item));
+        await (_exchange as FutureOr<Exchange?>),
+        item.comparisonText,
+        bigPrice,
+        bigAmount,
+        item));
   }
 
   void finalizeTrade() {
@@ -822,7 +834,8 @@ class Session extends OnlineObject {
     if (account!.channel == null ||
         !await channelManager!.exists(account!.channel)) return false;
 
-    (await channelManager!.getResource(null, account!.channel, onLogout))['users']
+    (await channelManager!
+            .getResource(null, account!.channel, onLogout))['users']
         .remove(account!.id);
 
     // Must be in a future or the current channel is not saved.
@@ -1058,8 +1071,8 @@ class Session extends OnlineObject {
     }
 
     BigInt countIngredients(Iterable<Item> ingredients) =>
-        ingredients.fold<BigInt>(
-            BigInt.zero, (BigInt total, Item item) => total + item.getAmount()!);
+        ingredients.fold<BigInt>(BigInt.zero,
+            (BigInt total, Item item) => total + item.getAmount()!);
 
     List<Item> matches() => List<Item>.from(items!.items.values
         .where((item) => item.comparisonText == text && item.amount > 0));
@@ -1154,10 +1167,12 @@ class Session extends OnlineObject {
   bool messagePublic(String string) {
     if (string == null || string.isEmpty) return false;
 
-    account!.doll!.internal.addEvent(ObservableEvent(type: 'public chat', data: {
-      'from': account!.id,
-      'value': string.substring(0, min(string.length, 1000))
-    }));
+    account!.doll!.internal.addEvent(ObservableEvent(
+        type: 'public chat',
+        data: {
+          'from': account!.id,
+          'value': string.substring(0, min(string.length, 1000))
+        }));
 
     return true;
   }
@@ -1216,15 +1231,15 @@ class Session extends OnlineObject {
     return (_completers[counter] = Completer()).future;
   }
 
-  void removeChannelMod(String user) {
-    Future(() async => (await channelManager!.getResource(
-            null, account!.channel, onLogout))['mods']
+  Future<dynamic> removeChannelMod(String user) {
+    return Future(() async => (await channelManager!
+            .getResource(null, account!.channel, onLogout))['mods']
         .remove(sanitizeName(user)));
   }
 
-  void removeChannelOwner(String user) {
-    Future(() async => (await channelManager!.getResource(
-            null, account!.channel, onLogout))['owners']
+  Future<dynamic> removeChannelOwner(String user) {
+    return Future(() async => (await channelManager!
+            .getResource(null, account!.channel, onLogout))['owners']
         .remove(sanitizeName(user)));
   }
 
@@ -1262,7 +1277,8 @@ class Session extends OnlineObject {
       // stats in the small window of time after combat ends but before they are
       // healed for being out of combat.
 
-      account!.doll!.inCombat || account!.doll!.health != account!.doll!.maxHealth
+      account!.doll!.inCombat ||
+              account!.doll!.health != account!.doll!.maxHealth
           ? alert(alerts[#noCombat])
           : account!.sheet.resetAttributes();
 
@@ -1477,12 +1493,14 @@ class Session extends OnlineObject {
   }
 
   void updateScores(String sanitized) async {
-    (await _scores('combat'))?.add(sanitized, account!.sheet.combat!.experience);
+    (await _scores('combat'))
+        ?.add(sanitized, account!.sheet.combat!.experience);
 
     (await _scores('fishing'))
         ?.add(sanitized, account!.sheet.fishing!.experience);
 
-    (await _scores('mining'))?.add(sanitized, account!.sheet.mining!.experience);
+    (await _scores('mining'))
+        ?.add(sanitized, account!.sheet.mining!.experience);
 
     (await _scores('woodcutting'))
         ?.add(sanitized, account!.sheet.woodcutting!.experience);
@@ -1511,7 +1529,8 @@ class Session extends OnlineObject {
 
   /// Upgrades an item.
 
-  void upgrade(String? key, dynamic amount) => account!.upgradeItem(key, amount);
+  void upgrade(String? key, dynamic amount) =>
+      account!.upgradeItem(key, amount);
 
   /// [ability] is used when the user's doll is ready unless another ability is
   /// used instead.
@@ -1573,7 +1592,8 @@ class Session extends OnlineObject {
             .where((item) => item.canUpgrade && item.equipment))
         .forEach((Item item) {
       if (map.containsKey(item.comparisonText))
-        map[item.comparisonText] = map[item.comparisonText]! + item.getAmount()!;
+        map[item.comparisonText] =
+            map[item.comparisonText]! + item.getAmount()!;
       else {
         map[item.comparisonText] = item.getAmount();
         result.add(item);
@@ -1704,9 +1724,10 @@ class Session extends OnlineObject {
         () => List<Item>.from(account!.items.items.values
             .where((item) => item.infoName == 'autumn katana'))
           ..forEach(account!.items.deleteItem)
-          ..forEach((item) => account!.lootItem(Item('katana', 1, [Ego.electric])
-            ..amount = item.amount
-            ..bonus = item.bonus)));
+          ..forEach(
+              (item) => account!.lootItem(Item('katana', 1, [Ego.electric])
+                ..amount = item.amount
+                ..bonus = item.bonus)));
 
     _applyPatch(
         'remove invisibility potion patch',
