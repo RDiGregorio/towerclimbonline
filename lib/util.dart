@@ -5,6 +5,7 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
@@ -16,51 +17,96 @@ import 'package:quiver/async.dart';
 import 'package:quiver/collection.dart';
 import 'package:r_tree/r_tree.dart' hide Node;
 import 'package:towerclimbonline/config.dart';
+import 'package:collection/collection.dart' show IterableExtension;
 
 part 'src/util/ability.dart';
+
 part 'src/util/account.dart';
+
 part 'src/util/async_order.dart';
+
 part 'src/util/big_int_util.dart';
+
 part 'src/util/buff.dart';
+
 part 'src/util/character_sheet.dart';
+
 part 'src/util/clock.dart';
+
 part 'src/util/cool_down.dart';
+
 part 'src/util/crafting.dart';
+
 part 'src/util/crafting_option.dart';
+
 part 'src/util/customization_layer.dart';
+
 part 'src/util/doll.dart';
+
 part 'src/util/doll_customization.dart';
+
 part 'src/util/doll_info.dart';
+
 part 'src/util/drop_table.dart';
+
 part 'src/util/effect.dart';
+
 part 'src/util/ego.dart';
+
 part 'src/util/exchange.dart';
+
 part 'src/util/exchange_offer.dart';
+
 part 'src/util/experience_curve.dart';
+
 part 'src/util/experience_rate.dart';
+
 part 'src/util/idler.dart';
+
 part 'src/util/item.dart';
+
 part 'src/util/item_container.dart';
+
 part 'src/util/item_info.dart';
+
 part 'src/util/missile.dart';
+
 part 'src/util/observable_event.dart';
+
 part 'src/util/observable_map.dart';
+
 part 'src/util/online_object.dart';
+
 part 'src/util/path_finder.dart';
+
 part 'src/util/random_shop.dart';
+
 part 'src/util/recovery_attempt.dart';
+
 part 'src/util/resource_manager.dart';
+
 part 'src/util/scores.dart';
+
 part 'src/util/server_globals.dart';
+
 part 'src/util/session.dart';
+
 part 'src/util/space.dart';
+
 part 'src/util/splat.dart';
+
 part 'src/util/sprite.dart';
+
 part 'src/util/stage.dart';
+
 part 'src/util/stat.dart';
+
 part 'src/util/terrain.dart';
+
 part 'src/util/theme.dart';
+
 part 'src/util/tile.dart';
+
 part 'src/util/wrapper.dart';
 
 const int millisecondsPerDay = 86400000,
@@ -72,7 +118,7 @@ const int millisecondsPerDay = 86400000,
     quadrillion = 1000 * trillion,
     quintillion = 1000 * quadrillion,
 
-    // 2 ^ 32
+// 2 ^ 32
 
     maxInt = 4294967296;
 
@@ -97,7 +143,7 @@ final int maxFinite = double.maxFinite.floor();
 final BigInt maxInput = big(100000)! * big('1X')! - BigInt.one;
 final String missingItemName = '????',
 
-    // Thin spaces are the international standard for digit grouping.
+// Thin spaces are the international standard for digit grouping.
 
     separator = '\u{202F}';
 
@@ -370,7 +416,8 @@ BigInt calculateAccuracy(Doll doll, [Item? weapon]) {
 int calculateAccuracyPercentBonus(
     Item? weapon, Iterable<dynamic> nonWeaponEquipment) {
   var increasePercent = damageIncreasePercent(nonWeaponEquipment.fold(
-          weapon?.bonus ?? 0, (accuracy, item) => accuracy + item.accuracy as int)),
+          weapon?.bonus ?? 0,
+          (accuracy, item) => accuracy + item.accuracy as int)),
       weaponAccuracy = weapon?.accuracy ?? 0;
 
   var result = increasePercent + weaponAccuracy;
@@ -496,8 +543,9 @@ BigInt calculateReflectedDamage(Doll doll) {
 
   var equipped = List<Item>.from(doll.equipped.values
           .where((item) => item.egos.contains(Ego.reflection))),
-      bonus = equipped.fold(0, (dynamic result, item) => result + upgrades(item)) ~/
-          equipped.length;
+      bonus =
+          equipped.fold(0, (dynamic result, item) => result + upgrades(item)) ~/
+              equipped.length;
 
   // Reflection uses vitality for damage.
 
@@ -511,7 +559,7 @@ BigInt calculateReflectedDamage(Doll doll) {
 
 /// Capitalizes the first letter of [string].
 
-String capitalize(String string) => string == null
+String? capitalize(String string) => string == null
     ? null
     : string.length == 0
         ? string
@@ -1156,8 +1204,8 @@ void registerItemSource(String type, String image,
                   doll.playersInRange
                       .where((looter) =>
                           looter!.id != account.id && looter.canLoot(doll))
-                      .forEach(
-                          (looter) => looter!.collectFromItemSource(doll, type));
+                      .forEach((looter) =>
+                          looter!.collectFromItemSource(doll, type));
               }
             }));
 

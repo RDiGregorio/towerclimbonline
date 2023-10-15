@@ -890,7 +890,7 @@ class Account extends OnlineObject {
     tradeAccepted = false;
 
     if (tradeTarget != null) {
-      tradeTarget
+      tradeTarget!
         ..tradeAccepted = false
         ..tradeTarget = null
         ..closeModal();

@@ -296,7 +296,7 @@ class ItemModal implements OnDestroy {
     showInputModal('Threashold', 'auto heal', (input) {
       ClientGlobals.session!.remote(#setOption, [
         'auto heal',
-        min(maxFinite, parseInteger(input)),
+        min(maxFinite, parseInteger(input)!),
       ]).then((result) => _changeDetectorRef.markForCheck());
     });
 

@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart' show IterableExtension;
 part of util;
 
 /// Holds information for collision detection and finding nearby dolls. It
@@ -30,17 +29,17 @@ class Stage<T extends Doll?> extends OnlineObject {
   Map<String, dynamic> get flags => internal['flags'] ?? {};
 
   Doll? get stairsDown =>
-      dolls.values.firstWhereOrNull((doll) => doll.isStairsDown);
+      dolls.values.firstWhereOrNull((doll) => doll!.isStairsDown);
 
   Doll? get stairsUp =>
-      dolls.values.firstWhereOrNull((doll) => doll.isStairsUp);
+      dolls.values.firstWhereOrNull((doll) => doll!.isStairsUp);
 
   int get timestamp => _timestamp ?? 0;
 
   void set timestamp(int value) => _timestamp = value;
 
   void addDoll(T doll, [Point<int>? location]) {
-    if (dolls.containsKey(doll.id)) removeDoll(dolls[doll.id]!);
+    if (dolls.containsKey(doll!.id)) removeDoll(dolls[doll.id]!);
 
     if (doll.temporary)
       Future.delayed(
@@ -58,7 +57,7 @@ class Stage<T extends Doll?> extends OnlineObject {
       _userDollSpace.add(doll.currentLocation, doll);
       doll.updateLastTeleportTime();
 
-      doll.account
+      doll.account!
         ..internal['stage'] = id
         ..sessions.forEach((session) {
           // Sets up the terrain sections that are visible client side.
@@ -74,7 +73,7 @@ class Stage<T extends Doll?> extends OnlineObject {
               map);
         });
     } else
-      doll
+      doll!
         ..spawnStage = this
         ..spawnLocation = doll.currentLocation;
   }
@@ -90,10 +89,10 @@ class Stage<T extends Doll?> extends OnlineObject {
       (getTerrain(location) ?? double.infinity) <= Terrain.land;
 
   void moveDoll(T doll, Point<int> location) {
-    assert(doll.stage == this);
+    assert(doll!.stage == this);
 
     _dollsByLocation
-      ..remove(doll.currentLocation, doll)
+      ..remove(doll!.currentLocation, doll)
       ..add(location, doll);
 
     if (doll.account != null)
@@ -130,7 +129,7 @@ class Stage<T extends Doll?> extends OnlineObject {
   }
 
   void removeDoll(T doll) {
-    if (doll.account != null) _userDollSpace.remove(doll);
+    if (doll!.account != null) _userDollSpace.remove(doll);
     _dollsByLocation.remove(doll.currentLocation, doll);
     _dollsByName.remove((doll.._stage = null).id);
     _space.remove(doll);
@@ -159,7 +158,7 @@ class Stage<T extends Doll?> extends OnlineObject {
         dollsAt(location).fold(
                 terrainType,
                 (dynamic terrainType, doll) =>
-                    max<num>(terrainType, doll.canPassThis!)) <=
+                    max<num>(terrainType, doll!.canPassThis!)) <=
             pass!;
   }
 

@@ -95,14 +95,14 @@ class Session extends OnlineObject {
 
       // Needed for public level up effects.
 
-      account
+      account!
         ..sheet.stats.forEach((stat) {
           // var subscription;
           // subscription =
 
           stat.internal.getEvents(type: 'level up').listen((event) {
             if (account!.sessions.contains(this)) {
-              account
+              account!
                 ..doll!.splat('level up!', 'level-up')
                 ..alert('You level up!');
 
@@ -156,7 +156,7 @@ class Session extends OnlineObject {
         setAction('explore', 1);
         setAction('examine', 2);
 
-        account
+        account!
           ..doll!.summon()
           ..newbie = false;
       }
@@ -372,7 +372,7 @@ class Session extends OnlineObject {
 
   void addTradeGold(String gold) {
     if (_validTradeState && !(youFinalizedTrade && theyFinalizedTrade))
-      account!.tradeGold += parseBigInteger(gold)!;
+      account!.tradeGold = account!.tradeGold! + parseBigInteger(gold)!;
   }
 
   void addTradeItem(String itemId, String amount) {
@@ -458,7 +458,7 @@ class Session extends OnlineObject {
 
   void click(String target) {
     if (account?.doll?.stage != null)
-      account!.doll
+      account!.doll!
         ..targetLocation = null
         ..targetDoll = account!.doll!.stage!.dolls[target];
   }
@@ -764,7 +764,7 @@ class Session extends OnlineObject {
 
     resource['users'][account!.id] = true;
 
-    account
+    account!
       ..sessions.forEach((session) => session.internal
         ..['channel'] = resource['users']
         ..['channel name'] = channel)
@@ -938,7 +938,7 @@ class Session extends OnlineObject {
 
     // Gives the player abilities.
 
-    account
+    account!
       ..abilities.clear()
       ..abilities['examine'] = true
       ..abilities['teleport'] = true
@@ -953,7 +953,7 @@ class Session extends OnlineObject {
       ..spawnStageName = 'tutorial0'
       ..spawnLocation = const Point(2, 2);
 
-    if (Config.debug) account..abilities['kill'] = true;
+    if (Config.debug) account!..abilities['kill'] = true;
     var targetId = account!.internal['target'];
 
     Future(() async {
@@ -1119,7 +1119,7 @@ class Session extends OnlineObject {
       user = sanitizeName(user);
       _offlineMessages(user)!.then((map) => map[uuid()] = data);
 
-      account
+      account!
         ..privateMessages[user] ??= ObservableMap()
         ..privateMessages[user][uuid()] = data;
     }
@@ -1170,7 +1170,7 @@ class Session extends OnlineObject {
     // A user can't trade with itself.
 
     if (doll != null && doll != account!.doll)
-      account!.doll
+      account!.doll!
         ..targetLocation = null
         ..ability = 'trade'
         ..targetDoll = doll;
@@ -1428,7 +1428,7 @@ class Session extends OnlineObject {
 
     highestFloor = account!.highestFloor;
 
-    account!.doll
+    account!.doll!
       ..internal['player'] = true
       ..internal['level'] = account!.sheet.combat!.level
       ..internal['pker'] = account!.doll!.buffs.containsKey('pker');
@@ -1553,7 +1553,7 @@ class Session extends OnlineObject {
   void walk(int x, int y) {
     // Even if a player can't move, their target location should still be set.
 
-    account!.doll
+    account!.doll!
       ..targetLocation = Point(x.floor(), y.floor())
       ..ability = null
       ..targetDoll = null;
@@ -1609,7 +1609,7 @@ class Session extends OnlineObject {
   }
 
   void _leaveChannel() {
-    internal['channel name'] = (account
+    internal['channel name'] = (account!
           ..sessions.forEach((session) => session.internal.remove('channel')))!
         .channel = null;
 

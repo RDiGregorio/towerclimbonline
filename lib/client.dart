@@ -48,7 +48,7 @@ void hideModal() => querySelector('button.close')?.click();
 /// Fixes routing issues with Firefox.
 
 void navigate(String url) {
-  window.open(url, null);
+  window.open(url, '');
 }
 
 void reload() {

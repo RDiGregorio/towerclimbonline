@@ -553,7 +553,7 @@ void registerItems(Map<String?, Stage<Doll?>?> stages) {
                 BigIntUtil.multiplyByDouble(amount!, safeLog(reactor.bonus));
 
             if (amount > BigInt.zero)
-              doll.account
+              doll.account!
                 ..items.deleteItem(uranium)
                 ..lootItem(Item('energy')..setAmount(amount));
             else
@@ -570,7 +570,7 @@ void registerItems(Map<String?, Stage<Doll?>?> stages) {
     amount += BigIntUtil.multiplyByDouble(amount!, safeLog(stone.bonus));
 
     if (amount > BigInt.zero)
-      doll.account
+      doll.account!
         ..items.deleteItem(potions)
         ..lootItem(Item('gold')..setAmount(amount));
     else
@@ -606,7 +606,7 @@ void registerItems(Map<String?, Stage<Doll?>?> stages) {
                     !doll.boss &&
                     doll.account == null &&
                     doll.info?.interaction == null)
-                .forEach((target) => target
+                .forEach((target) => target!
                   ..killWithNoReward()
                   ..splat('no reward', 'effect-text'));
 

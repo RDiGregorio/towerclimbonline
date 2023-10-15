@@ -27,7 +27,7 @@ final Map<WebSocket, String> addresses = {};
 
 // [Config] is visible to the client, so [databasePassword] is set here.
 
-HttpServer httpServer, httpsServer;
+HttpServer? httpServer, httpsServer;
 Future<Connection>? _postgresConnection;
 
 Future<int?> get availableMemory async => runZoned(
@@ -80,7 +80,7 @@ Stream<WebSocket> getSecureWebSockets(
       await HttpServer.bindSecure(InternetAddress.anyIPv6, port, context);
   Logger.root.info('listening on port $port');
 
-  await for (var request in httpsServer.handleError(_onError)) {
+  await for (var request in httpsServer!.handleError(_onError)) {
     var socket = await runZoned(
         (() => WebSocketTransformer.isUpgradeRequest(request)
             ? WebSocketTransformer.upgrade(request).catchError((error, trace) {
@@ -104,7 +104,7 @@ Stream<WebSocket> getWebSockets(int port) async* {
   httpServer = await HttpServer.bind(InternetAddress.anyIPv6, port);
   Logger.root.info('listening on port $port');
 
-  await for (var request in httpServer.handleError(_onError)) {
+  await for (var request in httpServer!.handleError(_onError)) {
     var socket = await runZoned(
         (() => WebSocketTransformer.isUpgradeRequest(request)
             ? WebSocketTransformer.upgrade(request).catchError((error, trace) {

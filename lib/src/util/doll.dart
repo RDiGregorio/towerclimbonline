@@ -572,7 +572,7 @@ class Doll extends OnlineObject {
 
       // Keeps track of bonus experience and drops for being offline.
 
-      account
+      account!
         ..updateLastSeen()
         ..timeBonus = max(
             0,
@@ -1280,11 +1280,11 @@ class Doll extends OnlineObject {
 
     bigAmount = bigAmount * big(account!.timeBonusMultiplier)!;
 
-    account
+    account!
       ..gainExperience(
           account!.hasCrystalGloves ? experience * BigInt.two : experience,
           'crime')
-      ..money += bigAmount
+      ..money = account!.money! + bigAmount
       ..alert('You gain: ${formatCurrency(bigAmount)}.');
   }
 
@@ -1383,7 +1383,7 @@ class Doll extends OnlineObject {
     account!.pet ??= Doll('puppy');
     account!.pet!.internal['pet'] = true;
 
-    account!.pet
+    account!.pet!
       ..masterDoll = this
       ..summoned = true
       ..jump(stage, currentLocation, false, false);

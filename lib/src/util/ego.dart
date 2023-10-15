@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart' show IterableExtension;
 part of util;
 
 // You can add new egos but you can't remove old ones because they are used for
