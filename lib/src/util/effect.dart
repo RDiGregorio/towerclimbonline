@@ -2,7 +2,7 @@ part of util;
 
 class Effect {
   final Doll source;
-  final BigInt damage, accuracy;
+  final BigInt? damage, accuracy;
   List<int> egos;
   Map<int, int> sourceNonWeaponEgos = {};
   int delay;

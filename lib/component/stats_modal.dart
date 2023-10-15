@@ -10,34 +10,34 @@ import 'package:towerclimbonline/util.dart';
     directives: [coreDirectives, formDirectives],
     templateUrl: 'stats_modal.html')
 class StatsModal {
-  static ExperienceRate tracker;
+  static late ExperienceRate tracker;
   int step = 1;
 
-  int get agilityBuffs => sheet.agilityBuffs;
+  int get agilityBuffs => sheet!.agilityBuffs;
 
-  int get dexterityBuffs => sheet.dexterityBuffs;
+  int get dexterityBuffs => sheet!.dexterityBuffs;
 
   String get experiencePerHour =>
       formatCurrency(max<int>(0, tracker.experiencePerHour), false);
 
-  String get god => godName(ClientGlobals.session.god) ?? 'none';
+  String get god => godName(ClientGlobals.session!.god) ?? 'none';
 
-  int get healthBuffs => sheet.healthBuffs;
+  int get healthBuffs => sheet!.healthBuffs;
 
-  int get intelligenceBuffs => sheet.intelligenceBuffs;
+  int get intelligenceBuffs => sheet!.intelligenceBuffs;
 
-  CharacterSheet get sheet => ClientGlobals.session.sheet;
+  CharacterSheet? get sheet => ClientGlobals.session!.sheet;
 
-  int get strengthBuffs => sheet.strengthBuffs;
+  int get strengthBuffs => sheet!.strengthBuffs;
 
-  String get xpMode => ClientGlobals.session.options['xp mode'] ?? 'default';
+  String get xpMode => ClientGlobals.session!.options!['xp mode'] ?? 'default';
 
   void set xpMode(String mode) {
-    ClientGlobals.session.remote(#setOption, ['xp mode', mode]);
+    ClientGlobals.session!.remote(#setOption, ['xp mode', mode]);
   }
 
   void ascend(Stat stat) {
-    ClientGlobals.session.remote(#ascend, [stat.id]);
+    ClientGlobals.session!.remote(#ascend, [stat.id]);
   }
 
   String displayAscensions(Stat stat) =>
@@ -63,8 +63,8 @@ class StatsModal {
   String formatStatBuff(int statBuff) => formatNumber(statBuff);
 
   void gainStat(String stat) {
-    if (sheet.unspentPoints > 0 || step == -1)
-      ClientGlobals.session.remote(#gainStat, [stat, step]);
+    if (sheet!.unspentPoints > 0 || step == -1)
+      ClientGlobals.session!.remote(#gainStat, [stat, step]);
   }
 
   bool isMaxLevel(Stat stat) => stat.internalLevel >= Stat.maxLevel;
@@ -75,7 +75,7 @@ class StatsModal {
     try {
       percent = stat == null
           ? 0
-          : (stat.experience - stat.previousLevelExperience) *
+          : (stat.experience! - stat.previousLevelExperience) *
               BigInt.from(100) /
               (stat.nextLevelExperience - stat.previousLevelExperience);
     } catch (error) {
@@ -86,10 +86,10 @@ class StatsModal {
   }
 
   void resetStats() {
-    ClientGlobals.session.remote(#resetStats, const []);
+    ClientGlobals.session!.remote(#resetStats, const []);
   }
 
   void track() {
-    tracker = ExperienceRate(ClientGlobals.session.sheet);
+    tracker = ExperienceRate(ClientGlobals.session!.sheet!);
   }
 }

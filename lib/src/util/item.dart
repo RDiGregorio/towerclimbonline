@@ -7,17 +7,17 @@ class Item extends OnlineObject {
   static const String dummyItemName = 'error';
   static RegExp _bonus = RegExp(r'\+\d+ ');
   static const int _basePrice = 10;
-  String _comparisonText, _displayTextWithoutAmount, _amountText, _displayText;
+  String? _comparisonText, _displayTextWithoutAmount, _amountText, _displayText;
 
-  Item([String infoName, int amount = 1, List<int> egos]) {
+  Item([String? infoName, int amount = 1, List<int>? egos]) {
     if (infoName?.isNotEmpty != true) return;
 
-    infoName = infoName?.trim()?.toLowerCase();
+    infoName = infoName?.trim().toLowerCase();
     var bonus;
 
     if (infoName?.startsWith(_bonus) == true) {
-      infoName = infoName.replaceFirstMapped(_bonus, (match) {
-        bonus = int.parse(match[0]);
+      infoName = infoName!.replaceFirstMapped(_bonus, (match) {
+        bonus = int.parse(match[0]!);
         return '';
       });
     }
@@ -37,7 +37,7 @@ class Item extends OnlineObject {
 
     if (text.startsWith(_bonus))
       text = text.replaceFirstMapped(_bonus, (match) {
-        bonus = max(0, int.parse(match[0]));
+        bonus = max(0, int.parse(match[0]!));
         return '';
       });
 
@@ -64,9 +64,9 @@ class Item extends OnlineObject {
     _updateAmountText();
   }
 
-  String get amountText => internal['amount text'];
+  String? get amountText => internal['amount text'];
 
-  void set amountText(String text) {
+  void set amountText(String? text) {
     internal['amount text'] = text;
   }
 
@@ -84,9 +84,9 @@ class Item extends OnlineObject {
   }
 
   bool get canUpgrade {
-    if (infoName == null || getAmount() <= BigInt.zero) return false;
+    if (infoName == null || getAmount()! <= BigInt.zero) return false;
     if (food) return true;
-    if (equipment) return info.slot != #thrown;
+    if (equipment) return info!.slot != #thrown;
     if (potion) return true;
 
     return const ['nuclear reactor', 'philosopher\'s stone', 'puzzle box']
@@ -95,7 +95,7 @@ class Item extends OnlineObject {
 
   /// Returns the display text without the bonus or amount.
 
-  String get comparisonText {
+  String? get comparisonText {
     if (_comparisonText != null) return _comparisonText;
     var result = infoName;
 
@@ -127,7 +127,7 @@ class Item extends OnlineObject {
 
   int get defense => info?.defense ?? 0;
 
-  String get displayText {
+  String? get displayText {
     var result = displayTextWithoutAmount;
     if (amount == 1) return result;
 
@@ -137,7 +137,7 @@ class Item extends OnlineObject {
             '$result × ${formatCurrency(_amountText = amountText, false)}';
   }
 
-  String get displayTextWithoutAmount {
+  String? get displayTextWithoutAmount {
     if (_displayTextWithoutAmount != null) return _displayTextWithoutAmount;
     var result = infoName;
 
@@ -189,11 +189,11 @@ class Item extends OnlineObject {
 
   bool get food => egos.contains(Ego.food);
 
-  num get healingAmount => min<num>(100, info.heal + info.heal * bonus / 100);
+  num get healingAmount => min<num>(100, info!.heal + info!.heal * bonus / 100);
 
-  ItemInfo get info => _itemInfo[infoName];
+  ItemInfo? get info => _itemInfo[infoName];
 
-  String get infoName => internal['info'];
+  String? get infoName => internal['info'];
 
   Set<String> get ingredients =>
       Set<String>.from(Crafting.craftedTo(comparisonText).map((text) {
@@ -202,8 +202,8 @@ class Item extends OnlineObject {
         return item.displayTextWithoutAmount;
       }));
 
-  String get missile {
-    var result = null, egoSet = Set<int>.from(egos);
+  String? get missile {
+    var result = null as dynamic, egoSet = Set<int>.from(egos);
     if (!egoSet.contains(Ego.magic)) return null;
 
     Set<int> colors = Set.from([
@@ -233,11 +233,11 @@ class Item extends OnlineObject {
     return result;
   }
 
-  bool get potion => displayTextWithoutAmount.contains('potion');
+  bool get potion => displayTextWithoutAmount!.contains('potion');
 
-  BigInt get price => big(internal['price'] ?? _basePrice);
+  BigInt? get price => big(internal['price'] ?? _basePrice);
 
-  bool get scroll => displayTextWithoutAmount.contains('scroll');
+  bool get scroll => displayTextWithoutAmount!.contains('scroll');
 
   int get sellingPrice {
     if (!tradable) return 0;
@@ -249,7 +249,7 @@ class Item extends OnlineObject {
   String get text {
     var result = '$infoName',
         combination = Set.from(internal['egos'] ?? const [])
-            .fold(0, (result, ego) => result + (pow(2, ego)));
+            .fold(0, (dynamic result, ego) => result + (pow(2, ego)));
 
     if (combination != 0) result = '$result $combination';
     if (bonus != 0) result = '+$bonus $result';
@@ -269,7 +269,7 @@ class Item extends OnlineObject {
   /// Adds a [BigInt].
 
   void addAmount(dynamic amount) {
-    setAmount(big(internal['amount']) + big(amount));
+    setAmount(big(internal['amount'])! + big(amount)!);
   }
 
   Item copyWithEgos(Iterable<int> egos) {
@@ -283,11 +283,11 @@ class Item extends OnlineObject {
     return result;
   }
 
-  String examineText(CharacterSheet sheet) {
+  String? examineText(CharacterSheet? sheet) {
     if (food) return 'heals ${healingAmount.toStringAsFixed(2)}% health';
 
     if (thrown) {
-      var intBuffs = sheet.intelligenceBuffs, dexBuffs = sheet.dexterityBuffs;
+      var intBuffs = sheet!.intelligenceBuffs, dexBuffs = sheet.dexterityBuffs;
       return 'attacks target with +$intBuffs% damage and +$dexBuffs% accuracy';
     }
 
@@ -339,14 +339,14 @@ class Item extends OnlineObject {
 
   /// Returns a [BigInt].
 
-  BigInt getAmount() {
+  BigInt? getAmount() {
     return big(internal['amount']);
   }
 
   /// Removes a [BigInt].
 
   void removeAmount(dynamic amount) {
-    setAmount(big(internal['amount']) - big(amount));
+    setAmount(big(internal['amount'])! - big(amount)!);
   }
 
   /// Sets a [BigInt].

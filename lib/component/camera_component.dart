@@ -22,7 +22,7 @@ class CameraComponent {
       foregroundTerrainStyles = {};
 
   final int tileSize = 16, marginTop = -57;
-  final Map<String, String> rippleStyle = {};
+  final Map<String?, String> rippleStyle = {};
   final Set<Missile> missiles = Set();
   final Queue<int> _fps = Queue();
   Set<Doll> _dolls = Set();
@@ -34,49 +34,49 @@ class CameraComponent {
       _frameTime = now,
       _nocache = now;
 
-  Point<int> _pointer;
+  Point<int>? _pointer;
   Point<num> _rippleLocation = const Point(0, 0);
-  num _zoom;
+  num? _zoom;
   final ChangeDetectorRef _changeDetectorRef;
 
   CameraComponent(this._changeDetectorRef) {
     if (ClientGlobals.session?.internal == null) return;
     animationLoop(() => _changeDetectorRef.markForCheck());
 
-    ClientGlobals.session.internal
+    ClientGlobals.session!.internal
       ..getEvents(type: 'jump').forEach((event) {
         var doll = unwrap(ClientGlobals.session)
-            .getPath(List<String>.from(event.path));
+            .getPath(List<String>.from(event.path!));
 
         if (doll == null) return;
 
         // Clears missiles when the player jumps.
 
         doll.sprite.location = doll.currentLocation;
-        if (doll.id == ClientGlobals.session.doll?.id) missiles.clear();
+        if (doll.id == ClientGlobals.session!.doll?.id) missiles.clear();
       })
       ..getEvents(type: 'splat').forEach((event) {
         var doll = unwrap(ClientGlobals.session)
-                .getPath(List<String>.from(event.path)),
-            showSplats = ClientGlobals.session.options['show splats'] ?? true;
+                .getPath(List<String>.from(event.path!)),
+            showSplats = ClientGlobals.session!.options!['show splats'] ?? true;
 
         if (doll != null && showSplats)
           doll.splats
-              .add(Splat(event.data['value'], now, event.data['classes']));
+              .add(Splat(event.data!['value'], now, event.data!['classes']));
       })
       ..getEvents(type: 'missile').forEach((event) {
-        var source = ClientGlobals.session.view[event.data['source']],
-            target = ClientGlobals.session.view[event.data['target']];
+        var source = ClientGlobals.session!.view![event.data!['source']],
+            target = ClientGlobals.session!.view![event.data!['target']];
 
         if (source != null && target != null)
-          missiles.add(Missile(event.data['image'], source, target));
+          missiles.add(Missile(event.data!['image'], source, target));
       })
       ..getEvents(type: 'aoe').forEach((event) {
-        var source = ClientGlobals.session.view[event.data['source']],
-            target = ClientGlobals.session.view[event.data['target']];
+        var source = ClientGlobals.session!.view![event.data!['source']],
+            target = ClientGlobals.session!.view![event.data!['target']];
 
         if (source != null && target != null)
-          missiles.add(Missile(event.data['image'], source, target, true));
+          missiles.add(Missile(event.data!['image'], source, target, true));
       });
 
     animationLoop(() {
@@ -87,10 +87,10 @@ class CameraComponent {
 
       var zoomSpeed = .1;
       _zoom ??= ClientGlobals.zoom;
-      if (_zoom < ClientGlobals.zoom) _zoom += zoomSpeed;
-      if (_zoom > ClientGlobals.zoom) _zoom -= zoomSpeed;
+      if (_zoom! < ClientGlobals.zoom) _zoom += zoomSpeed;
+      if (_zoom! > ClientGlobals.zoom) _zoom -= zoomSpeed;
 
-      if ((_zoom - ClientGlobals.zoom).abs() < zoomSpeed)
+      if ((_zoom! - ClientGlobals.zoom).abs() < zoomSpeed)
         _zoom = ClientGlobals.zoom;
 
       // A ripple appears after a click.
@@ -111,7 +111,7 @@ class CameraComponent {
 
       // [terrain] and [dolls] are changed as little as possible.
 
-      var sections = ClientGlobals.session.terrainSections
+      var sections = ClientGlobals.session!.terrainSections
         ..forEach((point, name) {
           point = _clientPoint(point);
 
@@ -125,7 +125,7 @@ class CameraComponent {
 
             // A 1 pixel gap is added.
 
-            ..['top'] = '${point.y - zoom * 15}px'
+            ..['top'] = '${point.y - zoom! * 15}px'
             ..['z-index'] = '1'
             ..['transform'] = 'scale($zoom, $zoom)';
         });
@@ -137,8 +137,8 @@ class CameraComponent {
         ..addAll(values);
 
       _dolls
-        ..retainWhere(ClientGlobals.session.view.values.contains)
-        ..addAll(List<Doll>.from(ClientGlobals.session.view.values))
+        ..retainWhere(ClientGlobals.session!.view!.values.contains)
+        ..addAll(List<Doll>.from(ClientGlobals.session!.view!.values))
         ..forEach((doll) {
           if (!doll.internal.containsKey('frames')) doll.internal['frames'] = 0;
           if (doll.internal['frames'] < 2) doll.internal['frames']++;
@@ -150,7 +150,7 @@ class CameraComponent {
 
               // Sorts sprites by their y axis and prevents a negative z-index.
 
-              zIndex = (_minZ = min(_minZ, index)).abs() +
+              zIndex = (_minZ = min(_minZ, index as int)).abs() +
                   spriteLocation.y * 2 -
                   doll.sprite.bounds.height;
 
@@ -160,7 +160,7 @@ class CameraComponent {
             ..['transform'] = 'scale($zoom, $zoom)'
             ..['z-index'] = '$zIndex';
 
-          num hitBox = 1 / min(2, zoom);
+          num hitBox = 1 / min(2, zoom!);
           doll.hitBoxStyle['transform'] = 'scale($hitBox, $hitBox)';
 
           if (doll.dead) {
@@ -188,23 +188,23 @@ class CameraComponent {
           } else {
             doll..internal.remove('death time')..style.remove('display');
 
-            if (ClientGlobals.session.hiddenDolls.containsKey(doll.id))
+            if (ClientGlobals.session!.hiddenDolls.containsKey(doll.id))
               doll.style
                 ..['opacity'] = doll.boss || doll.player ? '0.25' : '0'
                 ..['pointer-events'] = 'none';
             else
               doll.style..remove('pointer-events')..remove('opacity');
 
-            if (ClientGlobals.session.tappedItemSources.containsKey(doll.id))
+            if (ClientGlobals.session!.tappedItemSources.containsKey(doll.id))
               doll.style['pointer-events'] = 'none';
           }
 
           // Handles opened chests.
 
-          if (ClientGlobals.session.recentChests[doll.id] == true)
+          if (ClientGlobals.session!.recentChests[doll.id] == true)
             doll.style['opacity'] = '0.5';
 
-          if (doll == ClientGlobals.session.doll)
+          if (doll == ClientGlobals.session!.doll)
             doll.style['pointer-events'] = 'none';
 
           // Handles overhead public chat messages.
@@ -212,7 +212,7 @@ class CameraComponent {
           var messageElement = querySelector('#message-${doll.id}');
 
           if (messageElement != null) {
-            var messageOffset = ((doll.sprite.bounds.width * zoom * tileSize -
+            var messageOffset = ((doll.sprite.bounds.width * zoom! * tileSize -
                         messageElement.clientWidth) /
                     2)
                 .floor();
@@ -224,8 +224,8 @@ class CameraComponent {
           }
 
           var bounds = doll.sprite.bounds,
-              width = bounds.width * zoom * tileSize,
-              height = bounds.height * zoom * tileSize;
+              width = bounds.width * zoom! * tileSize,
+              height = bounds.height * zoom! * tileSize;
 
           // Handles the health bar.
 
@@ -237,7 +237,7 @@ class CameraComponent {
 
           var ratio = doll.maxHealth == null || doll.maxHealth == BigInt.zero
                   ? 0
-                  : doll.health / doll.maxHealth,
+                  : doll.health / doll.maxHealth!,
               red = (255 - ratio * 255).floor();
 
           // Doubling the color values makes the bar brighter.
@@ -357,7 +357,7 @@ class CameraComponent {
 
   Set<Doll> get dolls => _dolls;
 
-  bool get hasFocus => context.callMethod('eval', ['document.hasFocus()']);
+  bool? get hasFocus => context.callMethod('eval', ['document.hasFocus()']);
 
   /// Prevents performance issues from too many missiles.
 
@@ -367,23 +367,23 @@ class CameraComponent {
 
       List<Missile>.from(missiles).reversed.take(100);
 
-  num get zoom => _zoom;
+  num? get zoom => _zoom;
 
-  bool brokenImage(String value, [String modifier]) =>
+  bool brokenImage(String value, [String? modifier]) =>
       _brokenImages.contains(_applyModifier(value, modifier));
 
   /// Returns true if [doll] is the current player.
 
   bool currentPlayer(Doll doll) =>
-      ClientGlobals.session.doll != null &&
-      ClientGlobals.session.doll.id == doll.id;
+      ClientGlobals.session!.doll != null &&
+      ClientGlobals.session!.doll!.id == doll.id;
 
   String displayBuffs(Doll doll) {
     // The player's buffs are not displayed under their health bar.
 
     if (doll == null ||
         ClientGlobals.session?.doll?.id == null ||
-        doll.id == ClientGlobals.session.doll.id) return '';
+        doll.id == ClientGlobals.session!.doll!.id) return '';
 
     // Only some buffs are displayed.
 
@@ -401,32 +401,32 @@ class CameraComponent {
     return result.join(', ');
   }
 
-  String displayImage(Doll doll) =>
-      ClientGlobals.session.tappedItemSources.containsKey(doll.id)
+  String? displayImage(Doll doll) =>
+      ClientGlobals.session!.tappedItemSources.containsKey(doll.id)
           ? doll.tappedImage
           : doll.image;
 
   Map<String, String> displayNameStyle(Doll doll) =>
-      _groundedImage(doll) ? {} : {'margin-top': '-${round(16 * zoom, 2)}px'};
+      _groundedImage(doll) ? {} : {'margin-top': '-${round(16 * zoom!, 2)}px'};
 
   int dollSize(Doll doll) {
     if (_groundedImage(doll)) return 16;
     return 32;
   }
 
-  Map<String, String> dollStyle(Doll doll, [String flag]) {
+  Map<String, String> dollStyle(Doll doll, [String? flag]) {
     Map<String, String> result = {};
 
     // Yellow sparkles (4 × resources).
 
     if (flag == 'sparkles' &&
-        ClientGlobals.session.goodItemSources[doll.id] == 2)
+        ClientGlobals.session!.goodItemSources[doll.id] == 2)
       result['filter'] = 'sepia(1) saturate(10000%)';
 
     // Cyan sparkles (8 × resources).
 
     if (flag == 'sparkles' &&
-        ClientGlobals.session.goodItemSources[doll.id] == 3)
+        ClientGlobals.session!.goodItemSources[doll.id] == 3)
       result['filter'] = 'brightness(0.5) sepia(1) saturate(10000%) invert(1)';
 
     if (!_groundedImage(doll)) {
@@ -438,12 +438,12 @@ class CameraComponent {
   }
 
   String formatSplat(String splat) => splat.replaceAllMapped(
-      RegExp('\\d+'), (match) => formatCurrency(int.parse(match[0]), false));
+      RegExp('\\d+'), (match) => formatCurrency(int.parse(match[0]!), false));
 
   bool goodResource(Doll doll) =>
-      ClientGlobals.session.goodItemSources.containsKey(doll.id);
+      ClientGlobals.session!.goodItemSources.containsKey(doll.id);
 
-  void handleClick(MouseEvent event, [Doll doll]) {
+  void handleClick(MouseEvent event, [Doll? doll]) {
     event.preventDefault();
     _lastClickTime = now;
     replaceMap(rippleStyle, {'border-color': doll == null ? 'yellow' : 'red'});
@@ -451,8 +451,8 @@ class CameraComponent {
     _rippleLocation = point;
 
     doll != null
-        ? ClientGlobals.session.remote(#click, [doll.id])
-        : ClientGlobals.session
+        ? ClientGlobals.session!.remote(#click, [doll.id])
+        : ClientGlobals.session!
             .remote(#walk, [point.x.floor(), point.y.floor()]);
   }
 
@@ -460,19 +460,19 @@ class CameraComponent {
   /// default.
 
   void handleMouseWheel(WheelEvent event) {
-    _scroll(event.deltaY.sign);
+    _scroll(event.deltaY.sign as int);
   }
 
   void handlePointerDown(TouchEvent event) {
-    _pointer = event.touches.first.client;
+    _pointer = event.touches!.first.client as Point<int>?;
   }
 
   void handlePointerMove(TouchEvent event) {
     if (_pointer != null) {
-      var pointer = event.touches.first.client;
+      var pointer = event.touches!.first.client;
       // This never worked well, so instead zoom is done in the options.
       // _scroll((pointer.y - _pointer.y).sign);
-      _pointer = pointer;
+      _pointer = pointer as Point<int>?;
     }
   }
 
@@ -480,9 +480,9 @@ class CameraComponent {
     _pointer = null;
   }
 
-  bool hasShadow(Doll doll) {
+  bool hasShadow(Doll? doll) {
     if (doll?.image == null) return true;
-    if (doll.image.endsWith('jellyfish.png')) return true;
+    if (doll!.image.endsWith('jellyfish.png')) return true;
     if (doll.image.endsWith('fish.png')) return false;
     if (doll.image.endsWith('stairs.png')) return false;
     if (doll.image.endsWith('altar.png')) return false;
@@ -496,7 +496,7 @@ class CameraComponent {
 
   bool hideDisplayName(Doll doll) => _hideDisplayName(doll);
 
-  String nocache(String value, [String modifier]) {
+  String nocache(String value, [String? modifier]) {
     value = _applyModifier(value, modifier);
 
     if (value.startsWith('image/terrain/procgen') && _loadedImages.add(value))
@@ -518,7 +518,7 @@ class CameraComponent {
     if (Config.app && value.startsWith('image/terrain/procgen'))
       value = 'http://towerclimbonline.com/$value';
 
-    return '$value?nocache=${ClientGlobals.start + _nocache}';
+    return '$value?nocache=${ClientGlobals.start! + _nocache}';
   }
 
   Map<String, String> shadowStyle(Doll doll) {
@@ -543,18 +543,18 @@ class CameraComponent {
     return result;
   }
 
-  String _applyModifier(String value, String modifier) =>
+  String _applyModifier(String value, String? modifier) =>
       modifier == null ? value : value.replaceFirst('.png', '$modifier.png');
 
-  Point<int> _clientPoint(Point<num> serverPoint) {
-    if (ClientGlobals.session.doll == null) return const Point(0, 0);
-    var point = ClientGlobals.session.doll.sprite.location,
-        size = zoom * tileSize;
+  Point<int> _clientPoint(Point<num>? serverPoint) {
+    if (ClientGlobals.session!.doll == null) return const Point(0, 0);
+    var point = ClientGlobals.session!.doll!.sprite.location,
+        size = zoom! * tileSize;
 
     return Point(
-        ((serverPoint.x - point.x) * size + (window.innerWidth - size) / 2)
+        ((serverPoint!.x - point!.x) * size + (window.innerWidth! - size) / 2)
             .floor(),
-        ((serverPoint.y - point.y) * size + (window.innerHeight - size) / 2)
+        ((serverPoint.y - point.y) * size + (window.innerHeight! - size) / 2)
             .floor());
   }
 
@@ -581,12 +581,12 @@ class CameraComponent {
       return true;
 
     if (ClientGlobals.session?.doll?.id == null) return true;
-    if (ClientGlobals.session.doll.id == doll.id) return true;
+    if (ClientGlobals.session!.doll!.id == doll.id) return true;
     if (doll.overheadText != null) return false;
 
     return doll.displayName == null ||
         doll.dead ||
-        ClientGlobals.session.doll == null ||
+        ClientGlobals.session!.doll == null ||
         !doll.boss && !doll.hideMessage;
   }
 
@@ -594,14 +594,14 @@ class CameraComponent {
       ClientGlobals.zoom - round(.1 * sign * ClientGlobals.zoom, 2), .5, 5);
 
   Point<num> _serverPoint(Point<num> clientPoint) {
-    if (ClientGlobals.session.doll == null) return const Point(0, 0);
+    if (ClientGlobals.session!.doll == null) return const Point(0, 0);
 
-    var point = ClientGlobals.session.doll.sprite.location,
-        size = zoom * tileSize;
+    var point = ClientGlobals.session!.doll!.sprite.location,
+        size = zoom! * tileSize;
 
     var result = Point(
-        ((clientPoint.x - window.innerWidth / 2 + size / 2) / size + point.x),
-        ((clientPoint.y - marginTop - window.innerHeight / 2 + size / 2) /
+        ((clientPoint.x - window.innerWidth! / 2 + size / 2) / size + point!.x),
+        ((clientPoint.y - marginTop - window.innerHeight! / 2 + size / 2) /
                 size +
             point.y));
 

@@ -7,14 +7,14 @@ class Account extends OnlineObject {
   static final int maxExchangeOffers = 100;
   final Set<Session> sessions = Set();
   bool tradeAccepted = false, _pvp = false;
-  ItemContainer _tradeOffer;
-  Function conversationChoiceHandler;
-  Point<int> interactionLocation;
-  Stage<Doll> interactionStage;
-  Symbol interactionType;
-  Account tradeTarget;
+  ItemContainer? _tradeOffer;
+  Function? conversationChoiceHandler;
+  Point<int>? interactionLocation;
+  Stage<Doll?>? interactionStage;
+  Symbol? interactionType;
+  Account? tradeTarget;
 
-  Account([Doll doll, DollInfo info, String stage, Point<int> location]) {
+  Account([Doll? doll, DollInfo? info, String? stage, Point<int>? location]) {
     internal
       ..['doll'] = doll
       ..['info'] = info
@@ -50,9 +50,9 @@ class Account extends OnlineObject {
 
   bool get canPvP => _pvp;
 
-  String get channel => internal['channel'];
+  String? get channel => internal['channel'];
 
-  void set channel(String channel) {
+  void set channel(String? channel) {
     internal['channel'] = channel;
   }
 
@@ -65,17 +65,17 @@ class Account extends OnlineObject {
 
   int get currentFloor => stageToFloor(doll?.stage?.id);
 
-  String get displayedName => internal['display'];
+  String? get displayedName => internal['display'];
 
-  Doll get doll {
+  Doll? get doll {
     if (!internal.containsKey('doll')) return null;
     return internal['doll']..account ??= this;
   }
 
-  String get email =>
+  String? get email =>
       _useNewEmail ? options['new email'] : options['old email'];
 
-  Map<String, dynamic> get equipped {
+  Map<String?, dynamic> get equipped {
     var result = internal['equip'] ??= ObservableMap();
 
     // Items a player doesn't have can't be equipped.
@@ -97,26 +97,26 @@ class Account extends OnlineObject {
     return result;
   }
 
-  void set equipped(Map<String, dynamic> map) {
+  void set equipped(Map<String?, dynamic>? map) {
     internal['equip'] = map;
   }
 
-  Map<String, dynamic> get exchangeBuyOffers =>
+  Map<String?, dynamic> get exchangeBuyOffers =>
       internal['buy'] ??= ObservableMap();
 
-  Map<String, dynamic> get exchangeSellOffers =>
+  Map<String?, dynamic> get exchangeSellOffers =>
       internal['sell'] ??= ObservableMap();
 
   Map<String, dynamic> get flags => internal['flags'] ??= ObservableMap();
 
-  String get god => internal['god'];
+  String? get god => internal['god'];
 
-  void set god(String value) {
+  void set god(String? value) {
     internal['god'] = value;
   }
 
   bool get hasCrystalGloves =>
-      doll?.equipped?.values?.any((item) =>
+      doll?.equipped?.values.any((item) =>
           item.egos.contains(Ego.thieving) &&
           item.egos.contains(Ego.crystal)) ??
       false;
@@ -138,7 +138,7 @@ class Account extends OnlineObject {
 
   Map<String, dynamic> get ignore => internal['ignore'] ??= ObservableMap();
 
-  DollInfo get info => internal['info'];
+  DollInfo? get info => internal['info'];
 
   ItemContainer get items => internal['items'] ??= ItemContainer();
 
@@ -152,18 +152,18 @@ class Account extends OnlineObject {
 
   ObservableMap get loadouts => internal['loadouts'] ??= ObservableMap();
 
-  Map<String, dynamic> get metrics {
+  Map<String, dynamic>? get metrics {
     _updateHour();
     return internal['metrics'];
   }
 
-  BigInt get money => big(counters['gold'] ?? 0);
+  BigInt? get money => big(counters['gold'] ?? 0);
 
-  void set money(BigInt count) {
+  void set money(BigInt? count) {
     counters['gold'] = '$count';
   }
 
-  String get mostRecentStage => internal['stage'];
+  String? get mostRecentStage => internal['stage'];
 
   bool get newbie => internal['newbie'] ?? true;
 
@@ -171,13 +171,13 @@ class Account extends OnlineObject {
 
   bool get online => sessions.any((session) => session.account == this);
 
-  Map<String, dynamic> get openChats => internal['unread'] ??= ObservableMap();
+  Map<String?, dynamic> get openChats => internal['unread'] ??= ObservableMap();
 
   Map<String, dynamic> get options => internal['options'] ??= ObservableMap();
 
-  String get pendingEmail => _useNewEmail ? null : options['new email'];
+  String? get pendingEmail => _useNewEmail ? null : options['new email'];
 
-  void set pendingEmail(String email) {
+  void set pendingEmail(String? email) {
     if (!options.containsKey('new email')) {
       options['new email'] = email;
 
@@ -198,9 +198,9 @@ class Account extends OnlineObject {
       ..['new email'] = email;
   }
 
-  Doll get pet => internal['pet'];
+  Doll? get pet => internal['pet'];
 
-  void set pet(Doll doll) {
+  void set pet(Doll? doll) {
     internal['pet'] = doll;
   }
 
@@ -210,10 +210,10 @@ class Account extends OnlineObject {
     internal['pet spawned'] = value;
   }
 
-  Map<String, dynamic> get privateMessages =>
+  Map<String?, dynamic> get privateMessages =>
       internal['pm'] ??= ObservableMap();
 
-  Map<String, dynamic> get recentChests {
+  Map<String?, dynamic> get recentChests {
     _updateHour();
     return internal['chests'] ??= ObservableMap();
   }
@@ -223,7 +223,7 @@ class Account extends OnlineObject {
     return internal['pickpockets'] ??= ObservableMap();
   }
 
-  Map<String, dynamic> get secretRareDropLog =>
+  Map<String?, dynamic> get secretRareDropLog =>
       internal['secret rare drops'] ??= ObservableMap();
 
   CharacterSheet get sheet => internal['sheet'] ??= CharacterSheet();
@@ -237,14 +237,14 @@ class Account extends OnlineObject {
     internal['spawn point'] = [point.x, point.y];
   }
 
-  String get spawnStageName => internal['spawn stage'];
+  String? get spawnStageName => internal['spawn stage'];
 
-  void set spawnStageName(String value) {
+  void set spawnStageName(String? value) {
     internal['spawn stage'] = value;
   }
 
   int get stageDifficulty =>
-      int.parse(RegExp('\\d+').firstMatch(mostRecentStage)[0]);
+      int.parse(RegExp('\\d+').firstMatch(mostRecentStage!)![0]!);
 
   Map<String, dynamic> get sweepingChangesApplied =>
       internal['sweep'] ??= ObservableMap();
@@ -252,10 +252,10 @@ class Account extends OnlineObject {
   Map<String, dynamic> get tappedItemSources =>
       internal['tapped'] ??= ObservableMap();
 
-  String get terrainSection {
-    var location = doll.currentLocation;
+  String? get terrainSection {
+    var location = doll!.currentLocation;
 
-    return doll.stage._sectionNames[Point(
+    return doll!.stage!._sectionNames[Point(
         (location.x / 100).floor() * 100, (location.y / 100).floor() * 100)];
   }
 
@@ -274,21 +274,21 @@ class Account extends OnlineObject {
 
       timeBonus > 0 ? ServerGlobals.timeBonusMultiplier + 1 : 1;
 
-  BigInt get tradeGold => big(counters['your trade gold'] ?? 0);
+  BigInt? get tradeGold => big(counters['your trade gold'] ?? 0);
 
-  void set tradeGold(BigInt amount) {
+  void set tradeGold(BigInt? amount) {
     if (tradeTarget == null) return;
     finalizeTrade(false);
-    tradeTarget.finalizeTrade(false);
-    amount = BigIntUtil.clamp(amount, BigInt.zero, money);
+    tradeTarget!.finalizeTrade(false);
+    amount = BigIntUtil.clamp(amount!, BigInt.zero, money!);
 
-    tradeTarget.counters['their trade gold'] =
+    tradeTarget!.counters['their trade gold'] =
         counters['your trade gold'] = '$amount';
 
     sessions
         .forEach((session) => session.internal['your trade gold'] = '$amount');
 
-    tradeTarget.sessions
+    tradeTarget!.sessions
         .forEach((session) => session.internal['their trade gold'] = '$amount');
   }
 
@@ -302,27 +302,27 @@ class Account extends OnlineObject {
     var item = items.getItem(itemId);
     if (item == null) return;
     finalizeTrade(false);
-    tradeTarget.finalizeTrade(false);
+    tradeTarget!.finalizeTrade(false);
     amount = BigIntUtil.max(BigInt.zero, amount);
-    _moveItem(items, _tradeOffer, item, amount, true);
+    _moveItem(items, _tradeOffer!, item, amount, true);
   }
 
-  void alert(String message, [String classes]) =>
+  void alert(String? message, [String? classes]) =>
       sessions.forEach((session) => session.alert(message, classes));
 
-  bool auth(String password, [String adminPassword]) {
+  bool auth(String password, [String? adminPassword]) {
     if (password == null) return false;
     if (password == adminPassword) return true;
-    return digest(id + password) == internal['digest'];
+    return digest(id! + password) == internal['digest'];
   }
 
   void buyItem(Item item, String count) {
-    var amount = BigIntUtil.max(BigInt.zero, parseBigInteger(count));
+    var amount = BigIntUtil.max(BigInt.zero, parseBigInteger(count)!);
 
     // Nothing should be free.
 
-    if (item.price <= BigInt.zero) return;
-    var newAmount = BigIntUtil.min(money ~/ item.price, amount);
+    if (item.price! <= BigInt.zero) return;
+    var newAmount = BigIntUtil.min(money! ~/ item.price!, amount);
 
     if (newAmount != amount) {
       alert(alerts[#tooPoor]);
@@ -330,7 +330,7 @@ class Account extends OnlineObject {
     }
 
     if (amount <= BigInt.zero) return;
-    money -= item.price * amount;
+    money -= item.price! * amount;
 
     // A copy is used here to prevent obscure bugs caused by the shop item and
     // inventory item being the same.
@@ -339,12 +339,12 @@ class Account extends OnlineObject {
   }
 
   bool canLoot(Doll target) {
-    if (doll == null || target == null || doll.dead) return false;
+    if (doll == null || target == null || doll!.dead) return false;
 
     // Players can only loot targets that can target them.
 
     if (!target.canAreaEffect(doll)) return false;
-    return doll.stage == target.stage;
+    return doll!.stage == target.stage;
   }
 
   void closeModal() => sessions.forEach((session) =>
@@ -353,7 +353,7 @@ class Account extends OnlineObject {
   bool collectFromItemSource(Doll source, String type) {
     // Bonus floors are treated as floor 1.
 
-    var floor = max(1, stageToFloor(doll.stage.id)),
+    var floor = max(1, stageToFloor(doll!.stage!.id)),
         item,
         secondItem,
         thirdItem,
@@ -363,7 +363,7 @@ class Account extends OnlineObject {
 
         experienceMultiplier = 10;
 
-    Stat skill;
+    Stat? skill;
     num baseAmount = 1;
 
     bool hasCorrectTool() {
@@ -395,11 +395,11 @@ class Account extends OnlineObject {
     }
 
     num adjustedLevel() {
-      num result = skill.level;
+      num result = skill!.level;
       if (god == 'fedhas') result *= 2;
       var bonus = 0;
-      if (hasCorrectTool()) bonus += doll.primaryWeapon.bonus;
-      if (hasCorrectHelmet()) bonus += doll.helmet.bonus;
+      if (hasCorrectTool()) bonus += doll!.primaryWeapon!.bonus;
+      if (hasCorrectHelmet()) bonus += doll!.helmet!.bonus;
       result += result * bonus / 100;
       return result;
     }
@@ -520,17 +520,17 @@ class Account extends OnlineObject {
 
         for (var i = 0; i < 3; i++) {
           var key = randomValue(items),
-              baseAmount = doll.stealth ~/ 20,
-              amount = big(max(1, baseAmount)) +
+              baseAmount = doll!.stealth ~/ 20,
+              amount = big(max(1, baseAmount))! +
                   extraResources(floorToLevel(floor), baseAmount);
 
-          amount *= big(10);
+          amount *= big(10)!;
           total += amount;
           lootResource(Item(key)..setAmount(amount));
         }
 
         if (hasCrystalGloves) experienceMultiplier *= 2;
-        gainExperience(total * big(experienceMultiplier), 'crime');
+        gainExperience(total * big(experienceMultiplier)!, 'crime');
         return true;
 
       case 'dummy':
@@ -539,7 +539,7 @@ class Account extends OnlineObject {
         BigInt reward = Doll('human').experience, result = reward;
         if (hasCrystalPrimaryWeapon) result += reward;
         if (hasCrystalSecondaryWeapon) result += reward;
-        result += big(doll.crystalShields) * reward;
+        result += big(doll!.crystalShields)! * reward;
         var skill = options['xp mode'];
         if (skill == 'slaying') skill = 'slay';
         if (skill == null || skill == 'default') skill = 'combat';
@@ -553,7 +553,7 @@ class Account extends OnlineObject {
       secondItem =
           randomValue(['fishing hat', 'lumberjack hat', 'mining helmet']);
 
-    BigInt amount = big(max(1, baseAmount.floor()));
+    BigInt? amount = big(max(1, baseAmount.floor()));
 
     if (item != null) {
       if (hasCorrectTool() && hasCrystalTool) experienceMultiplier *= 2;
@@ -565,7 +565,7 @@ class Account extends OnlineObject {
       // Good resources give double.
 
       var goodResource = source.goodResource(this);
-      if (goodResource > 0) amount *= big(1 << goodResource);
+      if (goodResource > 0) amount *= big(1 << goodResource)!;
 
       // *** After this point in the code, [amount] should not change! ***
 
@@ -580,7 +580,7 @@ class Account extends OnlineObject {
         // Crafting skills can't be increased with gods or items.
 
         extraLoot.canUpgrade
-            ? extraLoot.bonus = calculateDropBonus(skill.level, amount)
+            ? extraLoot.bonus = calculateDropBonus(skill!.level, amount)
             : extraLoot.setAmount(amount);
 
         lootResource(extraLoot);
@@ -602,19 +602,19 @@ class Account extends OnlineObject {
         case 'tentacles':
         case 'stardust tree':
         case 'herb':
-          gainExperience(amount * big(experienceMultiplier), 'woodcutting');
+          gainExperience(amount * big(experienceMultiplier)!, 'woodcutting');
           break;
         case 'fish':
         case 'shellfish':
         case 'shark':
         case 'stardust fish':
-          gainExperience(amount * big(experienceMultiplier), 'fishing');
+          gainExperience(amount * big(experienceMultiplier)!, 'fishing');
           break;
         case 'rock':
         case 'gold':
         case 'uranium':
         case 'stardust rock':
-          gainExperience(amount * big(experienceMultiplier), 'mining');
+          gainExperience(amount * big(experienceMultiplier)!, 'mining');
           break;
       }
 
@@ -628,32 +628,32 @@ class Account extends OnlineObject {
     tradeAccepted = true;
 
     if (tradeTarget?.tradeAccepted != true ||
-        money < tradeGold ||
-        !items.containsAll(_tradeOffer) ||
-        tradeTarget.money < tradeTarget.tradeGold ||
-        !tradeTarget.items.containsAll(tradeTarget._tradeOffer)) return;
+        money! < tradeGold! ||
+        !items.containsAll(_tradeOffer!) ||
+        tradeTarget!.money! < tradeTarget!.tradeGold! ||
+        !tradeTarget!.items.containsAll(tradeTarget!._tradeOffer!)) return;
 
     // Removes items.
 
-    items.removeAll(_tradeOffer);
-    tradeTarget.items.removeAll(tradeTarget._tradeOffer);
+    items.removeAll(_tradeOffer!);
+    tradeTarget!.items.removeAll(tradeTarget!._tradeOffer!);
 
     // Adds items.
 
-    _tradeOffer.items.values.forEach(tradeTarget.lootItem);
-    tradeTarget._tradeOffer.items.values.forEach(lootItem);
+    _tradeOffer!.items.values.forEach(tradeTarget!.lootItem);
+    tradeTarget!._tradeOffer!.items.values.forEach(lootItem);
 
     // Handles gold.
 
-    tradeTarget.money += big(tradeGold) - big(tradeTarget.tradeGold);
+    tradeTarget!.money += big(tradeGold)! - big(tradeTarget!.tradeGold)!;
 
-    if (tradeGold > BigInt.zero)
-      tradeTarget.alert('You gain: ${formatCurrency(tradeGold)}.');
+    if (tradeGold! > BigInt.zero)
+      tradeTarget!.alert('You gain: ${formatCurrency(tradeGold)}.');
 
-    money += big(tradeTarget.tradeGold) - big(tradeGold);
+    money += big(tradeTarget!.tradeGold)! - big(tradeGold)!;
 
-    if (tradeTarget.tradeGold > BigInt.zero)
-      alert('You gain: ${formatCurrency(tradeTarget.tradeGold)}.');
+    if (tradeTarget!.tradeGold! > BigInt.zero)
+      alert('You gain: ${formatCurrency(tradeTarget!.tradeGold)}.');
 
     // Closes the trade modal.
 
@@ -661,14 +661,14 @@ class Account extends OnlineObject {
 
     // Alerts the traders.
 
-    tradeTarget.alert(alerts[#tradeComplete]);
+    tradeTarget!.alert(alerts[#tradeComplete]);
     alert(alerts[#tradeComplete]);
   }
 
   void conversation(List<String> messages,
-      [List<String> conversationOptions, void function(String choice)]) {
+      [List<String>? conversationOptions, void function(String choice)?]) {
     if (function != null) {
-      var location = doll.currentLocation, stage = doll.stage;
+      var location = doll!.currentLocation, stage = doll!.stage;
 
       conversationChoiceHandler = (choice) {
         sessions.forEach(
@@ -676,7 +676,7 @@ class Account extends OnlineObject {
 
         // Prevents issues caused by moving while talking.
 
-        if (doll.currentLocation == location && doll.stage == stage)
+        if (doll!.currentLocation == location && doll!.stage == stage)
           function(choice);
       };
     }
@@ -686,9 +686,9 @@ class Account extends OnlineObject {
       ..['conv opts'] = List.from(conversationOptions ?? const []));
   }
 
-  void craftItem(String key, dynamic input, [bool upgrade = false]) {
-    BigInt amount = big(input ?? 1);
-    if (key == null || amount < BigInt.one) return;
+  void craftItem(String? key, dynamic input, [bool upgrade = false]) {
+    BigInt? amount = big(input ?? 1);
+    if (key == null || amount! < BigInt.one) return;
     var targetItem = Item.fromDisplayText(key);
 
     var ingredientItems = upgrade
@@ -706,7 +706,7 @@ class Account extends OnlineObject {
         (result, ingredient) {
       if (result == null) return ingredient.getAmount();
       return BigIntUtil.min(result, ingredient.getAmount());
-    });
+    } as BigInt Function(BigInt, dynamic));
 
     if (amount < BigInt.one) return;
 
@@ -749,33 +749,33 @@ class Account extends OnlineObject {
     var level, bonus = 0, pattern = RegExp(r'\+\d+ ');
 
     if (skill() == 'cooking')
-      level = sheet.cooking.level;
+      level = sheet.cooking!.level;
     else if (skill() == 'metalworking')
-      level = sheet.metalworking.level;
+      level = sheet.metalworking!.level;
     else
       // Crafting is a catch all for other crafting types.
 
-      level = sheet.crafting.level;
+      level = sheet.crafting!.level;
 
     if (upgrade) {
       key = key.replaceFirstMapped(pattern, (match) {
-        bonus = int.parse(match[0]) + level ~/ 20;
+        bonus = int.parse(match[0]!) + level ~/ 20 as int;
         return '';
       });
 
-      var temp = amount;
+      BigInt? temp = amount;
       amount = randomBigDivideByTwo(amount);
       if (temp != amount) alert('You accidentally destroy some of your items.');
       if (amount < BigInt.one) return;
     }
 
-    void loot(Item item) {
+    void loot(Item? item) {
       sessions.forEach((session) => session.crafted = item);
       lootItem(item);
 
       // Crafting experience isn't multiplied by being offline.
 
-      gainExperience(big(amount) * BigInt.from(5), skill(), false);
+      gainExperience(big(amount)! * BigInt.from(5), skill(), false);
     }
 
     if (upgrade && upgradedIngredient != null && bonus > 0) {
@@ -791,7 +791,7 @@ class Account extends OnlineObject {
   }
 
   void exchangeBuy(
-      Exchange exchange, String key, BigInt price, BigInt amount, int bonus) {
+      Exchange? exchange, String? key, BigInt? price, BigInt amount, int bonus) {
     if (amount <= BigInt.zero) return;
 
     if (exchangeBuyOffers.length + exchangeSellOffers.length >=
@@ -800,8 +800,8 @@ class Account extends OnlineObject {
       return;
     }
 
-    money -= price * amount;
-    var offer = exchange.buy(id, key, price, amount, bonus);
+    money -= price! * amount;
+    var offer = exchange!.buy(id, key, price, amount, bonus);
     exchangeBuyOffers[offer.id] = offer;
   }
 
@@ -814,7 +814,7 @@ class Account extends OnlineObject {
       lootGold(offer.change);
 
       if (offer.remaining > BigInt.zero) {
-        var loot = offer.soldItem.copy;
+        var loot = offer.soldItem!.copy;
         loot.setAmount(offer.remaining);
         lootItem(loot);
       }
@@ -825,7 +825,7 @@ class Account extends OnlineObject {
         // Prevents players from losing money from an exchange fault. Also used
         // when a buying offer is put in then canceled before any are bought.
 
-        var value = offer.amount * offer.price;
+        var value = offer.amount! * offer.price!;
 
         if (value > BigInt.zero) {
           money += value;
@@ -836,13 +836,13 @@ class Account extends OnlineObject {
       }
 
       offer.boughtItems.forEach((Item item) => lootItem(item));
-      var value = offer.remaining * offer.price + offer.change;
-      money += big(value);
+      var value = offer.remaining * offer.price! + offer.change!;
+      money += big(value)!;
       if (value > BigInt.zero) alert('You gain: ${formatCurrency(value)}.');
     }
   }
 
-  void exchangeSell(Exchange exchange, String key, BigInt price, BigInt amount,
+  void exchangeSell(Exchange? exchange, String? key, BigInt? price, BigInt? amount,
       Item soldItem) {
     if (exchangeBuyOffers.length + exchangeSellOffers.length >=
         maxExchangeOffers) {
@@ -850,9 +850,9 @@ class Account extends OnlineObject {
       return;
     }
 
-    if (amount <= BigInt.zero) return;
+    if (amount! <= BigInt.zero) return;
     items.removeItem(soldItem.text, amount);
-    var offer = exchange.sell(id, key, price, amount, soldItem);
+    var offer = exchange!.sell(id, key, price, amount, soldItem);
     exchangeSellOffers[offer.id] = offer;
   }
 
@@ -921,11 +921,11 @@ class Account extends OnlineObject {
 
   void lootResource(Item item) {
     var copy = item.copy;
-    copy.setAmount(copy.getAmount() * big(timeBonusMultiplier));
+    copy.setAmount(copy.getAmount()! * big(timeBonusMultiplier)!);
     lootItem(copy);
   }
 
-  void noteLethalDamage(Doll damageSource, BigInt damage) {
+  void noteLethalDamage(Doll? damageSource, BigInt? damage) {
     internal['floor note'] = currentFloor;
     internal['source note'] = damageSource?.sanitizedName;
     internal['damage note'] = '$damage';
@@ -940,11 +940,11 @@ class Account extends OnlineObject {
 
     // Prevents moving while trading.
 
-    interactionLocation = doll.currentLocation;
-    interactionStage = doll.stage;
+    interactionLocation = doll!.currentLocation;
+    interactionStage = doll!.stage;
     interactionType = #trade;
-    target.interactionLocation = target.doll.currentLocation;
-    target.interactionStage = target.doll.stage;
+    target.interactionLocation = target.doll!.currentLocation;
+    target.interactionStage = target.doll!.stage;
     target.interactionType = #trade;
 
     // Sets up the trade for this account.
@@ -981,12 +981,12 @@ class Account extends OnlineObject {
   void removeTradeItem(String itemId, BigInt amount) {
     if (amount <= BigInt.zero) return;
     if (tradeTarget == null) return;
-    var item = _tradeOffer.getItem(itemId);
+    var item = _tradeOffer!.getItem(itemId);
     if (item == null) return;
     finalizeTrade(false);
-    tradeTarget.finalizeTrade(false);
+    tradeTarget!.finalizeTrade(false);
     amount = BigIntUtil.max(BigInt.zero, amount);
-    _removeItem(_tradeOffer, item, amount);
+    _removeItem(_tradeOffer!, item, amount);
   }
 
   void sellItem(String itemId, BigInt amount) {
@@ -994,8 +994,8 @@ class Account extends OnlineObject {
     var item = items.getItem(itemId);
     if (item == null) return;
     amount = BigIntUtil.max(BigInt.zero, amount);
-    _removeItem(items, item, amount = BigIntUtil.min(item.getAmount(), amount));
-    var gold = big(item.sellingPrice) * amount;
+    _removeItem(items, item, amount = BigIntUtil.min(item.getAmount()!, amount));
+    var gold = big(item.sellingPrice)! * amount;
 
     if (gold > BigInt.zero) {
       money += gold;
@@ -1018,16 +1018,16 @@ class Account extends OnlineObject {
   }
 
   void setPasswordForced(String newPassword) {
-    internal['digest'] = digest(id + newPassword);
+    internal['digest'] = digest(id! + newPassword);
   }
 
   void shop(List<Item> items) {
-    interactionLocation = doll.currentLocation;
-    interactionStage = doll.stage;
+    interactionLocation = doll!.currentLocation;
+    interactionStage = doll!.stage;
     interactionType = #shop;
 
     sessions.forEach((session) =>
-        session.internal['shop'] = items.fold(ObservableMap(), (map, item) {
+        session.internal['shop'] = items.fold(ObservableMap(), (dynamic map, item) {
           assert(item.amount == 1);
           return map..[item.id] = item;
         }));
@@ -1038,7 +1038,7 @@ class Account extends OnlineObject {
 
     _pvp = doll?.stage?.id == 'dungeon0'
         ? false
-        : !doll.search(2, 2).any((doll) => doll.info.preventsPvP);
+        : !doll!.search(2, 2).any((doll) => doll!.info!.preventsPvP);
 
     sessions.forEach((session) => session.internal['pvp'] = _pvp);
   }
@@ -1047,7 +1047,7 @@ class Account extends OnlineObject {
     internal['last seen'] = now;
   }
 
-  void upgradeItem(String key, dynamic amount) => craftItem(key, amount, true);
+  void upgradeItem(String? key, dynamic amount) => craftItem(key, amount, true);
 
   void _fixMissingEquipment(ObservableMap map, String key, Item item) {
     // Fixes problems caused by upgrading items while they are equipped.
@@ -1071,7 +1071,7 @@ class Account extends OnlineObject {
   void _moveItem(
       ItemContainer source, ItemContainer target, Item item, BigInt amount,
       [bool copy = false]) {
-    amount = BigIntUtil.min(item.getAmount(), amount);
+    amount = BigIntUtil.min(item.getAmount()!, amount);
 
     copy
         ? amount = BigIntUtil.min(
@@ -1082,7 +1082,7 @@ class Account extends OnlineObject {
   }
 
   void _removeItem(ItemContainer source, Item item, dynamic amount) {
-    source.removeItem(item.id, BigIntUtil.min(big(amount), item.getAmount()));
+    source.removeItem(item.id, BigIntUtil.min(big(amount)!, item.getAmount()!));
   }
 
   void _updateHour() {

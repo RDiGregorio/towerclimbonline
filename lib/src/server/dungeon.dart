@@ -24,39 +24,39 @@ class Dungeon {
   int roomTries;
   int maxRoomSize;
 
-  Array2D<int> _floors;
+  late Array2D<int?> _floors;
 
   final _rooms = <Rect>[];
-  int _roomTriesLeft;
+  late int _roomTriesLeft;
 
-  int _currentRegion;
+  int? _currentRegion;
 
   /// Starting position of the current maze.
-  int _mazeStartX;
-  int _mazeStartY;
+  late int _mazeStartX;
+  late int _mazeStartY;
 
-  Direction _lastMazeDir;
+  Direction? _lastMazeDir;
 
   /// The open cells for the current maze being generated.
   final _mazeCells = <Vec>[];
 
-  List<Vec> _connectors;
+  late List<Vec> _connectors;
 
-  final _mergeCells = Queue<Vec>();
+  final _mergeCells = Queue<Vec?>();
 
   final _openCells = <Vec>[];
-  int _deadEndSeek;
+  int? _deadEndSeek;
 
   /// Size of the dungeon in cells, not pixels.
-  int _dungeonWidth;
-  int _dungeonHeight;
+  late int _dungeonWidth;
+  late int _dungeonHeight;
 
   Dungeon({this.cellSize = 6, this.roomTries = 200, this.maxRoomSize = 20}) {
     var size = 100;
     _dungeonWidth = size;
     _dungeonHeight = size;
 
-    _floors = Array2D<int>(_dungeonWidth, _dungeonHeight, null);
+    _floors = Array2D<int?>(_dungeonWidth, _dungeonHeight, null);
     reset();
     while (update());
     _carveWalls();
@@ -126,11 +126,11 @@ class Dungeon {
     return false;
   }
 
-  void _carve(Vec pos, [int value]) {
+  void _carve(Vec pos, [int? value]) {
     value ??= _currentRegion;
     _floors[pos] = value;
 
-    if (value > CELL_SOLID) {
+    if (value! > CELL_SOLID) {
       // Open region.
       _drawTile(pos.x, pos.y, TILE_FLOOR);
     } else if (value == CELL_SOLID) {
@@ -198,8 +198,8 @@ class Dungeon {
       var pos = _mergeCells.removeFirst();
 
       for (var dir in Direction.cardinal) {
-        var here = pos + dir;
-        if (_floors[here] <= CELL_SOLID) continue;
+        var here = pos! + dir;
+        if (_floors[here]! <= CELL_SOLID) continue;
 
         _carve(here, CELL_MERGED);
         _mergeCells.add(here);
@@ -219,7 +219,7 @@ class Dungeon {
   void _findConnectors() {
     for (var pos in _floors.bounds.inflate(-1)) {
       // Can't already be part of a region.
-      if (_floors[pos] > CELL_SOLID) continue;
+      if (_floors[pos]! > CELL_SOLID) continue;
 
       var regions = _getRegionsTouching(pos);
       if (regions.length < 2) continue;
@@ -242,8 +242,8 @@ class Dungeon {
     _deadEndSeek = 0;
   }
 
-  Set<int> _getRegionsTouching(Vec pos) {
-    var regions = Set<int>();
+  Set<int?> _getRegionsTouching(Vec pos) {
+    var regions = Set<int?>();
     for (var dir in Direction.cardinal) {
       var region = _floors[pos + dir];
       if (region != CELL_SOLID) regions.add(region);
@@ -305,7 +305,7 @@ class Dungeon {
 
     // Find a connector that's touching the merged area.
     var connector;
-    var merged;
+    late var merged;
     for (var i = 0; i < _connectors.length; i++) {
       merged = _getRegionsTouching(_connectors[i]);
       if (merged.contains(CELL_MERGED)) {
@@ -344,7 +344,7 @@ class Dungeon {
     var start = _deadEndSeek;
 
     while (true) {
-      var pos = _openCells[_deadEndSeek];
+      var pos = _openCells[_deadEndSeek!];
 
       // If it only has one exit, it's a dead end.
       var exits = 0;
@@ -354,13 +354,13 @@ class Dungeon {
 
       if (exits == 1) {
         _carve(pos, CELL_SOLID);
-        _openCells.removeAt(_deadEndSeek);
+        _openCells.removeAt(_deadEndSeek!);
         if (_deadEndSeek == _openCells.length) _deadEndSeek = 0;
         return true;
       }
 
       // Move on to the next candidate.
-      _deadEndSeek = (_deadEndSeek + 1) % _openCells.length;
+      _deadEndSeek = (_deadEndSeek! + 1) % _openCells.length;
 
       // If we did a full cycle and didn't find a dead end, there must not be
       // any more.

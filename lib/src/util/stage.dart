@@ -1,45 +1,46 @@
+import 'package:collection/collection.dart' show IterableExtension;
 part of util;
 
 /// Holds information for collision detection and finding nearby dolls. It
 /// doesn't hold graphical information (that can be stored somewhere else based
 /// on the stage name).
 
-class Stage<T extends Doll> extends OnlineObject {
-  final String id;
-  int keepAlive = 0, _sectionWidth, _sectionHeight, _timestamp;
+class Stage<T extends Doll?> extends OnlineObject {
+  final String? id;
+  int? keepAlive = 0, _sectionWidth, _sectionHeight, _timestamp;
   Map<Point<int>, Map<Point<int>, int>> _sections = {};
   Space<T> _space = Space(), _userDollSpace = Space();
-  Map<String, T> _dollsByName = {};
+  Map<String?, T> _dollsByName = {};
   SetMultimap<Point<int>, T> _dollsByLocation = SetMultimap();
   Map<Point<int>, String> _sectionNames = {};
-  List<Point<int>> _traversableLocations;
+  List<Point<int>>? _traversableLocations;
 
   Stage(this.id, this._sectionWidth, this._sectionHeight);
 
   Rectangle<int> get bounds => Rectangle<int>(
       0,
       0,
-      _sections.keys.fold(0, (result, point) => max<int>(result, point.x)) +
-          _sectionWidth,
-      _sections.keys.fold(0, (result, point) => max<int>(result, point.y)) +
-          _sectionHeight);
+      _sections.keys.fold(0, (dynamic result, point) => max<int>(result, point.x)) +
+          _sectionWidth!,
+      _sections.keys.fold(0, (dynamic result, point) => max<int>(result, point.y)) +
+          _sectionHeight!);
 
-  Map<String, T> get dolls => UnmodifiableMapView(_dollsByName);
+  Map<String?, T> get dolls => UnmodifiableMapView(_dollsByName);
 
   Map<String, dynamic> get flags => internal['flags'] ?? {};
 
-  Doll get stairsDown =>
-      dolls.values.firstWhere((doll) => doll.isStairsDown, orElse: () => null);
+  Doll? get stairsDown =>
+      dolls.values.firstWhereOrNull((doll) => doll.isStairsDown);
 
-  Doll get stairsUp =>
-      dolls.values.firstWhere((doll) => doll.isStairsUp, orElse: () => null);
+  Doll? get stairsUp =>
+      dolls.values.firstWhereOrNull((doll) => doll.isStairsUp);
 
   int get timestamp => _timestamp ?? 0;
 
   void set timestamp(int value) => _timestamp = value;
 
-  void addDoll(T doll, [Point<int> location]) {
-    if (dolls.containsKey(doll.id)) removeDoll(dolls[doll.id]);
+  void addDoll(T doll, [Point<int>? location]) {
+    if (dolls.containsKey(doll.id)) removeDoll(dolls[doll.id]!);
 
     if (doll.temporary)
       Future.delayed(
@@ -80,10 +81,10 @@ class Stage<T extends Doll> extends OnlineObject {
 
   Set<T> dollsAt(Point<int> location) => Set.from(_dollsByLocation[location]);
 
-  int getTerrain(Point<int> location) => (_sections[Point(
-          location.x - location.x % _sectionWidth,
-          location.y - location.y % _sectionHeight)] ??
-      const {})[Point(location.x % _sectionWidth, location.y % _sectionHeight)];
+  int? getTerrain(Point<int> location) => (_sections[Point(
+          location.x - location.x % _sectionWidth!,
+          location.y - location.y % _sectionHeight!)] ??
+      const {})[Point(location.x % _sectionWidth!, location.y % _sectionHeight!)];
 
   bool land(Point<int> location) =>
       (getTerrain(location) ?? double.infinity) <= Terrain.land;
@@ -107,7 +108,7 @@ class Stage<T extends Doll> extends OnlineObject {
     doll.internal['loc'] = [location.x, location.y];
   }
 
-  Point<int> randomTraversableLocation(Doll doll) {
+  Point<int>? randomTraversableLocation(Doll doll) {
     traversableLocations() {
       _traversableLocations = [];
       var bottomRight = bounds.bottomRight;
@@ -117,10 +118,10 @@ class Stage<T extends Doll> extends OnlineObject {
           var point = Point(x, y);
 
           if (traversable(doll, point, Terrain.land))
-            _traversableLocations.add(point);
+            _traversableLocations!.add(point);
         }
 
-      return _traversableLocations.isEmpty
+      return _traversableLocations!.isEmpty
           ? const [Point(0, 0)]
           : _traversableLocations;
     }
@@ -142,24 +143,24 @@ class Stage<T extends Doll> extends OnlineObject {
   /// If [_sectionWidth] and [_sectionHeight] are 100, for example, valid
   /// [location]s are [0, 0], [100, -200], [500, 600], and so on.
 
-  void setCollisionMap(String name, Map<Point<int>, int> collision,
+  void setCollisionMap(String? name, Map<Point<int>, int> collision,
       [Point<int> location = const Point(0, 0)]) {
     // Sets up collision detection.
 
-    assert(location.x % _sectionWidth == 0 && location.y % _sectionHeight == 0);
+    assert(location.x % _sectionWidth! == 0 && location.y % _sectionHeight! == 0);
     _sectionNames[location] = 'image/terrain/$name.png';
     _sections[location] = Map.from(collision);
   }
 
-  bool traversable(Doll doll, Point<int> location, int pass) {
+  bool traversable(Doll doll, Point<int> location, int? pass) {
     var terrainType = getTerrain(location);
 
     return terrainType != null &&
         dollsAt(location).fold(
                 terrainType,
-                (terrainType, doll) =>
-                    max<num>(terrainType, doll.canPassThis)) <=
-            pass;
+                (dynamic terrainType, doll) =>
+                    max<num>(terrainType, doll.canPassThis!)) <=
+            pass!;
   }
 
   /// Searches only user dolls.

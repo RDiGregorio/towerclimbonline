@@ -15,7 +15,7 @@ class RecoveryComponent {
   }
 
   void recover() {
-    ClientGlobals.session
+    ClientGlobals.session!
         .remote(#login, [null, username, null, false, code, password]).then(
             (result) => result
                 ? ClientGlobals.currentView = 'game'
@@ -23,7 +23,7 @@ class RecoveryComponent {
   }
 
   void send() {
-    ClientGlobals.session.remote(#sendRecoveryEmail, [username]).then(
+    ClientGlobals.session!.remote(#sendRecoveryEmail, [username]).then(
         (result) => result ? sent = true : error = true);
   }
 }

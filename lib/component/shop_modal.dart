@@ -16,46 +16,46 @@ class ShopModal implements OnDestroy {
   String filter, searchInput = '';
   final ChangeDetectorRef _changeDetectorRef;
 
-  StreamSubscription<ObservableEvent> _subscription;
+  late StreamSubscription<ObservableEvent> _subscription;
   ShopModal(this._changeDetectorRef) {
-    _subscription = ClientGlobals.session.internal.getEvents(
+    _subscription = ClientGlobals.session!.internal.getEvents(
         type: 'change', path: ['items']).listen((event) => _updateItems());
 
     Future(_updateItems);
   }
 
   Iterable<Item> get displayedItems => sortedItems.where((item) =>
-      item.displayTextWithoutAmount
+      item.displayTextWithoutAmount!
           .toLowerCase()
           .contains(searchInput.toLowerCase()) &&
       item.amount > 0);
 
   Map<String, dynamic> get items =>
-      ClientGlobals.session.items?.items ?? const {};
+      ClientGlobals.session!.items?.items ?? const {};
 
   Map<String, dynamic> get shopItems =>
-      ClientGlobals.session.shopItems ?? const {};
+      ClientGlobals.session!.shopItems ?? const {};
 
   List<Item> get sortedShopItems =>
-      List<Item>.from(shopItems.values)..sort(compareItems);
+      List<Item>.from(shopItems.values)..sort(compareItems as int Function(Item, Item)?);
 
   void buyItem(Item item) {
     showInputModal(
         'Amount (${item.displayTextWithoutAmount})',
         'buy',
         (input) async =>
-            await ClientGlobals.session.remote(#buyItem, [item.id, input]));
+            await ClientGlobals.session!.remote(#buyItem, [item.id, input]));
 
-    querySelector('#input-modal-toggle').click();
+    querySelector('#input-modal-toggle')!.click();
   }
 
   String formatBuyingPrice(Item item) => formatCurrency(item.price);
 
   String formatSellingPrice(Item item) => formatCurrency(item.sellingPrice);
 
-  String itemImage(Item item) => item.info.image;
+  String? itemImage(Item item) => item.info!.image;
 
-  String itemName(Item item) => item.displayText;
+  String? itemName(Item item) => item.displayText;
 
   void ngOnDestroy() {
     _subscription.cancel();
@@ -63,13 +63,13 @@ class ShopModal implements OnDestroy {
 
   void sellItem(Item item) {
     showInputModal('Amount (${item.displayTextWithoutAmount})', 'sell',
-        (input) => ClientGlobals.session.remote(#sellItem, [item.id, input]));
+        (input) => ClientGlobals.session!.remote(#sellItem, [item.id, input]));
 
-    querySelector('#input-modal-toggle').click();
+    querySelector('#input-modal-toggle')!.click();
   }
 
   void _updateItems() {
-    sortedItems = List<Item>.from(items.values)..sort(compareItems);
+    sortedItems = List<Item>.from(items.values)..sort(compareItems as int Function(Item, Item)?);
     _changeDetectorRef.markForCheck();
   }
 }

@@ -10,7 +10,7 @@ class Scores extends OnlineObject {
   List<dynamic> get list {
     var scores = internal['scores'],
         result = List.from(scores.keys.map((key) => [key, scores[key]]))
-          ..sort((first, second) => -big(first[1]).compareTo(big(second[1])));
+          ..sort((first, second) => -big(first[1])!.compareTo(big(second[1])!));
 
     return List<dynamic>.from(
         result.map((list) => [list[0], formatNumber(list[1])]));
@@ -22,9 +22,9 @@ class Scores extends OnlineObject {
 
     if (scores.length >= 100) {
       if (List<dynamic>.from(scores.values)
-          .any((value) => big(value) < big(score))) {
+          .any((value) => big(value)! < big(score)!)) {
         scores.remove(List<String>.from(scores.keys).reduce((first, second) =>
-            big(scores[first]) < big(scores[second]) ? first : second));
+            big(scores[first])! < big(scores[second])! ? first : second));
 
         scores[username] = '$score';
       }

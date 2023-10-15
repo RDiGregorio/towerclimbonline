@@ -5,7 +5,7 @@ part of util;
 class ServerGlobals {
   static Set<dynamic> sockets = Set();
   static bool shuttingDown = false;
-  static Stage playerSpawnStage = null;
+  static Stage? playerSpawnStage = null;
 
   static const int sight = 10,
       tickDelay = 200,

@@ -125,8 +125,8 @@ Future<dynamic> _main() async {
 
       // Tries to load the stage as a resource.
 
-      Stage<Doll> stage =
-          await stageManager.getResource(() => null, stageKey, future);
+      Stage<Doll>? stage =
+          await (stageManager.getResource(() => null, stageKey, future) as FutureOr<Stage<Doll>?>);
 
       // If that fails, tries to load the stage from the disk.
 
@@ -215,7 +215,7 @@ Future<dynamic> _main() async {
           key = data[i].join('_'),
           offset = Point<int>(data[i][1] * 100, data[i][2] * 100);
 
-      stage.setCollisionMap(
+      stage!.setCollisionMap(
           key, await newCollisionMap(stage, key, offset), offset);
     }
 
@@ -258,7 +258,7 @@ Future<dynamic> _main() async {
 
               account
                 ..lootItem(weapon)
-                ..doll.equip(weapon);
+                ..doll!.equip(weapon);
 
               account.lootItem(Item('leash'));
 
@@ -283,7 +283,7 @@ Future<dynamic> _main() async {
                   Item.fromDisplayText('+$upgrades spirit distortion cloak')
                 ].forEach((item) {
                   account.lootItem(item);
-                  account.doll.equip(item);
+                  account.doll!.equip(item);
                 });
 
                 account.sheet
@@ -359,11 +359,11 @@ Future<dynamic> _main() async {
           ..recipients.add(email)
           ..subject = 'recovery code'
           ..text = text,
-        gmail(secretConfig['email'], secretConfig['email password']));
+        gmail(secretConfig['email']!, secretConfig['email password']!));
 
     Clock.start(Duration(milliseconds: ServerGlobals.tickDelay));
 
-    Clock.ticks.expand((time) {
+    Clock.ticks!.expand((time) {
       var result = [];
 
       result.addAll(nearbyDolls(

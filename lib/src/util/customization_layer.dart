@@ -66,5 +66,5 @@ class CustomizationLayer extends OnlineObject {
     return {'-webkit-filter': filter, 'filter': filter};
   }
 
-  int _value(int value) => clamp(value ?? 0, 0, 360).floor();
+  int _value(int? value) => clamp(value ?? 0, 0, 360).floor();
 }

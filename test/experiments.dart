@@ -16,7 +16,7 @@ void main() {
 }
 
 class CertificateFinder {
-  Product _product;
+  late Product _product;
   Function _collision;
   int _key = 0, _max = 0;
 
@@ -25,7 +25,7 @@ class CertificateFinder {
     print('length: ${_product.length}');
   }
 
-  List<int> get certificate {
+  List<int?>? get certificate {
     for (int i = 0; i < 100; i++) {
       print('key: $_key, max: $_max');
       print(_key.toRadixString(3).padLeft(10, '0'));
@@ -50,7 +50,7 @@ class CertificateFinder {
     return null;
   }
 
-  List<int> _findCollision(List<int> certificate) {
+  List<int>? _findCollision(List<int?> certificate) {
     print('cert: $certificate');
 
     for (int i = certificate.length - 1; i >= 0; i--)
@@ -64,29 +64,29 @@ class CertificateFinder {
 
 class Product {
   List<List<int>> _list;
-  int _base, _length;
+  int? _base, _length;
 
   Product(List<List<int>> this._list) {
-    _base = _list.fold(0, (result, list) => max<int>(result, list.length));
-    _length = pow(_base, _list.length).floor();
+    _base = _list.fold(0, ((result, list) => max<int>(result, list.length)) as int? Function(int?, List<int>));
+    _length = pow(_base!, _list.length).floor();
   }
 
-  int get length => _length;
+  int? get length => _length;
 
-  List<int> operator [](int key) {
-    var keys = _keys(key), result = List<int>(_list.length);
+  List<int?> operator [](int key) {
+    var keys = _keys(key), result = List<int?>(_list.length);
     for (int i = 0; i < keys.length; i++) result[i] = _list[i][keys[i]];
     return result;
   }
 
   int flip(int key, int bit) {
     var keys = _keys(key), index = keys.length - (bit + 1);
-    keys[index] = (keys[index] + 1) % _base;
+    keys[index] = (keys[index] + 1) % _base!;
     return int.parse(keys.join(''), radix: _base);
   }
 
   List<int> _keys(int key) => List<int>.from(key
-      .toRadixString(_base)
+      .toRadixString(_base!)
       .padLeft(_list.length, '0')
       .split('')
       .map(int.parse));

@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart' show IterableExtension;
 part of util;
 
 // You can add new egos but you can't remove old ones because they are used for
@@ -219,21 +220,21 @@ class Ego {
     Ego.energy: 'image/missile/white_bolt.png'
   };
 
-  static String longDescriptionFor(Item item, int ego) {
+  static String? longDescriptionFor(Item item, int ego) {
     if (item.egos.contains(Ego.crystal)) {
       if (item.egos.contains(Ego.mining))
-        return longDescriptions[ego].replaceFirst('{skill}', 'mining');
+        return longDescriptions[ego]!.replaceFirst('{skill}', 'mining');
 
       if (item.egos.contains(Ego.fishing))
-        return longDescriptions[ego].replaceFirst('{skill}', 'fishing');
+        return longDescriptions[ego]!.replaceFirst('{skill}', 'fishing');
 
       if (item.egos.contains(Ego.gathering))
-        return longDescriptions[ego].replaceFirst('{skill}', 'gathering');
+        return longDescriptions[ego]!.replaceFirst('{skill}', 'gathering');
 
       if (item.egos.contains(Ego.thieving))
-        return longDescriptions[ego].replaceFirst('{skill}', 'stealth');
+        return longDescriptions[ego]!.replaceFirst('{skill}', 'stealth');
 
-      return longDescriptions[ego]
+      return longDescriptions[ego]!
           .replaceFirst('{skill}', 'combat, luck, and taming');
     }
 
@@ -244,12 +245,11 @@ class Ego {
     for (List<int> result = [];;) {
       string = string.trim();
 
-      var key = descriptions.keys.firstWhere(
-          (key) => string.startsWith(descriptions[key]),
-          orElse: () => null);
+      var key = descriptions.keys.firstWhereOrNull(
+          (key) => string.startsWith(descriptions[key]!));
 
       if (key == null) return result;
-      string = string.replaceFirst(descriptions[key], '');
+      string = string.replaceFirst(descriptions[key]!, '');
       result.add(key);
     }
   }

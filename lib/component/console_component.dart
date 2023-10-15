@@ -17,14 +17,14 @@ class ConsoleComponent {
       _accurateTimePattern = RegExp(r'\d+:\d+:\d+.\d+'),
       _datePattern = RegExp(r'\d+-\d+-\d+');
 
-  String input;
+  String? input;
   bool _scroll = false;
   int unreadPublic = 0, unreadChannel = 0, unreadAlerts = 0, _messageCap = 20;
-  final Map<String, int> _unreadPrivate = {};
-  final Map<String, Queue<Map<String, dynamic>>> privateMessages = {};
+  final Map<String?, int> _unreadPrivate = {};
+  final Map<String?, Queue<Map<String, dynamic>?>> privateMessages = {};
   final Map<String, String> chatStyle = {};
 
-  final Queue<Map<String, dynamic>> output = Queue(),
+  final Queue<Map<String, dynamic>?> output = Queue(),
       _channelMessages = Queue(),
       alerts = Queue();
 
@@ -32,9 +32,9 @@ class ConsoleComponent {
   final ChangeDetectorRef _changeDetectorRef;
 
   ConsoleComponent(this._changeDetectorRef) {
-    ClientGlobals.session.alert('Type "/commands" for a list of commands.');
+    ClientGlobals.session!.alert('Type "/commands" for a list of commands.');
 
-    ClientGlobals.session.remote(
+    ClientGlobals.session!.remote(
         #openChats, const []).then((chats) => chats.keys.forEach(openChat));
 
     animationLoop(() {
@@ -42,10 +42,10 @@ class ConsoleComponent {
 
       // The width is set this way because of issues with iOS devices.
 
-      chatStyle['width'] = '${window.innerWidth - 152}px';
+      chatStyle['width'] = '${window.innerWidth! - 152}px';
 
       if (ClientGlobals.currentModal != null)
-        document.body.classes.add('modal-open');
+        document.body!.classes.add('modal-open');
 
       if (!_scroll) return;
       var element = querySelector('.console-left-output');
@@ -55,9 +55,9 @@ class ConsoleComponent {
 
     // Note: events on dolls on the mini-map are duplicated.
 
-    ClientGlobals.session.internal
+    ClientGlobals.session!.internal
       ..getEvents(type: 'alert').forEach((ObservableEvent event) {
-        event.data['timestamp'] = timestamp;
+        event.data!['timestamp'] = timestamp;
         if (activePillId != 'alert-') unreadAlerts++;
         alerts.add(event.data);
 
@@ -67,12 +67,12 @@ class ConsoleComponent {
         _autoScroll();
       })
       ..getEvents(type: 'prompt').forEach((ObservableEvent event) {
-        ClientGlobals.currentModalMessage = event.data['value'];
+        ClientGlobals.currentModalMessage = event.data!['value'];
 
         // Closes any open prompts.
 
         querySelectorAll('.modal-header button.close')
-            ?.forEach((element) => element.click());
+            .forEach((element) => element.click());
 
         _closeModal();
 
@@ -84,13 +84,13 @@ class ConsoleComponent {
         });
       })
       ..getEvents(type: 'trade').forEach((event) {
-        event.data['timestamp'] = timestamp;
+        event.data!['timestamp'] = timestamp;
 
         output.add({
           'timestamp': timestamp,
           'type': 'trade',
-          'from': event.data['from'],
-          'doll': event.data['doll']
+          'from': event.data!['from'],
+          'doll': event.data!['doll']
         });
 
         if (activePillId != 'chat-') unreadPublic++;
@@ -103,8 +103,8 @@ class ConsoleComponent {
 
         Future.delayed(Duration(milliseconds: 100), () {
           ClientGlobals.tradeAccepted = false;
-          showModal('Trade with ${event.data['from']}', 'trade');
-          querySelector('#modal-toggle').click();
+          showModal('Trade with ${event.data!['from']}', 'trade');
+          querySelector('#modal-toggle')!.click();
           _changeDetectorRef.markForCheck();
         });
       })
@@ -114,15 +114,15 @@ class ConsoleComponent {
       })
       ..getEvents(type: 'change', path: ['shop']).forEach((event) {
         showModal('Shop', 'shop');
-        querySelector('#modal-toggle').click();
+        querySelector('#modal-toggle')!.click();
         _changeDetectorRef.markForCheck();
       })
       ..getEvents(type: 'change').forEach((event) {
         // Ends the current conversation when you move.
 
-        if (ClientGlobals.session.doll != null &&
+        if (ClientGlobals.session!.doll != null &&
             listsEqual(
-                event.path, ['view', ClientGlobals.session.doll.id, 'loc'])) {
+                event.path, ['view', ClientGlobals.session!.doll!.id, 'loc'])) {
           if (conversationMessages.isNotEmpty) conversationMessages.clear();
           if (conversationOptions.isNotEmpty) conversationOptions.clear();
         }
@@ -130,17 +130,17 @@ class ConsoleComponent {
         _changeDetectorRef.markForCheck();
       })
       ..getEvents(type: 'change', path: ['ignore']).forEach((event) {
-        event.path.length > 1
-            ? event.data['value'] == true
-                ? ignore.add(event.path[1])
-                : ignore.remove(event.path[1])
-            : ignore.addAll(event.data['value'].keys);
+        event.path!.length > 1
+            ? event.data!['value'] == true
+                ? ignore.add(event.path![1])
+                : ignore.remove(event.path![1])
+            : ignore.addAll(event.data!['value'].keys);
 
         _autoScroll();
       })
       ..getEvents(type: 'private chat').forEach((event) {
-        event.data['timestamp'] = timestamp;
-        var user = event.data['from'];
+        event.data!['timestamp'] = timestamp;
+        var user = event.data!['from'];
 
         if (!privateMessages.containsKey(user))
           openChat(user);
@@ -154,31 +154,31 @@ class ConsoleComponent {
         _autoScroll();
       })
       ..getEvents(type: 'channel chat').forEach((event) {
-        event.data['timestamp'] =
-            _timestamp(DateTime.fromMillisecondsSinceEpoch(event.data['time']));
+        event.data!['timestamp'] =
+            _timestamp(DateTime.fromMillisecondsSinceEpoch(event.data!['time']));
 
         _channelMessages.add(event.data);
 
         if (activePillId != 'group-chat' &&
-            !ignore.contains(event.data['from']) &&
-            event.data['historic'] != true) unreadChannel++;
+            !ignore.contains(event.data!['from']) &&
+            event.data!['historic'] != true) unreadChannel++;
 
         _autoScroll();
       })
       ..getEvents(type: 'public chat', path: ['view']).forEach((event) {
-        event.data['timestamp'] = timestamp;
+        event.data!['timestamp'] = timestamp;
 
-        if (activePillId != 'chat-' && !ignore.contains(event.data['from']))
+        if (activePillId != 'chat-' && !ignore.contains(event.data!['from']))
           unreadPublic++;
 
-        if (!ignore.contains(event.data['from'])) {
-          var doll = ClientGlobals.session.internal
-              .getPath(List<String>.from(event.path));
+        if (!ignore.contains(event.data!['from'])) {
+          var doll = ClientGlobals.session!.internal
+              .getPath(List<String>.from(event.path!));
 
           if (doll != null)
             doll
               ..messageTime = now
-              ..message = event.data['value'];
+              ..message = event.data!['value'];
         }
 
         output.add(event.data);
@@ -186,9 +186,9 @@ class ConsoleComponent {
       });
   }
 
-  String get activePillId => querySelector('.console-nav .active').id;
+  String get activePillId => querySelector('.console-nav .active')!.id;
 
-  String get channel => ClientGlobals.session.channelName ?? '';
+  String get channel => ClientGlobals.session!.channelName ?? '';
 
   Iterable<dynamic> get channelMessages {
     if (_channelMessages.length > _messageCap) _channelMessages.removeFirst();
@@ -196,10 +196,10 @@ class ConsoleComponent {
   }
 
   Iterable<dynamic> get channelMods =>
-      ClientGlobals.session.channelMods ?? const [];
+      (ClientGlobals.session!.channelMods ?? const []) as Iterable<dynamic>;
 
   Iterable<dynamic> get channelOwners =>
-      ClientGlobals.session.channelOwners ?? const [];
+      (ClientGlobals.session!.channelOwners ?? const []) as Iterable<dynamic>;
 
   Set<dynamic> get channelUsers {
     var users = ClientGlobals.session?.channel ?? const {};
@@ -207,16 +207,16 @@ class ConsoleComponent {
   }
 
   List<dynamic> get conversationMessages =>
-      ClientGlobals.session.conversationMessages ?? const [];
+      ClientGlobals.session!.conversationMessages ?? const [];
 
   List<dynamic> get conversationOptions =>
-      ClientGlobals.session.conversationOptions ?? const [];
+      ClientGlobals.session!.conversationOptions ?? const [];
 
-  Iterable<dynamic> get offlineContacts => ClientGlobals.session.contacts.keys
-      .where((key) => !ClientGlobals.session.contacts[key]);
+  Iterable<dynamic> get offlineContacts => ClientGlobals.session!.contacts.keys
+      .where((key) => !ClientGlobals.session!.contacts[key]);
 
-  Iterable<dynamic> get onlineContacts => ClientGlobals.session.contacts.keys
-      .where((key) => ClientGlobals.session.contacts[key]);
+  Iterable<dynamic> get onlineContacts => ClientGlobals.session!.contacts.keys
+      .where((key) => ClientGlobals.session!.contacts[key]);
 
   List<dynamic> get sortedChannelUsers => List.from(channelUsers)..sort();
 
@@ -249,17 +249,17 @@ class ConsoleComponent {
 
   void closeChat(String user) {
     privateMessages.remove(user);
-    ClientGlobals.session.remote(#closeChat, [user]);
+    ClientGlobals.session!.remote(#closeChat, [user]);
 
     // Shows the public chat.
 
     showChat('');
   }
 
-  void conversationChoice([String choice]) {
+  void conversationChoice([String? choice]) {
     choice == null
-        ? ClientGlobals.session.conversationMessages.removeAt(0)
-        : ClientGlobals.session.remote(#conversationChoice, [choice]);
+        ? ClientGlobals.session!.conversationMessages!.removeAt(0)
+        : ClientGlobals.session!.remote(#conversationChoice, [choice]);
   }
 
   String formatCount(int count) => formatNumber(count ?? 0);
@@ -273,31 +273,31 @@ class ConsoleComponent {
     switch (option) {
       case 'add contact':
         showInputModal('Add contact', option,
-            (user) => ClientGlobals.session.remote(#addContact, [user]));
+            (user) => ClientGlobals.session!.remote(#addContact, [user]));
         return;
       case 'remove contact':
         showInputModal('Remove contact', option,
-            (user) => ClientGlobals.session.remote(#removeContact, [user]));
+            (user) => ClientGlobals.session!.remote(#removeContact, [user]));
         return;
       case 'add ignore':
         showInputModal('Add ignore', option,
-            (user) => ClientGlobals.session.remote(#addIgnore, [user]));
+            (user) => ClientGlobals.session!.remote(#addIgnore, [user]));
         return;
       case 'remove ignore':
         showInputModal('Remove ignore', option,
-            (user) => ClientGlobals.session.remote(#removeIgnore, [user]));
+            (user) => ClientGlobals.session!.remote(#removeIgnore, [user]));
         return;
       case 'join channel':
         showInputModal('Join channel', option, (channel) async {
-          await ClientGlobals.session.remote(#joinChannel, [channel])
+          await (ClientGlobals.session!.remote(#joinChannel, [channel]) as FutureOr<bool>)
               ? _showChannel()
-              : ClientGlobals.session.alert('You can\'t join that channel.');
+              : ClientGlobals.session!.alert('You can\'t join that channel.');
         });
         return;
       case 'create channel':
         showInputModal('Create channel', option, (channel) async {
-          if (await ClientGlobals.session.remote(#createChannel, [channel])) {
-            await ClientGlobals.session.remote(#joinChannel, [channel]);
+          if (await (ClientGlobals.session!.remote(#createChannel, [channel]) as FutureOr<bool>)) {
+            await ClientGlobals.session!.remote(#joinChannel, [channel]);
             _showChannel();
           }
         });
@@ -305,8 +305,8 @@ class ConsoleComponent {
         return;
       case 'kick user':
         showInputModal('Kick user', option, (user) async {
-          if (!await ClientGlobals.session.remote(#kickChannelUser, [user]))
-            ClientGlobals.session.alert('You can\'t kick that player.');
+          if (!await (ClientGlobals.session!.remote(#kickChannelUser, [user]) as FutureOr<bool>))
+            ClientGlobals.session!.alert('You can\'t kick that player.');
         });
         return;
       case 'channel options':
@@ -318,58 +318,58 @@ class ConsoleComponent {
   }
 
   bool handleSubmit() {
-    if (input == null || input.isEmpty) return false;
-    var id = querySelector('.console-left .active').id, list = id.split('-');
+    if (input == null || input!.isEmpty) return false;
+    var id = querySelector('.console-left .active')!.id, list = id.split('-');
 
     // Handles commands
 
-    if (input.startsWith('/')) {
-      ClientGlobals.session.remote(#command, [input]);
+    if (input!.startsWith('/')) {
+      ClientGlobals.session!.remote(#command, [input]);
       input = null;
       return false;
     }
 
     if (list[0] == 'alert') {
-      ClientGlobals.session.remote(#messagePublic, [input]);
+      ClientGlobals.session!.remote(#messagePublic, [input]);
       input = null;
       return false;
     }
 
     if (list[0] == 'chat') if (list[1].isEmpty)
-      ClientGlobals.session.remote(#messagePublic, [input]);
+      ClientGlobals.session!.remote(#messagePublic, [input]);
     else {
       openChat(list[1]);
 
-      if (list[1] != ClientGlobals.session.username)
-        privateMessages[list[1]].add({
+      if (list[1] != ClientGlobals.session!.username)
+        privateMessages[list[1]]!.add({
           'timestamp': timestamp,
-          'from': ClientGlobals.session.username,
+          'from': ClientGlobals.session!.username,
           'value': input
         });
 
       _autoScroll();
-      ClientGlobals.session.remote(#messageContact, [list[1], input]);
+      ClientGlobals.session!.remote(#messageContact, [list[1], input]);
     }
     else
-      ClientGlobals.session.remote(#messageChannel, [input]);
+      ClientGlobals.session!.remote(#messageChannel, [input]);
 
     input = null;
     return false;
   }
 
-  void increaseUnreadPrivate(String key) {
+  void increaseUnreadPrivate(String? key) {
     var value = _unreadPrivate[key] ?? 0;
     _unreadPrivate[key] = value + 1;
   }
 
-  bool isMod([String user]) =>
-      channelMods.contains(user ?? ClientGlobals.session.username);
+  bool isMod([String? user]) =>
+      channelMods.contains(user ?? ClientGlobals.session!.username);
 
-  bool isOwner([String user]) =>
-      channelOwners.contains(user ?? ClientGlobals.session.username);
+  bool isOwner([String? user]) =>
+      channelOwners.contains(user ?? ClientGlobals.session!.username);
 
   void leaveChannel() {
-    ClientGlobals.session.remote(#leaveChannel);
+    ClientGlobals.session!.remote(#leaveChannel);
     _channelMessages.clear();
 
     // Shows the public chat.
@@ -377,7 +377,7 @@ class ConsoleComponent {
     showChat('');
   }
 
-  void openChat(String user) {
+  void openChat(String? user) {
     if (privateMessages.containsKey(user)) return;
     privateMessages[user] = Queue();
 
@@ -385,23 +385,23 @@ class ConsoleComponent {
 
     Future(() async {
       Map<String, dynamic> messageHistory =
-          await ClientGlobals.session.remote(#privateMessages, [user]);
+          await (ClientGlobals.session!.remote(#privateMessages, [user]) as FutureOr<Map<String, dynamic>>);
 
       messageHistory.forEach((key, data) {
         data['timestamp'] =
             _timestamp(DateTime.fromMillisecondsSinceEpoch(data['time']));
 
-        privateMessages[user].add(data);
+        privateMessages[user]!.add(data);
       });
     });
   }
 
   void removeContact(String user) {
-    ClientGlobals.session.remote(#removeContact, [user]);
+    ClientGlobals.session!.remote(#removeContact, [user]);
   }
 
   void removeIgnore(String user) {
-    ClientGlobals.session.remote(#removeIgnore, [user]);
+    ClientGlobals.session!.remote(#removeIgnore, [user]);
   }
 
   void resetUnreadPrivate(String key) {
@@ -426,7 +426,7 @@ class ConsoleComponent {
   }
 
   void trade(String dollId) {
-    ClientGlobals.session.remote(#openTrade, [dollId]);
+    ClientGlobals.session!.remote(#openTrade, [dollId]);
   }
 
   void _autoScroll() {
@@ -464,7 +464,7 @@ class ConsoleComponent {
 
     return date.isBefore(DateTime.parse('${DateTime.now().toUtc()}'
             .replaceFirst(_accurateTimePattern, '00:00:00.000')))
-        ? '[${_datePattern.firstMatch('$date').group(0)}]'
-        : '[${_timePattern.firstMatch('$date').group(0)}]';
+        ? '[${_datePattern.firstMatch('$date')!.group(0)}]'
+        : '[${_timePattern.firstMatch('$date')!.group(0)}]';
   }
 }

@@ -1,6 +1,6 @@
 part of content;
 
-void registerDolls(Map<String, Stage<Doll>> stages) {
+void registerDolls(Map<String?, Stage<Doll?>?> stages) {
   // A fallback for missing [Doll]s.
 
   registerDollInfo('missing',
@@ -2202,15 +2202,15 @@ void registerDolls(Map<String, Stage<Doll>> stages) {
               if (choice.contains('resistances')) {
                 var message = '';
                 message += '<b>elements:</b>' + '<br>';
-                message += '🞄 ' + Ego.longDescriptions[Ego.fire] + '<br>';
-                message += '🞄 ' + Ego.longDescriptions[Ego.ice] + '<br>';
-                message += '🞄 ' + Ego.longDescriptions[Ego.electric] + '<br>';
-                message += '🞄 ' + Ego.longDescriptions[Ego.acid] + '<br>';
-                message += '🞄 ' + Ego.longDescriptions[Ego.poison] + '<br>';
-                message += '🞄 ' + Ego.longDescriptions[Ego.gravity] + '<br>';
+                message += '🞄 ' + Ego.longDescriptions[Ego.fire]! + '<br>';
+                message += '🞄 ' + Ego.longDescriptions[Ego.ice]! + '<br>';
+                message += '🞄 ' + Ego.longDescriptions[Ego.electric]! + '<br>';
+                message += '🞄 ' + Ego.longDescriptions[Ego.acid]! + '<br>';
+                message += '🞄 ' + Ego.longDescriptions[Ego.poison]! + '<br>';
+                message += '🞄 ' + Ego.longDescriptions[Ego.gravity]! + '<br>';
 
                 message +=
-                    '🞄  blood ' + Ego.longDescriptions[Ego.blood] + '<br>';
+                    '🞄  blood ' + Ego.longDescriptions[Ego.blood]! + '<br>';
 
                 message += '<b>resistances:</b>' + '<br>';
                 message += '🞄 resistances completely prevent these effects';

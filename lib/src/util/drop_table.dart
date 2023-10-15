@@ -3,8 +3,8 @@ part of util;
 class DropTable {
   List<Function> _always = [], _uncommon = [], _rare = [], _random = [];
 
-  List<Item> get all {
-    var result = <Item>[];
+  List<Item?> get all {
+    var result = <Item?>[];
     _always.forEach((function) => result.add(function()));
     _uncommon.forEach((function) => result.add(function()));
     _rare.forEach((function) => result.add(function()));
@@ -13,9 +13,9 @@ class DropTable {
   }
 
   String get text {
-    var result = <String>[];
+    var result = <String?>[];
 
-    String format(dynamic item, [num rate]) {
+    String? format(dynamic item, [num? rate]) {
       var result = item.displayText;
 
       if (rate != null)
@@ -38,8 +38,8 @@ class DropTable {
     return result.join(', ');
   }
 
-  List<Item> get drops {
-    var result = <Item>[];
+  List<Item?> get drops {
+    var result = <Item?>[];
 
     add(list) {
       var function = randomValue(list);

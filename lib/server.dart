@@ -28,9 +28,9 @@ final Map<WebSocket, String> addresses = {};
 // [Config] is visible to the client, so [databasePassword] is set here.
 
 HttpServer httpServer, httpsServer;
-Future<Connection> _postgresConnection;
+Future<Connection>? _postgresConnection;
 
-Future<int> get availableMemory async => runZoned(
+Future<int?> get availableMemory async => runZoned(
         () async => parseInteger(List.from(RegExp(r'\d+')
             .allMatches((await Process.run('free', const ['-m'])).stdout)
             .map((match) => match.group(0)))[5]), onError: (error, trace) {
@@ -50,13 +50,13 @@ Future<Connection> get postgresConnection async {
         ':' +
         (Config.debug
             ? Config.debugDatabasePassword
-            : (await secret)['database password']) +
+            : (await secret)['database password']!) +
         '@' +
         (Config.debug ? Config.debugDatabaseHost : Config.databaseHost) +
         ':5432/postgres');
   }
 
-  var result = await _postgresConnection;
+  var result = (await _postgresConnection)!;
 
   // Reopens closed connections.
 
@@ -65,7 +65,7 @@ Future<Connection> get postgresConnection async {
     return postgresConnection;
   }
 
-  return await _postgresConnection;
+  return (await _postgresConnection)!;
 }
 
 Future<Map<String, String>> get secret async => Map<String, String>.from(
@@ -82,13 +82,13 @@ Stream<WebSocket> getSecureWebSockets(
 
   await for (var request in httpsServer.handleError(_onError)) {
     var socket = await runZoned(
-        () => WebSocketTransformer.isUpgradeRequest(request)
+        (() => WebSocketTransformer.isUpgradeRequest(request)
             ? WebSocketTransformer.upgrade(request).catchError((error, trace) {
                 Logger.root.severe('$error');
                 Logger.root.severe('$trace');
                 return null;
               })
-            : null, onError: (error, trace) {
+            : null) as FutureOr<WebSocket> Function(), onError: (error, trace) {
       Logger.root.severe('$error');
       Logger.root.severe('$trace');
     });
@@ -106,13 +106,13 @@ Stream<WebSocket> getWebSockets(int port) async* {
 
   await for (var request in httpServer.handleError(_onError)) {
     var socket = await runZoned(
-        () => WebSocketTransformer.isUpgradeRequest(request)
+        (() => WebSocketTransformer.isUpgradeRequest(request)
             ? WebSocketTransformer.upgrade(request).catchError((error, trace) {
                 Logger.root.severe('$error');
                 Logger.root.severe('$trace');
                 return null;
               })
-            : null, onError: (error, trace) {
+            : null) as FutureOr<WebSocket> Function(), onError: (error, trace) {
       Logger.root.severe('$error');
       Logger.root.severe('$trace');
     });
@@ -128,7 +128,7 @@ Stream<WebSocket> getWebSockets(int port) async* {
 /// closed and is closed on "kick" events.
 
 void host(int port, Wrapper<ObservableMap> function(WebSocket socket),
-    {void onError(dynamic error, StackTrace trace)}) {
+    {void onError(dynamic error, StackTrace trace)?}) {
   Future(() async => retryOnError(() async {
         if (ServerGlobals.shuttingDown) return;
 
@@ -157,10 +157,10 @@ void host(int port, Wrapper<ObservableMap> function(WebSocket socket),
 }
 
 Future<Map<Point<int>, int>> newCollisionMap(
-    Stage stage, String name, Point<int> offset) async {
+    Stage stage, String? name, Point<int> offset) async {
   // FIXME: this is poorly named, as it adds dolls, sets a timestamp, etc.
 
-  var dolls = 0, chests = 0, procedural = false;
+  var dolls = 0, chests = 0, procedural = false as bool?;
 
   List<dynamic> tilesFromEditor(String string) {
     var data = json.decode(string), cells = data['cells'], result = [];
@@ -185,7 +185,7 @@ Future<Map<Point<int>, int>> newCollisionMap(
 
   var result = tilesFromEditor((await File('dat/$name.json').readAsString()))
       .expand((tiles) => tiles)
-      .fold({}, (section, tile) {
+      .fold({}, (dynamic section, tile) {
     var point = Point<int>(tile.x, tile.y),
         value = tile.properties['value'] ?? -1,
         spawn = tile.properties['spawn'];
@@ -194,14 +194,14 @@ Future<Map<Point<int>, int>> newCollisionMap(
       // Names must be deterministic and unique.
 
       var id = '_' +
-          sanitizeName(name, -1) +
+          sanitizeName(name!, -1) +
           '_${tile.x}_${tile.y}_' +
           sanitizeName(spawn, -1);
 
       // Fixes portals from older stages.
 
       spawn = _fixPortals(spawn);
-      var doll = Doll(spawn, id, false, procedural ? stageToFloor(name) : null);
+      var doll = Doll(spawn, id, false, procedural! ? stageToFloor(name) : null);
 
       dolls++;
       if (spawn == 'chest') chests++;
@@ -260,7 +260,7 @@ Future<ResourceManager> newPostgresResourceManager(String table) async {
               'SELECT data FROM tables.$table WHERE id = @id',
               {'id': key}).toList())[0][0],
           reviver: (key, value) =>
-              mapWrapperDecoder(key, value, safety: (key, value) => value is Map ? ObservableMap(value) : value)));
+              mapWrapperDecoder(key, value, safety: (key, value) => value is Map ? ObservableMap(value as Map<String?, dynamic>) : value)));
 }
 
 void output(dynamic message) {
@@ -288,7 +288,7 @@ String _fixPortals(String infoName) {
 }
 
 void _host(WebSocket socket, Wrapper<ObservableMap> function(WebSocket socket),
-    void onError(dynamic error, StackTrace trace)) {
+    void onError(dynamic error, StackTrace trace)?) {
   runZoned(() {
     if (socket == null) return;
     ServerGlobals.sockets.add(socket);
@@ -317,7 +317,7 @@ void _host(WebSocket socket, Wrapper<ObservableMap> function(WebSocket socket),
     });
 
     Future(() async {
-      await for (String value in socket)
+      await for (String value in socket as Stream<String>)
         runZoned(() async {
           var list = json.decode(value);
 
@@ -350,7 +350,7 @@ void _onError(Object error, StackTrace stackTrace) {
     // Connection reset by peer (error code 104).
     // Broken pipe (error code 32).
 
-    Logger.root.info(error.osError.message);
+    Logger.root.info(error.osError!.message);
     return;
   }
 

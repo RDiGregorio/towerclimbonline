@@ -13,7 +13,7 @@ import 'package:towerclimbonline/util.dart';
     directives: [coreDirectives, formDirectives],
     templateUrl: 'option_modal.html')
 class OptionModal {
-  static Future<dynamic> _throttle;
+  static Future<dynamic>? _throttle;
 
   String oldPassword = '',
       newPassword = '',
@@ -23,15 +23,15 @@ class OptionModal {
       script = 'alert("hello world")';
 
   String get directMessages =>
-      ClientGlobals.session.options['online status'] ?? 'on';
+      ClientGlobals.session!.options!['online status'] ?? 'on';
 
   void set directMessages(String mode) {
-    ClientGlobals.session.remote(#setOption, ['online status', mode]);
+    ClientGlobals.session!.remote(#setOption, ['online status', mode]);
   }
 
-  String get email => ClientGlobals.session.email ?? 'none';
+  String get email => ClientGlobals.session!.email ?? 'none';
 
-  int get lastEmailReset => ClientGlobals.session.lastEmailReset ?? 0;
+  int get lastEmailReset => ClientGlobals.session!.lastEmailReset ?? 0;
 
   num get mapSize {
     var map = ClientGlobals.session?.options ?? {};
@@ -39,7 +39,7 @@ class OptionModal {
   }
 
   void set mapSize(dynamic value) {
-    value = clamp(parseInteger(value), 100, 200);
+    value = clamp(parseInteger(value)!, 100, 200);
 
     if (_throttle == null) {
       _throttle = Future.delayed(const Duration(milliseconds: 100), () {
@@ -49,7 +49,7 @@ class OptionModal {
     }
   }
 
-  String get pendingEmail => ClientGlobals.session.pendingEmail ?? 'none';
+  String get pendingEmail => ClientGlobals.session!.pendingEmail ?? 'none';
 
   String get pendingReset {
     if (pendingEmail == 'none') return '';
@@ -63,55 +63,55 @@ class OptionModal {
   }
 
   String get petAggro {
-    var result = ClientGlobals.session.options['pet aggro'] ?? false;
+    var result = ClientGlobals.session!.options!['pet aggro'] ?? false;
     return result ? 'on' : 'off';
   }
 
   void set petAggro(String mode) {
-    ClientGlobals.session.remote(#setOption, ['pet aggro', mode == 'on']);
+    ClientGlobals.session!.remote(#setOption, ['pet aggro', mode == 'on']);
   }
 
   String get progressDisplay =>
-      ClientGlobals.session.options['progress'] ?? 'combat';
+      ClientGlobals.session!.options!['progress'] ?? 'combat';
 
   void set progressDisplay(String mode) {
-    ClientGlobals.session.remote(#setOption, ['progress', mode]);
+    ClientGlobals.session!.remote(#setOption, ['progress', mode]);
   }
 
   String get showEvasionPercent {
-    var result = ClientGlobals.session.options['ev percent'] ?? false;
+    var result = ClientGlobals.session!.options!['ev percent'] ?? false;
     return result ? 'on' : 'off';
   }
 
   void set showEvasionPercent(String mode) {
-    ClientGlobals.session.remote(#setOption, ['ev percent', mode == 'on']);
+    ClientGlobals.session!.remote(#setOption, ['ev percent', mode == 'on']);
   }
 
   String get showEvents {
-    var result = ClientGlobals.session.options['show splats'] ?? true;
+    var result = ClientGlobals.session!.options!['show splats'] ?? true;
     return result ? 'on' : 'off';
   }
 
   void set showEvents(String mode) {
-    ClientGlobals.session.remote(#setOption, ['show splats', mode == 'on']);
+    ClientGlobals.session!.remote(#setOption, ['show splats', mode == 'on']);
   }
 
   String get showFps {
-    var result = ClientGlobals.session.options['show fps'] ?? false;
+    var result = ClientGlobals.session!.options!['show fps'] ?? false;
     return result ? 'on' : 'off';
   }
 
   void set showFps(String mode) {
-    ClientGlobals.session.remote(#setOption, ['show fps', mode == 'on']);
+    ClientGlobals.session!.remote(#setOption, ['show fps', mode == 'on']);
   }
 
   String get stealth {
-    var result = ClientGlobals.session.options['stealth'] ?? true;
+    var result = ClientGlobals.session!.options!['stealth'] ?? true;
     return result ? 'on' : 'off';
   }
 
   void set stealth(String mode) {
-    ClientGlobals.session.remote(#setOption, ['stealth', mode == 'on']);
+    ClientGlobals.session!.remote(#setOption, ['stealth', mode == 'on']);
   }
 
   num get zoom => ClientGlobals.zoom;
@@ -122,8 +122,8 @@ class OptionModal {
 
   void changePassword() {
     Future(() async {
-      if (await ClientGlobals.session
-          .remote(#setPassword, [oldPassword, newPassword])) {
+      if (await (ClientGlobals.session!
+          .remote(#setPassword, [oldPassword, newPassword]) as FutureOr<bool>)) {
         message = 'success';
         oldPassword = '';
         newPassword = '';
@@ -151,7 +151,7 @@ class OptionModal {
   }
 
   void updateEmail() {
-    ClientGlobals.session.remote(#setOption, ['email', newEmail]);
+    ClientGlobals.session!.remote(#setOption, ['email', newEmail]);
     newEmail = '';
   }
 }

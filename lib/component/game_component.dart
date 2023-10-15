@@ -67,7 +67,7 @@ class GameComponent {
     Crafting.init();
   }
 
-  String get inputModalTitle => ClientGlobals.currentInputModalTitle;
+  String? get inputModalTitle => ClientGlobals.currentInputModalTitle;
 
   String get inputModalType {
     if (ClientGlobals.currentInputModal == 'teleport') return 'teleport';
@@ -93,27 +93,27 @@ class GameComponent {
             : 'int';
   }
 
-  String get modal => ClientGlobals.currentModal;
+  String? get modal => ClientGlobals.currentModal;
 
-  String get modalTitle => ClientGlobals.currentModalTitle;
+  String? get modalTitle => ClientGlobals.currentModalTitle;
 
-  String get view => ClientGlobals.currentView;
+  String? get view => ClientGlobals.currentView;
 
   void handleClose() {
     if (ClientGlobals.currentModal == 'customize')
-      ClientGlobals.session.remote(#customize, [
-        json.encode(ClientGlobals.session.doll.customization,
+      ClientGlobals.session!.remote(#customize, [
+        json.encode(ClientGlobals.session!.doll!.customization,
             toEncodable: mapWrapperEncoder)
       ]);
 
     ClientGlobals.currentModalTitle = null;
     ClientGlobals.currentModal = null;
     ClientGlobals.clickedActionIndex = null;
-    ClientGlobals.session.remote(#handleClosedModal, const []);
+    ClientGlobals.session!.remote(#handleClosedModal, const []);
   }
 
   void reload(bool login) {
-    if (!login) window.localStorage[ClientGlobals.preventLoginCookie] = 'true';
+    if (!login) window.localStorage[ClientGlobals.preventLoginCookie!] = 'true';
     window.location.reload();
   }
 }

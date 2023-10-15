@@ -7,7 +7,7 @@ import 'package:towerclimbonline/client.dart';
     directives: [coreDirectives, formDirectives],
     templateUrl: 'confirm_modal.html')
 class ConfirmModal {
-  String get message => ClientGlobals.currentModalMessage;
+  String? get message => ClientGlobals.currentModalMessage;
 
   void choice(bool input) => handleInputModalSubmit('$input');
 }

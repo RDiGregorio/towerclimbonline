@@ -1,6 +1,6 @@
 part of content;
 
-void registerItems(Map<String, Stage<Doll>> stages) {
+void registerItems(Map<String?, Stage<Doll?>?> stages) {
   registerFood(key, amount) => registerItemInfo(
       key,
       ItemInfo(
@@ -10,12 +10,12 @@ void registerItems(Map<String, Stage<Doll>> stages) {
             if (doll.full) return false;
 
             if (doll.account != null &&
-                item.bonus > doll.account.sheet.healthBuffs)
-              doll.account.sheet.healthBuffs = item.bonus;
+                item.bonus > doll.account!.sheet.healthBuffs)
+              doll.account!.sheet.healthBuffs = item.bonus;
 
             return doll.heal(
-                BigIntUtil.min(doll.maxHealth,
-                    BigIntUtil.percent(doll.maxHealth, item.healingAmount)),
+                BigIntUtil.min(doll.maxHealth!,
+                    BigIntUtil.percent(doll.maxHealth!, item.healingAmount)),
                 true);
           },
           egos: const [Ego.food]));
@@ -78,20 +78,20 @@ void registerItems(Map<String, Stage<Doll>> stages) {
                 // Permanently increases attributes.
 
                 if (buff == 'agi+' &&
-                    item.bonus > doll.account.sheet.agilityBuffs)
-                  doll.account.sheet.agilityBuffs = item.bonus;
+                    item.bonus > doll.account!.sheet.agilityBuffs)
+                  doll.account!.sheet.agilityBuffs = item.bonus;
 
                 if (buff == 'str+' &&
-                    item.bonus > doll.account.sheet.strengthBuffs)
-                  doll.account.sheet.strengthBuffs = item.bonus;
+                    item.bonus > doll.account!.sheet.strengthBuffs)
+                  doll.account!.sheet.strengthBuffs = item.bonus;
 
                 if (buff == 'dex+' &&
-                    item.bonus > doll.account.sheet.dexterityBuffs)
-                  doll.account.sheet.dexterityBuffs = item.bonus;
+                    item.bonus > doll.account!.sheet.dexterityBuffs)
+                  doll.account!.sheet.dexterityBuffs = item.bonus;
 
                 if (buff == 'int+' &&
-                    item.bonus > doll.account.sheet.intelligenceBuffs)
-                  doll.account.sheet.intelligenceBuffs = item.bonus;
+                    item.bonus > doll.account!.sheet.intelligenceBuffs)
+                  doll.account!.sheet.intelligenceBuffs = item.bonus;
 
                 doll.buffs[buff] = Buff(duration: duration);
                 return true;
@@ -546,11 +546,11 @@ void registerItems(Map<String, Stage<Doll>> stages) {
       ItemInfo(
           egos: const [Ego.metal],
           use: (Doll doll, Item reactor) {
-            var uranium = doll.account.items.getItem('uranium'),
+            var uranium = doll.account!.items.getItem('uranium'),
                 amount = big(uranium?.getAmount() ?? 0);
 
             amount +=
-                BigIntUtil.multiplyByDouble(amount, safeLog(reactor.bonus));
+                BigIntUtil.multiplyByDouble(amount!, safeLog(reactor.bonus));
 
             if (amount > BigInt.zero)
               doll.account
@@ -564,10 +564,10 @@ void registerItems(Map<String, Stage<Doll>> stages) {
 
   registerItemInfo('philosopher\'s stone',
       ItemInfo(use: (Doll doll, Item stone) {
-    var potions = doll.account.items.getItem('blood potion'),
+    var potions = doll.account!.items.getItem('blood potion'),
         amount = big(potions?.getAmount() ?? 0);
 
-    amount += BigIntUtil.multiplyByDouble(amount, safeLog(stone.bonus));
+    amount += BigIntUtil.multiplyByDouble(amount!, safeLog(stone.bonus));
 
     if (amount > BigInt.zero)
       doll.account
@@ -586,8 +586,8 @@ void registerItems(Map<String, Stage<Doll>> stages) {
           use: (Doll doll, Item puzzle) {
             var secretRareDrop = secretRare;
             secretRareDrop.bonus = puzzle.bonus;
-            doll.account.lootItem(secretRareDrop);
-            doll.account.secretRareDropLog[secretRareDrop.displayText] = true;
+            doll.account!.lootItem(secretRareDrop);
+            doll.account!.secretRareDropLog[secretRareDrop.displayText] = true;
             return true;
           }));
 
@@ -601,7 +601,7 @@ void registerItems(Map<String, Stage<Doll>> stages) {
                 .search(ServerGlobals.sight, ServerGlobals.sight)
                 .where(source.canAreaEffect)
                 .where((doll) =>
-                    !doll.dead &&
+                    !doll!.dead &&
                     !doll.summoned &&
                     !doll.boss &&
                     doll.account == null &&

@@ -1,7 +1,7 @@
 part of util;
 
 class RecoveryAttempt {
-  DateTime _expirationDate;
+  late DateTime _expirationDate;
   final String code;
 
   RecoveryAttempt(this.code) {

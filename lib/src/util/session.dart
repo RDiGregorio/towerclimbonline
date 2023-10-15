@@ -10,20 +10,20 @@ class Session extends OnlineObject {
   static final Map<String, Function> adminCommands = {};
   static final Map<String, RecoveryAttempt> recoveries = {};
   static final Map<String, String> secret = {};
-  static Function proceduralStage;
-  static Function sendEmail;
+  static late Function proceduralStage;
+  static Function? sendEmail;
   static final Set<String> _users = Set<String>();
-  Account _account;
+  Account? _account;
 
   Completer<dynamic> _loginCompleter = Completer(),
       _logoutCompleter = Completer();
 
   bool _done = false, _preventLogout = false;
-  Function _function;
+  Function? _function;
   dynamic /* WebSocket */ _socket;
-  Future<dynamic> disconnect;
+  Future<dynamic>? disconnect;
 
-  final ResourceManager accountManager,
+  final ResourceManager? accountManager,
       channelManager,
       stageManager,
       exchangeManager,
@@ -31,8 +31,8 @@ class Session extends OnlineObject {
       directMessageManager;
 
   Session(
-      [Account this._function(),
-      ResourceManager this.accountManager,
+      [Account this._function()?,
+      ResourceManager? this.accountManager,
       this.channelManager,
       this.stageManager,
       this.exchangeManager,
@@ -42,54 +42,54 @@ class Session extends OnlineObject {
     Future(() async {
       await onLogin;
 
-      if (account.mostRecentStage != null) {
-        if (!account.mostRecentStage.startsWith('procgen'))
-          (await stageManager.getResource(
-                  null, account.mostRecentStage, onLogout))
-              .addDoll(account.doll);
+      if (account!.mostRecentStage != null) {
+        if (!account!.mostRecentStage!.startsWith('procgen'))
+          (await stageManager!.getResource(
+                  null, account!.mostRecentStage, onLogout))
+              .addDoll(account!.doll);
         else {
           // Handles logging into procedurally generated floors.
 
-          Stage mostRecentStage =
-              stageManager.resources.containsKey(account.mostRecentStage)
-                  ? await stageManager.getResource(
-                      null, account.mostRecentStage, onLogout)
+          Stage? mostRecentStage =
+              stageManager!.resources.containsKey(account!.mostRecentStage)
+                  ? await (stageManager!.getResource(
+                      null, account!.mostRecentStage, onLogout) as FutureOr<Stage<Doll?>?>)
                   : null;
 
           mostRecentStage != null
-              ? mostRecentStage.addDoll(account.doll)
+              ? mostRecentStage.addDoll(account!.doll)
               : (mostRecentStage = await proceduralStage(
                       stageManager,
                       int.parse(
-                          account.mostRecentStage.replaceFirst('procgen', '')),
+                          account!.mostRecentStage!.replaceFirst('procgen', '')),
                       onLogout))
-                  .addDoll(account.doll);
+                  .addDoll(account!.doll);
 
           // Prevents players from getting stuck in walls on a procedurally
           // generated floor as it is being regenerated.
 
-          if (!mostRecentStage.land(account.doll.currentLocation))
-            account.doll.randomJump(mostRecentStage);
+          if (!mostRecentStage!.land(account!.doll!.currentLocation))
+            account!.doll!.randomJump(mostRecentStage);
         }
       }
 
       internal
-        ..['contacts'] = account.contacts
+        ..['contacts'] = account!.contacts
 
         // fixme: ignore list needs to be reworked
 
         ..['ignore'] = ObservableMap()
-        ..['doll'] = account.doll.id
-        ..['items'] = account.items
-        ..['abilities'] = account.abilities
-        ..['equip'] = account.equipped
-        ..['counters'] = account.counters
-        ..['sheet'] = account.sheet
-        ..['buffs'] = account.buffs
-        ..['buy'] = account.exchangeBuyOffers
-        ..['sell'] = account.exchangeSellOffers
-        ..['options'] = account.options
-        ..['flags'] = account.flags;
+        ..['doll'] = account!.doll!.id
+        ..['items'] = account!.items
+        ..['abilities'] = account!.abilities
+        ..['equip'] = account!.equipped
+        ..['counters'] = account!.counters
+        ..['sheet'] = account!.sheet
+        ..['buffs'] = account!.buffs
+        ..['buy'] = account!.exchangeBuyOffers
+        ..['sell'] = account!.exchangeSellOffers
+        ..['options'] = account!.options
+        ..['flags'] = account!.flags;
 
       _exchangeSync();
 
@@ -101,9 +101,9 @@ class Session extends OnlineObject {
           // subscription =
 
           stat.internal.getEvents(type: 'level up').listen((event) {
-            if (account.sessions.contains(this)) {
+            if (account!.sessions.contains(this)) {
               account
-                ..doll.splat('level up!', 'level-up')
+                ..doll!.splat('level up!', 'level-up')
                 ..alert('You level up!');
 
               // FIXME: this was causing only the first level up message to be
@@ -118,25 +118,25 @@ class Session extends OnlineObject {
           var subscription;
 
           subscription = stat.internal.getEvents(type: 'xp').listen((event) =>
-              account.sessions.contains(this)
-                  ? account.doll.splat('${event.data['value']}', 'xp-splat')
+              account!.sessions.contains(this)
+                  ? account!.doll!.splat('${event.data['value']}', 'xp-splat')
                   : subscription.cancel());
         })
-        ..doll.internal['cust'] ??= DollCustomization();
+        ..doll!.internal['cust'] ??= DollCustomization();
 
-      if (account.channel != null)
+      if (account!.channel != null)
         Future.delayed(
-            Duration(seconds: 1), () => joinChannel(account.channel));
+            Duration(seconds: 1), () => joinChannel(account!.channel));
       else
         Future.delayed(Duration(seconds: 1), () => joinChannel('global'));
 
       // Handles offline messages.
 
-      _offlineMessages(account.id)?.then((map) {
+      _offlineMessages(account!.id)?.then((map) {
         map
           ..values.forEach((data) {
-            account.privateMessages[data['from']] ??= ObservableMap();
-            var log = account.privateMessages[data['from']];
+            account!.privateMessages[data['from']] ??= ObservableMap();
+            var log = account!.privateMessages[data['from']];
             log[uuid()] = data;
             if (log.length > 100) log.remove(log.keys.first);
 
@@ -148,8 +148,8 @@ class Session extends OnlineObject {
 
       // Handles new players.
 
-      if (account.newbie) {
-        if (account.channel == null)
+      if (account!.newbie) {
+        if (account!.channel == null)
           Future.delayed(Duration(seconds: 1), () => joinChannel('global'));
 
         setAction('teleport', 0);
@@ -157,15 +157,15 @@ class Session extends OnlineObject {
         setAction('examine', 2);
 
         account
-          ..doll.summon()
+          ..doll!.summon()
           ..newbie = false;
       }
     });
   }
 
-  Map<String, dynamic> get abilities => internal['abilities'];
+  Map<String, dynamic>? get abilities => internal['abilities'];
 
-  Account get account => _account;
+  Account? get account => _account;
 
   Map<int, dynamic> get actions {
     var result = <int, dynamic>{};
@@ -176,58 +176,58 @@ class Session extends OnlineObject {
     return result;
   }
 
-  ItemContainer get bank => internal['bank'];
+  ItemContainer? get bank => internal['bank'];
 
   Map<String, dynamic> get buffs => internal['buffs'] ?? const {};
 
-  bool get canPvP => internal['pvp'];
+  bool? get canPvP => internal['pvp'];
 
-  Map<String, dynamic> get channel => internal['channel'];
+  Map<String, dynamic>? get channel => internal['channel'];
 
-  Iterable<String> get channelMods => internal['mods']?.keys;
+  Iterable<String>? get channelMods => internal['mods']?.keys;
 
-  String get channelName => internal['channel name'];
+  String? get channelName => internal['channel name'];
 
-  Iterable<String> get channelOwners => internal['owners']?.keys;
+  Iterable<String>? get channelOwners => internal['owners']?.keys;
 
   Map<dynamic, dynamic> get contacts => internal['contacts'] ?? const {};
 
-  List<dynamic> get conversationMessages => internal['conv'];
+  List<dynamic>? get conversationMessages => internal['conv'];
 
-  List<dynamic> get conversationOptions => internal['conv opts'];
+  List<dynamic>? get conversationOptions => internal['conv opts'];
 
-  Item get crafted => internal['crafted'];
+  Item? get crafted => internal['crafted'];
 
-  void set crafted(Item item) {
+  void set crafted(Item? item) {
     internal['crafted'] = item;
   }
 
   /// Used client side to get the user's doll. This shouldn't be used server
   /// side because [account.doll] should be used instead.
 
-  Doll get doll {
+  Doll? get doll {
     assert(account == null);
-    return view == null ? null : view[internal['doll']];
+    return view == null ? null : view![internal['doll']];
   }
 
-  String get email =>
-      _useNewEmail ? options['new email'] : options['old email'];
+  String? get email =>
+      _useNewEmail ? options!['new email'] : options!['old email'];
 
-  Map<String, dynamic> get equipped => internal['equip'];
+  Map<String, dynamic>? get equipped => internal['equip'];
 
-  Map<String, dynamic> get exchangeBuyOffers => internal['buy'];
+  Map<String?, dynamic>? get exchangeBuyOffers => internal['buy'];
 
-  Map<String, dynamic> get exchangeSellOffers => internal['sell'];
+  Map<String?, dynamic>? get exchangeSellOffers => internal['sell'];
 
-  Map<String, dynamic> get flags => internal['flags'];
+  Map<String, dynamic>? get flags => internal['flags'];
 
-  String get god => internal['god'];
+  String? get god => internal['god'];
 
-  BigInt get gold => big(!internal.containsKey('counters')
+  BigInt? get gold => big(!internal.containsKey('counters')
       ? 0
       : internal['counters']['gold'] ?? 0);
 
-  Map<String, dynamic> get goodItemSources =>
+  Map<String?, dynamic> get goodItemSources =>
       internal['double res'] ??= ObservableMap();
 
   Map<String, dynamic> get hiddenDolls => internal['kills'] ??= ObservableMap();
@@ -238,20 +238,20 @@ class Session extends OnlineObject {
     internal['highest floor'] = value;
   }
 
-  Map<String, dynamic> get importantDolls =>
+  Map<String?, dynamic> get importantDolls =>
       internal['important'] ??= ObservableMap();
 
-  ItemContainer get items => internal['items'];
+  ItemContainer? get items => internal['items'];
 
-  int get lastEmailReset => options['last email reset'] ?? 0;
+  int get lastEmailReset => options!['last email reset'] ?? 0;
 
   Future<dynamic> get onLogin => _loginCompleter.future;
 
   Future<dynamic> get onLogout => _logoutCompleter.future;
 
-  Map<String, dynamic> get options => internal['options'];
+  Map<String, dynamic>? get options => internal['options'];
 
-  Map<dynamic, dynamic> get peerAccounts => accountManager.resources;
+  Map<dynamic, dynamic> get peerAccounts => accountManager!.resources;
 
   /// Used client side to style the pending action on the action bar. Shouldn't
   /// be used server side.
@@ -261,7 +261,7 @@ class Session extends OnlineObject {
     return ability == null ? const [] : [ability];
   }
 
-  String get pendingEmail => _useNewEmail ? null : options['new email'];
+  String? get pendingEmail => _useNewEmail ? null : options!['new email'];
 
   bool get preventLogout => _preventLogout;
 
@@ -270,30 +270,30 @@ class Session extends OnlineObject {
       _logoutCompleter.complete();
   }
 
-  Item get primaryWeapon => internal['left'];
+  Item? get primaryWeapon => internal['left'];
 
-  Map<String, dynamic> get recentChests =>
+  Map<String?, dynamic> get recentChests =>
       internal['chests'] ??= ObservableMap();
 
   int get restartTime => internal['restart time'] ?? 0;
 
-  Item get secondaryWeapon => internal['right'];
+  Item? get secondaryWeapon => internal['right'];
 
-  CharacterSheet get sheet => internal['sheet'];
+  CharacterSheet? get sheet => internal['sheet'];
 
   Map<String, dynamic> get shopItems => internal['shop'] ?? const {};
 
-  String get stage => internal['stage'];
+  String? get stage => internal['stage'];
 
-  Map<String, dynamic> get stageFlags =>
+  Map<String?, dynamic> get stageFlags =>
       internal['stage flags'] ??= ObservableMap();
 
   Map<String, dynamic> get tappedItemSources =>
       internal['tapped'] ??= ObservableMap();
 
-  BigInt get targetTradeGold => big(internal['their trade gold'] ?? 0);
+  BigInt? get targetTradeGold => big(internal['their trade gold'] ?? 0);
 
-  ItemContainer get targetTradeOffer => internal['their offer'];
+  ItemContainer? get targetTradeOffer => internal['their offer'];
 
   Map<Point<int>, String> get terrainSections {
     var result = <Point<int>, String>{};
@@ -310,22 +310,22 @@ class Session extends OnlineObject {
 
   int get timeBonusEnd => internal['time bonus end'] ?? 0;
 
-  BigInt get tradeGold => big(internal['your trade gold'] ?? 0);
+  BigInt? get tradeGold => big(internal['your trade gold'] ?? 0);
 
-  ItemContainer get tradeOffer => internal['your offer'];
+  ItemContainer? get tradeOffer => internal['your offer'];
 
-  String get username => internal['display'];
+  String? get username => internal['display'];
 
-  Map<String, dynamic> get view => internal.containsKey('view')
+  Map<String, dynamic>? get view => internal.containsKey('view')
       ? UnmodifiableMapView(internal['view'])
       : null;
 
   bool get youFinalizedTrade => internal['you finalized'] ?? false;
 
-  Future<dynamic> get _exchange =>
+  Future<dynamic>? get _exchange =>
       exchangeManager?.getResource(() => Exchange(), 'exchange', onLogout);
 
-  Map<String, dynamic> get _stageDolls =>
+  Map<String?, dynamic> get _stageDolls =>
       account?.doll?.stage?.dolls ?? const {};
 
   bool get _useNewEmail =>
@@ -333,15 +333,15 @@ class Session extends OnlineObject {
           .add(Config.emailResetDelay));
 
   bool get _validTradeState =>
-      account.interactionStage == account.doll.stage &&
-      account.interactionType == #trade;
+      account!.interactionStage == account!.doll!.stage &&
+      account!.interactionType == #trade;
 
   void addChannelMod(String user) {
     Future(() async {
       await (removeChannelOwner(user = sanitizeName(user)));
 
-      (await channelManager.getResource(
-          null, account.channel, onLogout))['mods'][user] = true;
+      (await channelManager!.getResource(
+          null, account!.channel, onLogout))['mods'][user] = true;
     });
   }
 
@@ -349,8 +349,8 @@ class Session extends OnlineObject {
     Future(() async {
       await (removeChannelMod(user = sanitizeName(user)));
 
-      (await channelManager.getResource(
-          null, account.channel, onLogout))['owners'][user] = true;
+      (await channelManager!.getResource(
+          null, account!.channel, onLogout))['owners'][user] = true;
     });
   }
 
@@ -361,18 +361,18 @@ class Session extends OnlineObject {
     }
 
     removeIgnore(user);
-    account.contacts[user] = true;
+    account!.contacts[user] = true;
   }
 
   void addIgnore(String user) {
     user = sanitizeName(user);
     removeContact(user);
-    account.ignore[user] = true;
+    account!.ignore[user] = true;
   }
 
   void addTradeGold(String gold) {
     if (_validTradeState && !(youFinalizedTrade && theyFinalizedTrade))
-      account.tradeGold += parseBigInteger(gold);
+      account!.tradeGold += parseBigInteger(gold)!;
   }
 
   void addTradeItem(String itemId, String amount) {
@@ -382,14 +382,14 @@ class Session extends OnlineObject {
     }
 
     if (_validTradeState && !(youFinalizedTrade && theyFinalizedTrade))
-      account.addTradeItem(itemId, parseBigInteger(amount));
+      account!.addTradeItem(itemId, parseBigInteger(amount)!);
   }
 
   void adminCommand(String command, String password) {
-    adminCommands[command](this, password);
+    adminCommands[command]!(this, password);
   }
 
-  void alert(String message, [String classes]) =>
+  void alert(String? message, [String? classes]) =>
       internal.addEvent(ObservableEvent(
           type: 'alert', data: {'value': message, 'classes': classes}));
 
@@ -398,16 +398,16 @@ class Session extends OnlineObject {
   Future<bool> allowChannelUser(String user) async {
     user = sanitizeName(user);
 
-    if (account.channel == null ||
-        !await channelManager.exists(account.channel)) return false;
+    if (account!.channel == null ||
+        !await channelManager!.exists(account!.channel)) return false;
 
     var resource =
-        await channelManager.getResource(null, account.channel, onLogout);
+        await channelManager!.getResource(null, account!.channel, onLogout);
 
     if ((resource['kicks'][user] ?? 0) < Clock.time) return false;
 
-    if (resource['owners'][account.id] == true ||
-        resource['mods'][account.id] == true) {
+    if (resource['owners'][account!.id] == true ||
+        resource['mods'][account!.id] == true) {
       resource['kicks'].remove(user);
       return true;
     }
@@ -422,16 +422,16 @@ class Session extends OnlineObject {
   void applySweepingChanges() {}
 
   void ascend(String id) {
-    sheet.stats.firstWhere((stat) => stat.id == id)..ascend();
-    if (sheet.totalPoints < sheet.spentPoints) sheet.resetAttributes();
+    sheet!.stats.firstWhere((stat) => stat.id == id)..ascend();
+    if (sheet!.totalPoints < sheet!.spentPoints) sheet!.resetAttributes();
   }
 
   List<Map<String, dynamic>> bosses() => List.from(_stageDolls.values
       .where((doll) => doll.boss && !doll.summoned)
       .map((doll) => doll.internal));
 
-  Future<Map<String, dynamic>> browseExchange(String offerType,
-      [String filter]) async {
+  Future<Map<String, dynamic>?> browseExchange(String offerType,
+      [String? filter]) async {
     var exchange = await _exchange;
     if (offerType == 'buy') return exchange.browseBuyOffers;
     if (offerType == 'sell') return exchange.browseSellOffers;
@@ -442,11 +442,11 @@ class Session extends OnlineObject {
     var item = shopItems[itemId];
 
     if (item == null ||
-        account.interactionLocation != account.doll.currentLocation ||
-        account.interactionStage != account.doll.stage ||
-        account.interactionType != #shop) return;
+        account!.interactionLocation != account!.doll!.currentLocation ||
+        account!.interactionStage != account!.doll!.stage ||
+        account!.interactionType != #shop) return;
 
-    account.buyItem(item, count);
+    account!.buyItem(item, count);
   }
 
   /// Max upgrades all equipment.
@@ -458,9 +458,9 @@ class Session extends OnlineObject {
 
   void click(String target) {
     if (account?.doll?.stage != null)
-      account.doll
+      account!.doll
         ..targetLocation = null
-        ..targetDoll = account.doll.stage.dolls[target];
+        ..targetDoll = account!.doll!.stage!.dolls[target];
   }
 
   void closeChat(String username) {
@@ -468,7 +468,7 @@ class Session extends OnlineObject {
   }
 
   void command(String input) {
-    String argument(int index) {
+    String? argument(int index) {
       var list = input.trim().split(RegExp(r'\s+'));
 
       // Arguments are not case sensitive.
@@ -480,7 +480,7 @@ class Session extends OnlineObject {
       // Debug commands.
 
       if (input == '/up') {
-        account.sheet.stats.forEach((stat) =>
+        account!.sheet.stats.forEach((stat) =>
             stat.experience += stat.experienceFromLevel(Stat.maxLevel));
 
         return;
@@ -501,7 +501,7 @@ class Session extends OnlineObject {
           return;
         }
 
-        doll.jump(account.doll.stage, account.doll.currentLocation);
+        doll.jump(account!.doll!.stage, account!.doll!.currentLocation);
         return;
       }
 
@@ -520,7 +520,7 @@ class Session extends OnlineObject {
           return;
         }
 
-        account.lootItem(item..amount = maxFinite);
+        account!.lootItem(item..amount = maxFinite);
         return;
       }
     }
@@ -539,13 +539,13 @@ class Session extends OnlineObject {
     if (input == '/die') {
       // No lethal damage note is made for suicides.
 
-      account.doll.health = BigInt.zero;
+      account!.doll!.health = BigInt.zero;
       return;
     }
 
     if (input == '/where') {
-      alert('${account.doll.currentLocation.x}, ' +
-          '${account.doll.currentLocation.y}');
+      alert('${account!.doll!.currentLocation.x}, ' +
+          '${account!.doll!.currentLocation.y}');
 
       return;
     }
@@ -577,7 +577,7 @@ class Session extends OnlineObject {
         alert('You need to add a player\'s name.');
 
         alert(
-            'For example, type "/examine ${account.id}" to examine yourself.');
+            'For example, type "/examine ${account!.id}" to examine yourself.');
 
         return;
       }
@@ -590,7 +590,7 @@ class Session extends OnlineObject {
         return;
       }
 
-      examine(account.doll, target.doll, true);
+      examine(account!.doll, target.doll, true);
       return;
     }
 
@@ -600,7 +600,7 @@ class Session extends OnlineObject {
 
   void completeTrade() {
     if (_validTradeState && theyFinalizedTrade && youFinalizedTrade)
-      account.completeTrade();
+      account!.completeTrade();
   }
 
   /// Use [getSocket] client side to create [webSocket].
@@ -612,18 +612,18 @@ class Session extends OnlineObject {
     decode(event) => json.decode(event.data,
         reviver: (key, value) => mapWrapperDecoder(key, value,
             safety: (key, value) =>
-                value is Map ? ObservableMap(value) : value));
+                value is Map ? ObservableMap(value as Map<String?, dynamic>) : value));
 
     _socket.onMessage.map(decode).forEach((value) {
       Logger.root.finest('${unwrap(value)}');
 
       value is ObservableEvent
           ? value.type == 'change'
-              ? value.path.isEmpty
-                  ? replaceMap(internal, unwrap(value.data['value']))
-                  : internal.setPath(value.path, value.data['value'])
+              ? value.path!.isEmpty
+                  ? replaceMap(internal, unwrap(value.data!['value']))
+                  : internal.setPath(value.path!, value.data!['value'])
               : internal.addEvent(value)
-          : _completers.remove(value[1]).complete(value[0]);
+          : _completers.remove(value[1])!.complete(value[0]);
     });
 
     Future(() async {
@@ -633,28 +633,28 @@ class Session extends OnlineObject {
   }
 
   void conversationChoice(String choice) {
-    if (account.conversationChoiceHandler != null)
-      account.conversationChoiceHandler(choice);
+    if (account!.conversationChoiceHandler != null)
+      account!.conversationChoiceHandler!(choice);
   }
 
   /// Crafts an item.
 
   void craft(String key, dynamic amount) {
     if (amount != null) amount = parseBigInteger(amount);
-    account.craftItem(key, amount);
+    account!.craftItem(key, amount);
   }
 
   Future<bool> createChannel(String channel) async {
     channel = sanitizeName(channel);
 
-    if (await channelManager.exists(channel)) {
+    if (await channelManager!.exists(channel)) {
       alert('You can\'t create that channel.');
       return false;
     }
 
-    await channelManager.getResource(
+    await channelManager!.getResource(
         () => ObservableMap({
-              'owners': ObservableMap({account.id: true}),
+              'owners': ObservableMap({account!.id: true}),
               'mods': ObservableMap(),
               'users': ObservableMap(),
               'kicks': ObservableMap(),
@@ -670,14 +670,14 @@ class Session extends OnlineObject {
 
   void customize(String encodedMap) {
     var map = json.decode(encodedMap, reviver: mapWrapperDecoder);
-    replaceMap(account.doll.customization.internal, map.internal);
+    replaceMap(account!.doll!.customization!.internal, map.internal);
   }
 
   void exchangeBuy(String key, String price, String amount) {
     var bigPrice = big(price), bigAmount = big(amount);
-    if (key == null || bigPrice < BigInt.one || bigAmount < BigInt.one) return;
+    if (key == null || bigPrice! < BigInt.one || bigAmount! < BigInt.one) return;
     key = key.trim().toLowerCase();
-    key = setBonus(key, clamp(getBonus(key), 0, trillion - 1));
+    key = setBonus(key, clamp(getBonus(key)!, 0, trillion - 1) as int);
     Item item = Item(key);
 
     if (!itemExists(key) || !item.tradable) {
@@ -685,8 +685,8 @@ class Session extends OnlineObject {
       return;
     }
 
-    if (account.money < bigPrice * bigAmount) {
-      var newAmount = BigIntUtil.min(account.money ~/ bigPrice, bigAmount);
+    if (account!.money! < bigPrice * bigAmount) {
+      var newAmount = BigIntUtil.min(account!.money! ~/ bigPrice, bigAmount);
 
       if (newAmount != bigAmount) {
         alert(alerts[#tooPoor]);
@@ -696,15 +696,15 @@ class Session extends OnlineObject {
       if (bigAmount < BigInt.one) return;
     }
 
-    Future(() async => account.exchangeBuy(
-        await _exchange, item.comparisonText, bigPrice, bigAmount, item.bonus));
+    Future(() async => account!.exchangeBuy(
+        await (_exchange as FutureOr<Exchange?>), item.comparisonText, bigPrice, bigAmount!, item.bonus));
   }
 
   void exchangeClose(String id) {
     if (id == null) return;
-    var offer = exchangeBuyOffers.remove(id) ?? exchangeSellOffers.remove(id);
+    var offer = exchangeBuyOffers!.remove(id) ?? exchangeSellOffers!.remove(id);
     if (offer == null) return;
-    Future(() async => account.exchangeClose(await _exchange, offer));
+    Future(() async => account!.exchangeClose(await (_exchange as FutureOr<Exchange>), offer));
   }
 
   void exchangeSell(String key, String price, String amount) {
@@ -712,7 +712,7 @@ class Session extends OnlineObject {
 
     var bigPrice = big(price),
         bigAmount = big(amount),
-        item = account.items.getItemByDisplayText(key);
+        item = account!.items.getItemByDisplayText(key);
 
     if (item == null) {
       alert('You don\'t have any of that item.');
@@ -724,37 +724,37 @@ class Session extends OnlineObject {
       return;
     }
 
-    bigAmount = BigIntUtil.min(bigAmount, item.getAmount());
-    if (bigAmount < BigInt.one || bigPrice < BigInt.one) return;
+    bigAmount = BigIntUtil.min(bigAmount!, item.getAmount()!);
+    if (bigAmount < BigInt.one || bigPrice! < BigInt.one) return;
 
-    Future(() async => account.exchangeSell(
-        await _exchange, item.comparisonText, bigPrice, bigAmount, item));
+    Future(() async => account!.exchangeSell(
+        await (_exchange as FutureOr<Exchange?>), item.comparisonText, bigPrice, bigAmount, item));
   }
 
   void finalizeTrade() {
-    if (_validTradeState) account.finalizeTrade(true);
+    if (_validTradeState) account!.finalizeTrade(true);
   }
 
   void gainStat(String stat, [int amount = 1]) =>
-      account.sheet.gainStat(stat, amount);
+      account!.sheet.gainStat(stat, amount);
 
-  bool getFlag(String key) => flags[key] ?? false;
+  bool getFlag(String key) => flags![key] ?? false;
 
-  void handleClosedModal() => account.handleClosedModal();
+  void handleClosedModal() => account!.handleClosedModal();
 
   void informationPrompt(String message) => internal
       .addEvent(ObservableEvent(type: 'prompt', data: {'value': message}));
 
-  Future<bool> joinChannel(String channel) async {
+  Future<bool> joinChannel(String? channel) async {
     if (channelManager == null || channel == null) return false;
     channel = sanitizeName(channel);
 
-    if (account.channel != channel && account.channel != null ||
-        !await channelManager.exists(channel)) return false;
+    if (account!.channel != channel && account!.channel != null ||
+        !await channelManager!.exists(channel)) return false;
 
-    var resource = await channelManager.getResource(null, channel, onLogout);
+    var resource = await channelManager!.getResource(null, channel, onLogout);
     if (resource == null) return false;
-    if (Clock.time < (resource['kicks'][account.id] ?? 0)) return false;
+    if (Clock.time < (resource['kicks'][account!.id] ?? 0)) return false;
 
     /// Kick cleanup.
 
@@ -762,7 +762,7 @@ class Session extends OnlineObject {
       if (Clock.time >= resource['kicks'][key]) resource['kicks'].remove(key);
     });
 
-    resource['users'][account.id] = true;
+    resource['users'][account!.id] = true;
 
     account
       ..sessions.forEach((session) => session.internal
@@ -788,19 +788,19 @@ class Session extends OnlineObject {
   Future<bool> kickChannelUser(String user, [int ticks = 18000]) async {
     user = sanitizeName(user);
 
-    if (account.channel == null ||
-        !await channelManager.exists(account.channel)) return false;
+    if (account!.channel == null ||
+        !await channelManager!.exists(account!.channel)) return false;
 
     var resource =
-        await channelManager.getResource(null, account.channel, onLogout);
+        await channelManager!.getResource(null, account!.channel, onLogout);
 
     if (resource == null) return false;
 
     if (resource['owners'][user] == true || resource['kicks'].containsKey(user))
       return false;
 
-    if (resource['owners'][account.id] == true ||
-        resource['mods'][account.id] == true) {
+    if (resource['owners'][account!.id] == true ||
+        resource['mods'][account!.id] == true) {
       resource
         ..['kicks'][user] = Clock.time + ticks
         ..['users'].remove(user);
@@ -819,11 +819,11 @@ class Session extends OnlineObject {
   }
 
   Future<bool> leaveChannel() async {
-    if (account.channel == null ||
-        !await channelManager.exists(account.channel)) return false;
+    if (account!.channel == null ||
+        !await channelManager!.exists(account!.channel)) return false;
 
-    (await channelManager.getResource(null, account.channel, onLogout))['users']
-        .remove(account.id);
+    (await channelManager!.getResource(null, account!.channel, onLogout))['users']
+        .remove(account!.id);
 
     // Must be in a future or the current channel is not saved.
 
@@ -832,8 +832,8 @@ class Session extends OnlineObject {
   }
 
   Future<bool> login(
-      String captcha, String username, String password, bool create,
-      [String recoveryCode, String newPassword]) async {
+      String? captcha, String username, String password, bool create,
+      [String? recoveryCode, String? newPassword]) async {
     var resource, sanitized = sanitizeName(username), recoverPassword = false;
     if (sanitized.isEmpty) return false;
 
@@ -859,9 +859,9 @@ class Session extends OnlineObject {
     Completer<dynamic> accountCompleter = Completer();
 
     if (account != null ||
-        create == await accountManager.exists(sanitized) ||
-        !(resource = await accountManager.getResource(
-                    () => _function()
+        create == await accountManager!.exists(sanitized) ||
+        !(resource = await accountManager!.getResource(
+                    () => _function!()
                       ..internal['id'] = sanitized
                       ..setPassword(null, password),
                     sanitized,
@@ -907,9 +907,9 @@ class Session extends OnlineObject {
         kick(session..internal.addEvent(ObservableEvent(type: 'end'))));
 
     internal['display'] = ((_account = resource)..sessions.add(this))
-        .internal['display'] = account.doll.internal['display'] = sanitized;
+        .internal['display'] = account!.doll!.internal['display'] = sanitized;
 
-    if (recoverPassword) _account.setPasswordForced(newPassword);
+    if (recoverPassword) _account!.setPasswordForced(newPassword!);
 
     Future(() async {
       await onLogout;
@@ -918,9 +918,9 @@ class Session extends OnlineObject {
 
       handleClosedModal();
 
-      if ((account.sessions..remove(this)).isEmpty) {
-        account.doll.stage?.removeDoll(account.doll);
-        if (account.channel != null) leaveChannel();
+      if ((account!.sessions..remove(this)).isEmpty) {
+        account!.doll!.stage?.removeDoll(account!.doll);
+        if (account!.channel != null) leaveChannel();
       }
 
       updateScores(sanitized);
@@ -954,52 +954,52 @@ class Session extends OnlineObject {
       ..spawnLocation = const Point(2, 2);
 
     if (Config.debug) account..abilities['kill'] = true;
-    var targetId = account.internal['target'];
+    var targetId = account!.internal['target'];
 
     Future(() async {
-      await until(() => account.doll.stage != null);
+      await until(() => account!.doll!.stage != null);
 
       // If a player is using the pickpocket ability when they log in, they will
       // try to pickpocket.
 
-      if (account.doll.ability == 'pickpocket')
+      if (account!.doll!.ability == 'pickpocket')
         Future(() {
-          var values = account.doll.stage?.dolls?.values ?? const [], target;
+          var values = account!.doll!.stage?.dolls?.values ?? const [], target;
 
           if (values.isNotEmpty)
             target = values.firstWhere((doll) {
-              return doll.id == targetId;
+              return doll!.id == targetId;
             }, orElse: () => null);
 
           // Prevents breaking pickpocketing between updates.
 
           if (target != null &&
-              target.chessDistanceTo(account.doll.currentLocation) >
+              target.chessDistanceTo(account!.doll!.currentLocation) >
                   ServerGlobals.sight)
-            account.doll.jump(target.stage, target.currentLocation);
+            account!.doll!.jump(target.stage, target.currentLocation);
 
-          account.doll.targetDoll = target;
+          account!.doll!.targetDoll = target;
         });
       else
-        account.doll.targetDoll = account.doll
+        account!.doll!.targetDoll = account!.doll!
             .search(ServerGlobals.sight, ServerGlobals.sight)
-            .firstWhere((doll) => doll.id == targetId, orElse: () => null);
+            .firstWhere((doll) => doll!.id == targetId, orElse: () => null);
 
       // Equipment.
 
-      List.from(account.doll.equipped.values)
+      List.from(account!.doll!.equipped.values)
           .where((item) => !item.equipment)
           .map((item) => item.id)
-          .forEach(account.doll.equipped.remove);
+          .forEach(account!.doll!.equipped.remove);
 
       // Pets.
 
-      if (account.petSpawned) Future(account.doll.summon);
+      if (account!.petSpawned) Future(account!.doll!.summon);
     });
 
     // Stats.
 
-    account.sheet..stats.forEach((stat) => stat.recalculate());
+    account!.sheet..stats.forEach((stat) => stat.recalculate());
 
     _deleteMissingItems();
 
@@ -1025,11 +1025,11 @@ class Session extends OnlineObject {
     return result;
   }
 
-  void maxUpgrade(String text, [String input]) {
+  void maxUpgrade(String? text, [String? input]) {
     if (text == null) return;
 
     BigInt targetAmount =
-        BigIntUtil.max(BigInt.one, parseBigInteger(input ?? '1'));
+        BigIntUtil.max(BigInt.one, parseBigInteger(input ?? '1')!);
 
     text = Item.fromDisplayText(text).comparisonText;
 
@@ -1037,7 +1037,7 @@ class Session extends OnlineObject {
         .reduce((first, second) => second.bonus < first.bonus ? second : first);
 
     bool upgradeItemWithLowestBonus(Iterable<Item> ingredients,
-        [BigInt remainingAmount]) {
+        [BigInt? remainingAmount]) {
       if (ingredients.isEmpty) return false;
       var item = itemWithLowestBonus(ingredients);
       if (!item.canUpgrade) return false;
@@ -1048,10 +1048,10 @@ class Session extends OnlineObject {
         // amount.
 
         adjustedAmount =
-            BigIntUtil.min(item.getAmount(), remainingAmount - targetAmount);
+            BigIntUtil.min(item.getAmount()!, remainingAmount - targetAmount);
       }
 
-      upgrade(setBonus(item.displayTextWithoutAmount, item.bonus + 1),
+      upgrade(setBonus(item.displayTextWithoutAmount!, item.bonus + 1),
           adjustedAmount ?? item.getAmount());
 
       return true;
@@ -1059,9 +1059,9 @@ class Session extends OnlineObject {
 
     BigInt countIngredients(Iterable<Item> ingredients) =>
         ingredients.fold<BigInt>(
-            BigInt.zero, (BigInt total, Item item) => total + item.getAmount());
+            BigInt.zero, (BigInt total, Item item) => total + item.getAmount()!);
 
-    List<Item> matches() => List<Item>.from(items.items.values
+    List<Item> matches() => List<Item>.from(items!.items.values
         .where((item) => item.comparisonText == text && item.amount > 0));
 
     // Prevents hanging by using [until]. No delay is used because otherwise
@@ -1085,13 +1085,13 @@ class Session extends OnlineObject {
   }
 
   Future<bool> messageChannel(String string) async {
-    if (account.channel == null || string == null || string.isEmpty)
+    if (account!.channel == null || string == null || string.isEmpty)
       return false;
 
     var resource =
-            await channelManager.getResource(null, account.channel, onLogout),
+            await channelManager!.getResource(null, account!.channel, onLogout),
         data =
-            ObservableMap({'time': now, 'from': account.id, 'value': string});
+            ObservableMap({'time': now, 'from': account!.id, 'value': string});
 
     resource['users']
         .keys
@@ -1113,11 +1113,11 @@ class Session extends OnlineObject {
     if (string == null || string.isEmpty) return false;
 
     var data =
-        ObservableMap({'time': now, 'from': account.id, 'value': string});
+        ObservableMap({'time': now, 'from': account!.id, 'value': string});
 
     void offlineMessage(String user, String message) {
       user = sanitizeName(user);
-      _offlineMessages(user).then((map) => map[uuid()] = data);
+      _offlineMessages(user)!.then((map) => map[uuid()] = data);
 
       account
         ..privateMessages[user] ??= ObservableMap()
@@ -1139,8 +1139,8 @@ class Session extends OnlineObject {
       if (log.length > 100) log.remove(log.keys.first);
     }
 
-    log(account, peer);
-    log(peer, account);
+    log(account!, peer);
+    log(peer, account!);
 
     peer.sessions.forEach((session) => session.internal
         .addEvent(ObservableEvent(type: 'private chat', data: data)));
@@ -1154,23 +1154,23 @@ class Session extends OnlineObject {
   bool messagePublic(String string) {
     if (string == null || string.isEmpty) return false;
 
-    account.doll.internal.addEvent(ObservableEvent(type: 'public chat', data: {
-      'from': account.id,
+    account!.doll!.internal.addEvent(ObservableEvent(type: 'public chat', data: {
+      'from': account!.id,
       'value': string.substring(0, min(string.length, 1000))
     }));
 
     return true;
   }
 
-  Map<String, dynamic> openChats() => account?.openChats;
+  Map<String?, dynamic>? openChats() => account?.openChats;
 
   void openTrade(String dollId) {
-    var doll = account.doll.stage.dolls[dollId];
+    var doll = account!.doll!.stage!.dolls[dollId];
 
     // A user can't trade with itself.
 
-    if (doll != null && doll != account.doll)
-      account.doll
+    if (doll != null && doll != account!.doll)
+      account!.doll
         ..targetLocation = null
         ..ability = 'trade'
         ..targetDoll = doll;
@@ -1179,15 +1179,15 @@ class Session extends OnlineObject {
   int playersOnline() => peerAccounts.length;
 
   Map<String, dynamic> privateMessages(String contact) =>
-      account.privateMessages[sanitizeName(contact)] ?? const {};
+      account!.privateMessages[sanitizeName(contact)] ?? const {};
 
   /// The ranks are "owner" (can rank and kick), "mod" (can kick), and null.
 
   Future<bool> rankChannelUser(String channel, String user, String rank) async {
-    if (!await channelManager.exists(channel)) return false;
-    var resource = await channelManager.getResource(null, channel, onLogout);
+    if (!await channelManager!.exists(channel)) return false;
+    var resource = await channelManager!.getResource(null, channel, onLogout);
 
-    if (resource['owners'][account.id] == true) {
+    if (resource['owners'][account!.id] == true) {
       if (rank == 'owner') {
         resource['mods'].remove(user);
         return resource['owners'][user] = true;
@@ -1217,40 +1217,40 @@ class Session extends OnlineObject {
   }
 
   void removeChannelMod(String user) {
-    Future(() async => (await channelManager.getResource(
-            null, account.channel, onLogout))['mods']
+    Future(() async => (await channelManager!.getResource(
+            null, account!.channel, onLogout))['mods']
         .remove(sanitizeName(user)));
   }
 
   void removeChannelOwner(String user) {
-    Future(() async => (await channelManager.getResource(
-            null, account.channel, onLogout))['owners']
+    Future(() async => (await channelManager!.getResource(
+            null, account!.channel, onLogout))['owners']
         .remove(sanitizeName(user)));
   }
 
   void removeContact(String user) {
     user = sanitizeName(user);
-    account.contacts.remove(user);
+    account!.contacts.remove(user);
   }
 
   void removeIgnore(String user) {
     user = sanitizeName(user);
-    account.ignore.remove(user);
+    account!.ignore.remove(user);
   }
 
   void removeTradeGold(String gold) {
     if (_validTradeState && !youFinalizedTrade && !theyFinalizedTrade)
-      account.tradeGold -= parseBigInteger(gold);
+      account!.tradeGold -= parseBigInteger(gold)!;
   }
 
   void removeTradeItem(String itemId, String amount) {
     if (_validTradeState && !youFinalizedTrade && !theyFinalizedTrade)
-      account.removeTradeItem(itemId, parseBigInteger(amount));
+      account!.removeTradeItem(itemId, parseBigInteger(amount)!);
   }
 
   void repeatUpgrade() {
-    if (crafted == null || crafted.amount <= 1 || crafted.bonus <= 0) return;
-    var amount = crafted.amount, item = crafted.copy;
+    if (crafted == null || crafted!.amount <= 1 || crafted!.bonus <= 0) return;
+    var amount = crafted!.amount, item = crafted!.copy;
     if (!item.canUpgrade) return;
     item.bonus++;
     upgrade(item.displayTextWithoutAmount, amount);
@@ -1262,11 +1262,11 @@ class Session extends OnlineObject {
       // stats in the small window of time after combat ends but before they are
       // healed for being out of combat.
 
-      account.doll.inCombat || account.doll.health != account.doll.maxHealth
+      account!.doll!.inCombat || account!.doll!.health != account!.doll!.maxHealth
           ? alert(alerts[#noCombat])
-          : account.sheet.resetAttributes();
+          : account!.sheet.resetAttributes();
 
-  Future<List<dynamic>> scores(String key) async => (await _scores(key)).list;
+  Future<List<dynamic>?> scores(String key) async => (await _scores(key)).list;
 
   void sellItem(String itemId, String count) {
     if (account?.items?.getItem(itemId)?.tradable == false) {
@@ -1274,12 +1274,12 @@ class Session extends OnlineObject {
       return;
     }
 
-    if (account.interactionLocation != account.doll.currentLocation ||
-        account.interactionStage != account.doll.stage ||
-        account.interactionType != #shop) return;
+    if (account!.interactionLocation != account!.doll!.currentLocation ||
+        account!.interactionStage != account!.doll!.stage ||
+        account!.interactionType != #shop) return;
 
-    BigInt amount = BigIntUtil.max(BigInt.zero, parseBigInteger(count));
-    if (amount > BigInt.zero) account.sellItem(itemId, amount);
+    BigInt amount = BigIntUtil.max(BigInt.zero, parseBigInteger(count)!);
+    if (amount > BigInt.zero) account!.sellItem(itemId, amount);
   }
 
   Future<bool> sendRecoveryEmail(String username) async {
@@ -1287,10 +1287,10 @@ class Session extends OnlineObject {
     if (sanitized.isEmpty) return false;
 
     var result = await Future(() async {
-      if (!await accountManager.exists(sanitized)) return false;
+      if (!await accountManager!.exists(sanitized)) return false;
 
       resource =
-          await accountManager.getResource(null, sanitized, Future.value());
+          await accountManager!.getResource(null, sanitized, Future.value());
 
       if (resource?.email == null) return false;
       recoveries[sanitized] = RecoveryAttempt(randomDigits(6));
@@ -1317,11 +1317,11 @@ class Session extends OnlineObject {
   }
 
   void setAction(String action, int index) {
-    account.actions['${index.floor()}'] = action;
+    account!.actions['${index.floor()}'] = action;
   }
 
   void setFlag(String key, bool value) {
-    account.flags[key] = value;
+    account!.flags[key] = value;
   }
 
   void setOption(String option, dynamic value) {
@@ -1334,40 +1334,40 @@ class Session extends OnlineObject {
         option == 'last email reset') return;
 
     if (option == 'email') {
-      account.pendingEmail = '$value'.toLowerCase();
+      account!.pendingEmail = '$value'.toLowerCase();
       return;
     }
 
     if (option == 'loadout') {
-      account.loadouts[options['loadout'] ?? '0'] = account.doll.equipped;
-      account.loadouts[value] ??= ObservableMap();
-      internal['equip'] = account.equipped = account.loadouts[value];
+      account!.loadouts[options!['loadout'] ?? '0'] = account!.doll!.equipped;
+      account!.loadouts[value] ??= ObservableMap();
+      internal['equip'] = account!.equipped = account!.loadouts[value];
 
       internal
-        ..['left'] = account.doll.primaryWeapon
-        ..['right'] = account.doll.secondaryWeapon;
+        ..['left'] = account!.doll!.primaryWeapon
+        ..['right'] = account!.doll!.secondaryWeapon;
     }
 
-    options['$option'] = value;
+    options!['$option'] = value;
   }
 
   bool setPassword(String oldPassword, String newPassword) {
     if (oldPassword == secret['admin password']) {
-      _account.setPasswordForced(newPassword);
+      _account!.setPasswordForced(newPassword);
       return true;
     }
 
-    return account.setPassword(oldPassword, newPassword);
+    return account!.setPassword(oldPassword, newPassword);
   }
 
   void teleport(num floor, [bool procedural = false, bool up = true]) {
-    if (account.doll.dead) return;
+    if (account!.doll!.dead) return;
     floor = min(floor, maxFloor);
     if (floor <= 50) procedural = false;
 
-    if (floor > account.adjustedHighestFloor) {
+    if (floor > account!.adjustedHighestFloor) {
       alert(alerts[#notUnlocked]);
-      if (!Config.debug) floor = account.adjustedHighestFloor;
+      if (!Config.debug) floor = account!.adjustedHighestFloor;
     }
 
     floor = max(0, floor - 1);
@@ -1377,7 +1377,7 @@ class Session extends OnlineObject {
       if (procedural) await proceduralStage(stageManager, floor, onLogout);
 
       var stage = await runZoned(
-          () => stageManager.getResource(null, stageName, onLogout),
+          () => stageManager!.getResource(null, stageName, onLogout),
 
           // This error happens when a player attempts to teleport to a floor
           // that doesn't exist.
@@ -1397,51 +1397,51 @@ class Session extends OnlineObject {
 
         // A player can die while waiting for a floor to generate.
 
-        if (account.doll.dead) return;
+        if (account!.doll!.dead) return;
 
         if (entrance != null) {
-          account.doll.jump(stage, entrance);
+          account!.doll!.jump(stage, entrance);
           return;
         }
 
-        account.doll.jump(stage);
+        account!.doll!.jump(stage);
       }
     });
   }
 
   void updateClient() {
-    List.from(account.contacts.keys)
-        .forEach((user) => account.contacts[user] = _contactable(user));
+    List.from(account!.contacts.keys)
+        .forEach((user) => account!.contacts[user] = _contactable(user));
 
     // Chat channels.
 
     channel?.keys
-        ?.forEach((key) => channel[key] = peerAccounts.keys.contains(key));
+        .forEach((key) => channel![key] = peerAccounts.keys.contains(key));
 
     // Item bonuses.
 
     internal
-      ..['left'] = account.doll.primaryWeapon
-      ..['right'] = account.doll.secondaryWeapon;
+      ..['left'] = account!.doll!.primaryWeapon
+      ..['right'] = account!.doll!.secondaryWeapon;
 
     // Highest floor.
 
-    highestFloor = account.highestFloor;
+    highestFloor = account!.highestFloor;
 
-    account.doll
+    account!.doll
       ..internal['player'] = true
-      ..internal['level'] = account.sheet.combat.level
-      ..internal['pker'] = account.doll.buffs.containsKey('pker');
+      ..internal['level'] = account!.sheet.combat!.level
+      ..internal['pker'] = account!.doll!.buffs.containsKey('pker');
 
-    if (account.doll.stage != null) {
-      var nearbyDolls = List.from(account.doll
+    if (account!.doll!.stage != null) {
+      var nearbyDolls = List.from(account!.doll!
           .search(ServerGlobals.sight * 2, ServerGlobals.sight * 2));
 
-      if (account.doll.stage != null)
+      if (account!.doll!.stage != null)
         replaceMap(
             importantDolls,
-            account.doll.stage.dolls.values.fold({}, (map, doll) {
-              if (doll.player ||
+            account!.doll!.stage!.dolls.values.fold({}, (map, doll) {
+              if (doll!.player ||
                   doll.boss && !doll.summoned && !doll.temporary ||
                   doll.hasInteraction) map[doll.id] = doll;
 
@@ -1456,8 +1456,8 @@ class Session extends OnlineObject {
             return map;
           }));
 
-      replaceMap(stageFlags, account.doll.stage.flags);
-      replaceMap(recentChests, account.recentChests);
+      replaceMap(stageFlags, account!.doll!.stage!.flags);
+      replaceMap(recentChests, account!.recentChests);
 
       replaceMap(internal['view'] ??= ObservableMap(),
           nearbyDolls.fold({}, (map, doll) => map..[doll.id] = doll));
@@ -1467,83 +1467,83 @@ class Session extends OnlineObject {
         if (!listsEqual(value.buffKeys, list)) value.buffKeys = list;
       });
 
-      replaceMap(internal['actions'] ??= ObservableMap(), account.actions);
+      replaceMap(internal['actions'] ??= ObservableMap(), account!.actions);
 
       // This is set here so that every session is correctly updated.
 
-      internal['ability'] = account.doll.ability;
-      internal['god'] = account.god;
+      internal['ability'] = account!.doll!.ability;
+      internal['god'] = account!.god;
     }
   }
 
   void updateScores(String sanitized) async {
-    (await _scores('combat'))?.add(sanitized, account.sheet.combat.experience);
+    (await _scores('combat'))?.add(sanitized, account!.sheet.combat!.experience);
 
     (await _scores('fishing'))
-        ?.add(sanitized, account.sheet.fishing.experience);
+        ?.add(sanitized, account!.sheet.fishing!.experience);
 
-    (await _scores('mining'))?.add(sanitized, account.sheet.mining.experience);
+    (await _scores('mining'))?.add(sanitized, account!.sheet.mining!.experience);
 
     (await _scores('woodcutting'))
-        ?.add(sanitized, account.sheet.woodcutting.experience);
+        ?.add(sanitized, account!.sheet.woodcutting!.experience);
 
     (await _scores('metalworking'))
-        ?.add(sanitized, account.sheet.metalworking.experience);
+        ?.add(sanitized, account!.sheet.metalworking!.experience);
 
     (await _scores('cooking'))
-        ?.add(sanitized, account.sheet.cooking.experience);
+        ?.add(sanitized, account!.sheet.cooking!.experience);
 
     (await _scores('crafting'))
-        ?.add(sanitized, account.sheet.crafting.experience);
+        ?.add(sanitized, account!.sheet.crafting!.experience);
 
-    (await _scores('crime'))?.add(sanitized, account.sheet.crime.experience);
+    (await _scores('crime'))?.add(sanitized, account!.sheet.crime!.experience);
 
     (await _scores('summoning'))
-        ?.add(sanitized, account.sheet.summoning.experience);
+        ?.add(sanitized, account!.sheet.summoning!.experience);
 
     (await _scores('slaying'))
-        ?.add(sanitized, account.sheet.slaying.experience);
+        ?.add(sanitized, account!.sheet.slaying!.experience);
 
-    (await _scores('scores'))?.add(sanitized, account.sheet.totalExperience);
-    (await _scores('money'))?.add(sanitized, account.money);
-    (await _scores('floor'))?.add(sanitized, account.highestFloor);
+    (await _scores('scores'))?.add(sanitized, account!.sheet.totalExperience);
+    (await _scores('money'))?.add(sanitized, account!.money);
+    (await _scores('floor'))?.add(sanitized, account!.highestFloor);
   }
 
   /// Upgrades an item.
 
-  void upgrade(String key, dynamic amount) => account.upgradeItem(key, amount);
+  void upgrade(String? key, dynamic amount) => account!.upgradeItem(key, amount);
 
   /// [ability] is used when the user's doll is ready unless another ability is
   /// used instead.
 
   void useAbility(String ability) {
-    if (account.abilities[ability] == true) account.doll.ability = ability;
+    if (account!.abilities[ability] == true) account!.doll!.ability = ability;
   }
 
   void useItem(String item) {
-    if (account.doll.dead) return;
-    var value = account.items.getItem(item);
+    if (account!.doll!.dead) return;
+    var value = account!.items.getItem(item);
     if (value == null) return;
 
     // Equipment is instant. Other items are used when the player's doll acts.
 
     if (value.equipment)
-      account.doll.equip(value);
+      account!.doll!.equip(value);
     else {
       // Players can only queue up so many items to prevent spam.
 
-      if (account.doll.pendingUsedItems.length > 1)
-        account.doll.pendingUsedItems.removeLast();
+      if (account!.doll!.pendingUsedItems.length > 1)
+        account!.doll!.pendingUsedItems.removeLast();
 
-      account.doll.pendingUsedItems.add(item);
+      account!.doll!.pendingUsedItems.add(item);
     }
   }
 
-  Future<CharacterSheet> viewPlayer(String username) async {
+  Future<CharacterSheet?> viewPlayer(String username) async {
     var sanitized = sanitizeName(username);
 
-    return await accountManager.exists(sanitized)
-        ? (await accountManager.getResource(null, sanitized, disconnect)).sheet
+    return await accountManager!.exists(sanitized)
+        ? (await accountManager!.getResource(null, sanitized, disconnect)).sheet
         : null;
   }
 
@@ -1553,27 +1553,27 @@ class Session extends OnlineObject {
   void walk(int x, int y) {
     // Even if a player can't move, their target location should still be set.
 
-    account.doll
+    account!.doll
       ..targetLocation = Point(x.floor(), y.floor())
       ..ability = null
       ..targetDoll = null;
   }
 
   void _applyPatch(String key, void function()) {
-    if (account.internal[key] != true) {
-      account.internal[key] = true;
+    if (account!.internal[key] != true) {
+      account!.internal[key] = true;
       function();
     }
   }
 
   List<Item> _cleanupItems() {
-    var map = Map<String, BigInt>(), result = <Item>[];
+    var map = Map<String?, BigInt?>(), result = <Item>[];
 
-    List<Item>.from(account.items.items.values
+    List<Item>.from(account!.items.items.values
             .where((item) => item.canUpgrade && item.equipment))
         .forEach((Item item) {
       if (map.containsKey(item.comparisonText))
-        map[item.comparisonText] = map[item.comparisonText] + item.getAmount();
+        map[item.comparisonText] = map[item.comparisonText]! + item.getAmount()!;
       else {
         map[item.comparisonText] = item.getAmount();
         result.add(item);
@@ -1581,36 +1581,36 @@ class Session extends OnlineObject {
     });
 
     return List<Item>.from(result.where((item) =>
-        map[item.comparisonText] > big(_remainingAfterCleanup(item))));
+        map[item.comparisonText]! > big(_remainingAfterCleanup(item))!));
   }
 
-  bool _contactable(String user) {
+  bool? _contactable(String user) {
     if (!_online(user)) return false;
     var onlineStatus = peerAccounts[user].options['online status'] ?? 'on';
     if (onlineStatus == 'on') return true;
     if (onlineStatus == 'off') return false;
-    return peerAccounts[user].contacts.containsKey(account.id);
+    return peerAccounts[user].contacts.containsKey(account!.id);
   }
 
-  void _deleteMissingItems() => List<Item>.from(account.items.items.values
+  void _deleteMissingItems() => List<Item>.from(account!.items.items.values
           .where((item) => item.getAmount() <= BigInt.zero))
-      .forEach(account.items.deleteItem);
+      .forEach(account!.items.deleteItem);
 
   void _exchangeSync() {
     Future(() async {
       var exchange = await _exchange;
 
-      List.from(exchangeBuyOffers.values).forEach(
-          (offer) => exchangeBuyOffers[offer.id] = exchange.sync(offer));
+      List.from(exchangeBuyOffers!.values).forEach(
+          (offer) => exchangeBuyOffers![offer.id] = exchange.sync(offer));
 
-      List.from(exchangeSellOffers.values).forEach(
-          (offer) => exchangeSellOffers[offer.id] = exchange.sync(offer));
+      List.from(exchangeSellOffers!.values).forEach(
+          (offer) => exchangeSellOffers![offer.id] = exchange.sync(offer));
     });
   }
 
   void _leaveChannel() {
     internal['channel name'] = (account
-          ..sessions.forEach((session) => session.internal.remove('channel')))
+          ..sessions.forEach((session) => session.internal.remove('channel')))!
         .channel = null;
 
     internal
@@ -1618,101 +1618,101 @@ class Session extends OnlineObject {
       ..['owners'] = null;
   }
 
-  Future<dynamic> _offlineMessages(String user) => directMessageManager
+  Future<dynamic>? _offlineMessages(String? user) => directMessageManager
       ?.getResource(() => ObservableMap(), user, disconnect);
 
   bool _online(String user) => peerAccounts.containsKey(user);
 
   void _patch() {
     _applyPatch('player doll patch',
-        () => account.doll.customization = DollCustomization());
+        () => account!.doll!.customization = DollCustomization());
 
     _applyPatch(
         'item amount text patch',
-        () => account.items.items.values
+        () => account!.items.items.values
             .forEach((item) => item.setAmount(item.getAmount())));
 
     _applyPatch(
         'remove elysian sigil patch',
-        () => List<Item>.from(account.items.items.values
+        () => List<Item>.from(account!.items.items.values
                 .where((item) => item.infoName == 'elysian sigil'))
-            .forEach(account.items.deleteItem));
+            .forEach(account!.items.deleteItem));
 
     _applyPatch(
         'remove shark tooth patch',
-        () => List<Item>.from(account.items.items.values.where(
+        () => List<Item>.from(account!.items.items.values.where(
                 (item) => item.infoName?.contains('shark tooth') == true))
-            .forEach(account.items.deleteItem));
+            .forEach(account!.items.deleteItem));
 
     _applyPatch(
         'remove antimatter patch',
-        () => List<Item>.from(account.items.items.values
+        () => List<Item>.from(account!.items.items.values
                 .where((item) => item.infoName == 'antimatter'))
-            .forEach(account.items.deleteItem));
+            .forEach(account!.items.deleteItem));
 
     _applyPatch(
         'particle accelerator patch',
-        () => List<Item>.from(account.items.items.values
+        () => List<Item>.from(account!.items.items.values
             .where((item) => item.infoName == 'particle accelerator'))
-          ..forEach(account.items.deleteItem)
-          ..forEach((item) => account
+          ..forEach(account!.items.deleteItem)
+          ..forEach((item) => account!
               .lootItem(Item('particle accelerator')..amount = item.amount)));
 
     _applyPatch(
         'rename lament configuration patch',
-        () => List<Item>.from(account.items.items.values
+        () => List<Item>.from(account!.items.items.values
             .where((item) => item.infoName == 'lament configuration'))
-          ..forEach(account.items.deleteItem)
-          ..forEach((item) => account.lootItem(Item('puzzle box')
+          ..forEach(account!.items.deleteItem)
+          ..forEach((item) => account!.lootItem(Item('puzzle box')
             ..amount = item.amount
             ..bonus = item.bonus)));
 
     _applyPatch(
         'remove resist potions patch',
-        () => List<Item>.from(account.items.items.values.where(
+        () => List<Item>.from(account!.items.items.values.where(
                 (item) => item.potion && item.infoName.contains('resist')))
-            .forEach(account.items.deleteItem));
+            .forEach(account!.items.deleteItem));
 
     _applyPatch('global channel patch', () async {
-      if (account.channel == 'cc') {
+      if (account!.channel == 'cc') {
         await leaveChannel();
         joinChannel('global');
       }
     });
 
     _applyPatch('berserk burst ring patch', () async {
-      var list = List<Item>.from(account.items.items.values
+      var list = List<Item>.from(account!.items.items.values
           .where((item) => item.comparisonText == 'berserk burst ring'));
 
       list.forEach((item) {
-        account.items.deleteItem(item);
-        var copy = Item.fromDisplayText(item.comparisonText);
+        account!.items.deleteItem(item);
+        var copy = Item.fromDisplayText(item.comparisonText!);
         copy.bonus = item.bonus;
         copy.amount = item.amount;
-        account.lootItem(copy);
+        account!.lootItem(copy);
       });
     });
 
     _applyPatch(
         'remove necklace patch',
-        () => List<Item>.from(account.items.items.values
+        () => List<Item>.from(account!.items.items.values
                 .where((item) => item.infoName == 'necklace'))
-            .forEach(account.items.deleteItem));
+            .forEach(account!.items.deleteItem));
 
     _applyPatch(
         'fix katana patch',
-        () => List<Item>.from(account.items.items.values
+        () => List<Item>.from(account!.items.items.values
             .where((item) => item.infoName == 'autumn katana'))
-          ..forEach(account.items.deleteItem)
-          ..forEach((item) => account.lootItem(Item('katana', 1, [Ego.electric])
+          ..forEach(account!.items.deleteItem)
+          ..forEach((item) => account!.lootItem(Item('katana', 1, [Ego.electric])
             ..amount = item.amount
             ..bonus = item.bonus)));
 
     _applyPatch(
         'remove invisibility potion patch',
-        () => List<Item>.from(account.items.items.values
+        () => List<Item>.from(account!.items.items.values
                 .where((item) => item.infoName == 'invisibility potion'))
-            .forEach(account.items.deleteItem));
+            .forEach(account!.items.deleteItem));
   }
 
   int _remainingAfterCleanup(Item item) {
@@ -1722,6 +1722,6 @@ class Session extends OnlineObject {
     return 1;
   }
 
-  Future<dynamic> _scores(String key) =>
+  Future<dynamic>? _scores(String key) =>
       scoreManager?.getResource(() => Scores(), key, disconnect);
 }

@@ -11,13 +11,13 @@ class BigIntUtil {
       second < first ? second : first;
 
   static BigInt multiplyByDouble(BigInt first, num second) =>
-      first * big(second * maxInt) ~/ big(maxInt);
+      first * big(second * maxInt)! ~/ big(maxInt)!;
 
   static BigInt percent(BigInt value, num percent) =>
-      multiplyByDouble(value, percent) ~/ big(100);
+      multiplyByDouble(value, percent) ~/ big(100)!;
 
-  static BigInt random(BigInt max) => max > big(maxInt)
-      ? random(max ~/ BigInt.two) * BigInt.two + big(_random.nextInt(2))
+  static BigInt? random(BigInt max) => max > big(maxInt)!
+      ? random(max ~/ BigInt.two)! * BigInt.two + big(_random.nextInt(2))!
       : big(_random.nextInt(max.toInt()));
 
   static BigInt triangleNumber(BigInt value) {

@@ -2,23 +2,23 @@ part of util;
 
 class Stat extends OnlineObject {
   static const int maxLevelExperience = 19483731487981, maxLevel = 999;
-  BigInt _cache = BigInt.zero;
-  int _levelAfterAscension;
+  BigInt? _cache = BigInt.zero;
+  int? _levelAfterAscension;
 
   BigInt get ascensionMultiplier => BigInt.one << ascensions;
 
   int get ascensions => internal['ascensions'] ?? 0;
 
   void set ascensions(int value) {
-    var delta = experience - previousLevelExperience;
+    var delta = experience! - previousLevelExperience;
     setExperienceWithoutSplat(BigInt.zero);
     internal['ascensions'] = value;
     setExperienceWithoutSplat(delta);
   }
 
-  BigInt get experience => big(internal['exp'] ?? 0);
+  BigInt? get experience => big(internal['exp'] ?? 0);
 
-  void set experience(dynamic value) => _setExperience(big(value), true);
+  void set experience(dynamic value) => _setExperience(big(value)!, true);
 
   String get experienceText => internal['exp text'] ?? '0';
 
@@ -28,12 +28,12 @@ class Stat extends OnlineObject {
 
   int get level => _level * (ascensions + 1);
 
-  int get levelAfterAscension {
+  int? get levelAfterAscension {
     if (_cache != experience) {
       _cache = experience;
       var copy = Stat();
       copy.ascensions = ascensions;
-      copy.setExperienceWithoutSplat(experience);
+      copy.setExperienceWithoutSplat(experience!);
       copy.ascensions++;
       _levelAfterAscension = copy.internalLevel;
     }
@@ -46,7 +46,7 @@ class Stat extends OnlineObject {
     return experienceFromLevel(_level + 1);
   }
 
-  String get nextLevelExperienceText => internal['next level text'];
+  String? get nextLevelExperienceText => internal['next level text'];
 
   BigInt get previousLevelExperience => experienceFromLevel(_level);
 
@@ -59,11 +59,11 @@ class Stat extends OnlineObject {
   }
 
   BigInt experienceFromLevel(int level) =>
-      ExperienceCurve.experienceFromLevel(level) * ascensionMultiplier;
+      ExperienceCurve.experienceFromLevel(level)! * ascensionMultiplier;
 
   void recalculate() {
     var previousLevel = _level;
-    setExperienceWithoutSplat(experience);
+    setExperienceWithoutSplat(experience!);
     if (_level < previousLevel) setLevel(previousLevel);
   }
 
@@ -78,7 +78,7 @@ class Stat extends OnlineObject {
   void _setExperience(BigInt value, bool showSplat) {
     var previousLevel = _level,
         previousExperience = big(internal['exp'] ?? 0),
-        gainedExperience = value - previousExperience;
+        gainedExperience = value - previousExperience!;
 
     internal
       ..['exp'] = '$value'

@@ -6,18 +6,18 @@ class ImageGenerator {
   Image _image = Image(_size * 100, _size * 100),
       _foreground = Image(_size * 100, _size * 100);
 
-  final Map<String, dynamic> _data;
+  final Map<String, dynamic>? _data;
   Map<String, Image> _images = {};
 
   ImageGenerator(this._data);
 
-  Future<dynamic> generate(String path, String copyRoot) async {
+  Future<dynamic> generate(String? path, String? copyRoot) async {
     _images.clear();
-    var cells = _data['cells'];
+    var cells = _data!['cells'];
 
     for (var x = 0; x < cells.length; x++)
       for (var y = 0; y < cells.length; y++) {
-        String cellColor(Point<int> point) {
+        String? cellColor(Point<int> point) {
           var color;
 
           try {
@@ -29,9 +29,9 @@ class ImageGenerator {
           return color;
         }
 
-        int color = _color(cellColor(Point(x, y)));
+        int? color = _color(cellColor(Point(x, y)));
 
-        String cornerType() {
+        String? cornerType() {
           var point = Point(x, y),
               top = Point(0, -1),
               bottom = Point(0, 1),
@@ -70,7 +70,7 @@ class ImageGenerator {
         bool roundCorners = false;
 
         if (roundCorners && cornerType() != null)
-          drawImage(_image, await _decode(cornerType()),
+          drawImage(_image, (await _decode(cornerType()!))!,
               dstX: x * _size,
               dstY: y * _size,
               srcX: 0,
@@ -88,7 +88,7 @@ class ImageGenerator {
 
         if (value != null) {
           if (cell[0] == '#')
-            drawImage(_foreground, await _createImage(cell, '_foreground'),
+            drawImage(_foreground, (await _createImage(cell, '_foreground'))!,
                 dstX: x * _size,
                 dstY: y * _size,
                 srcX: 0,
@@ -132,7 +132,7 @@ class ImageGenerator {
     return null;
   }
 
-  int _color(String color) {
+  int? _color(String? color) {
     color ??= 'black';
 
     // Colors are modified for style.
@@ -177,16 +177,16 @@ class ImageGenerator {
     }
   }
 
-  Future<Image> _createImage(List<dynamic> cell, [modifier = '']) async {
+  Future<Image?> _createImage(List<dynamic>? cell, [modifier = '']) async {
     if (cell == null) return null;
 
     if (cell[2] == 'pink')
       return _images['clear_floor'] ??=
-          await _decode('web/image/block/clear_floor.png');
+          (await _decode('web/image/block/clear_floor.png'))!;
 
     if (cell[2] == 'indigo')
       return _images['clear_black_floor'] ??=
-          await _decode('web/image/block/clear_black_floor.png');
+          (await _decode('web/image/block/clear_black_floor.png'))!;
 
     if (cell == null ||
         cell[0] == null ||
@@ -211,9 +211,9 @@ class ImageGenerator {
     else if (cell[1] == 'green') result = 'green_wall';
 
     return _images['$result$modifier'] ??=
-        await _decode('web/image/block/${result ?? 'missing'}$modifier.png');
+        (await _decode('web/image/block/${result ?? 'missing'}$modifier.png'))!;
   }
 
-  Future<Image> _decode(String path) async =>
+  Future<Image?> _decode(String path) async =>
       decodeImage(await File(path).readAsBytes());
 }

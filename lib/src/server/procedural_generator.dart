@@ -23,7 +23,7 @@ Future<dynamic> _isolate(SendPort sendPort) async {
 }
 
 class ProceduralGenerator {
-  static Map<String, dynamic> _placeholderData;
+  static Map<String, dynamic>? _placeholderData;
 
   Future<dynamic> generate(int floor) async {
     // Floor x (as displayed in the game) has a [floor] of x - 1.
@@ -33,7 +33,7 @@ class ProceduralGenerator {
     // This takes a while, so it's done in a thread.
 
     await Isolate.spawn(_isolate, receivePort.sendPort);
-    await _send(await receivePort.first, floor);
+    await _send(await (receivePort.first as FutureOr<SendPort>), floor);
   }
 
   Future<dynamic> _send(SendPort sendPort, int floor) {
@@ -42,7 +42,7 @@ class ProceduralGenerator {
     return receivePort.first;
   }
 
-  static Map<String, dynamic> dungeon(int floor) {
+  static Map<String, dynamic> dungeon(int? floor) {
     var data = <String, dynamic>{
       'timestamp': DateTime.now().millisecondsSinceEpoch,
       'flags': ['procgen'],
@@ -50,7 +50,7 @@ class ProceduralGenerator {
     };
 
     var traversable = [], theme = Theme.random(floor);
-    data['flags'].addAll(theme.flags);
+    data['flags'].addAll(theme!.flags);
 
     List<dynamic> defaults(int count) {
       if (theme.flags.contains('background-color: lightskyblue'))
@@ -86,7 +86,7 @@ class ProceduralGenerator {
       if (i == 0) {
         // high floors have a 1/3 chance gods or ascended enemies as a boss.
 
-        if (floor + 1 >= Session.maxFloor) {
+        if (floor! + 1 >= Session.maxFloor) {
           doll = 'enryu';
         } else if (floor >= 50 && random(3) == 0)
           doll = randomValue([
@@ -136,7 +136,7 @@ class ProceduralGenerator {
         doll = 'up stairs';
       else if (i <= 18 && theme.resources.isNotEmpty)
         doll = randomValue(theme.resources);
-      else if (i == 19 && floor % 5 == 4) {
+      else if (i == 19 && floor! % 5 == 4) {
         // Shops appear every 5 floors: F55, F60, F65, and so on.
 
         doll = 'random shop';
@@ -148,7 +148,7 @@ class ProceduralGenerator {
             : randomValue(theme.dolls);
 
       if (traversable.isEmpty) continue;
-      Point<int> point = traversable.removeAt(random(traversable.length));
+      Point<int>? point = traversable.removeAt(random(traversable.length));
 
       if (const ['fish', 'shellfish', 'shark', 'stardust fish', 'no fish']
           .contains(doll)) {
@@ -174,7 +174,7 @@ class ProceduralGenerator {
           doll = randomValue(theme.dolls);
       }
 
-      if (doll != 'no fish') data['cells'][point.x][point.y][0] = '@$doll';
+      if (doll != 'no fish') data['cells'][point!.x][point.y][0] = '@$doll';
     }
 
     return data;

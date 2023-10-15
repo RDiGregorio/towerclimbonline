@@ -12,13 +12,13 @@ class Doll extends OnlineObject {
   };
 
   static String _missingImage = 'image/block/missing.png';
-  Account account;
-  Stage _stage, spawnStage;
-  Sprite _sprite;
-  String message, _ability;
-  DollCustomization _customization;
+  Account? account;
+  Stage? _stage, spawnStage;
+  Sprite? _sprite;
+  String? message, _ability;
+  DollCustomization? _customization;
 
-  int _created,
+  int? _created,
       _poisonCycle = 0,
       messageTime = 0,
       lastCombatTime = -25,
@@ -33,9 +33,9 @@ class Doll extends OnlineObject {
   BigInt _charmDamage = BigInt.zero, _poisonDamage = BigInt.zero;
 
   Map<Symbol, int> _delays = {};
-  Point<int> targetLocation, spawnLocation;
+  Point<int>? targetLocation, spawnLocation;
 
-  Doll _targetDoll, masterDoll;
+  Doll? _targetDoll, masterDoll;
 
   final Set<Effect> effects = Set();
   final Set<Doll> _inCombatWith = Set();
@@ -52,13 +52,13 @@ class Doll extends OnlineObject {
 
   final Set<Splat> _splats = Set();
 
-  PathFinder _pathFinder;
+  PathFinder? _pathFinder;
 
   Doll(
-      [String infoName,
-      String id,
+      [String? infoName,
+      String? id,
       bool temporary = false,
-      int adjustedDifficulty]) {
+      int? adjustedDifficulty]) {
     _created = Clock.time;
     this.temporary = temporary;
     difficulty = adjustedDifficulty;
@@ -70,7 +70,7 @@ class Doll extends OnlineObject {
 
     if (info?.hidden == true) internal['hidden'] = true;
     if (info?.boss == true) internal['boss'] = true;
-    if (info?.overheadText != null) internal['overhead'] = info.overheadText;
+    if (info?.overheadText != null) internal['overhead'] = info!.overheadText;
     if (id != null) internal['id'] = id;
 
     internal['level'] = adjustedDifficulty != null
@@ -81,14 +81,14 @@ class Doll extends OnlineObject {
 
     info?.equipped?.forEach((key, value) {
       var copy = value.copy;
-      adjustedEquipment[key] = copy;
+      adjustedEquipment![key] = copy;
     });
 
     internal['boss level'] = level;
   }
 
-  List<String> get abilities {
-    var result = <String>[];
+  List<String?> get abilities {
+    var result = <String?>[];
     if (account != null) return result;
 
     // Bosses on floors higher than 50 can cast supernova.
@@ -102,9 +102,9 @@ class Doll extends OnlineObject {
     return result..addAll(infoAbilities);
   }
 
-  String get ability => internal['ability'] ?? _ability;
+  String? get ability => internal['ability'] ?? _ability;
 
-  void set ability(String ability) {
+  void set ability(String? ability) {
     account == null ? _ability = ability : internal['ability'] = ability;
   }
 
@@ -112,14 +112,14 @@ class Doll extends OnlineObject {
       .where((Item item) => item.egos.contains(Ego.accuracy))
       .length;
 
-  Map<String, dynamic> get adjustedEquipment => internal['adj equip'];
+  Map<String, dynamic>? get adjustedEquipment => internal['adj equip'];
 
   /// Returns the age of this [Doll] in clock ticks.
 
-  int get age => Clock.time - _created;
+  int get age => Clock.time - _created!;
 
   int get agility =>
-      _buff('agi', _sheet?.agility ?? _adjustedLevel(info.agility));
+      _buff('agi', _sheet?.agility ?? _adjustedLevel(info!.agility));
 
   bool get altar => !player && (infoName?.endsWith('altar') ?? false);
 
@@ -130,7 +130,7 @@ class Doll extends OnlineObject {
 
     if (resource) return true;
     if (info == null) return internal['boss'] ?? false;
-    return info.boss;
+    return info!.boss;
   }
 
   int get bossLevel => internal['boss level'] ?? 0;
@@ -141,7 +141,7 @@ class Doll extends OnlineObject {
 
   void set buffKeys(List<String> list) => internal['buff keys'] = list;
 
-  Map<String, dynamic> get buffs =>
+  Map<String?, dynamic> get buffs =>
       account?.buffs ?? (internal['buffs'] ??= ObservableMap());
 
   bool get burned => buffs.containsKey('burned');
@@ -153,7 +153,7 @@ class Doll extends OnlineObject {
       buffs.remove('burned');
   }
 
-  int get canPassThis => dead || spawning ? Terrain.land : info.canPassThis;
+  int? get canPassThis => dead || spawning ? Terrain.land : info!.canPassThis;
 
   int get crystalShields =>
       inSlot(#shield).where((item) => item.egos.contains(Ego.crystal)).length;
@@ -166,10 +166,10 @@ class Doll extends OnlineObject {
   void set currentLocation(Point<int> point) {
     stage == null
         ? internal['loc'] = [point.x, point.y]
-        : stage.moveDoll(this, point);
+        : stage!.moveDoll(this, point);
   }
 
-  DollCustomization get customization {
+  DollCustomization? get customization {
     if (['human', 'newbie shop', 'random shop'].contains(infoName)) {
       if (_customization == null)
         _customization =
@@ -208,25 +208,25 @@ class Doll extends OnlineObject {
     return internal['cust'];
   }
 
-  void set customization(DollCustomization value) {
+  void set customization(DollCustomization? value) {
     internal['cust'] = value;
   }
 
-  bool get dead => health <= BigInt.zero && maxHealth > BigInt.zero;
+  bool get dead => health <= BigInt.zero && maxHealth! > BigInt.zero;
 
   int get defense =>
-      equipped.values.fold(0, (result, item) => result + item.defense);
+      equipped.values.fold(0, (result, item) => result + item.defense as int);
 
   int get dexterity =>
-      _buff('dex', _sheet?.dexterity ?? _adjustedLevel(info.dexterity));
+      _buff('dex', _sheet?.dexterity ?? _adjustedLevel(info!.dexterity));
 
-  int get difficulty => internal['difficulty'] ?? info?.difficulty;
+  int? get difficulty => internal['difficulty'] ?? info?.difficulty;
 
-  void set difficulty(int difficulty) {
+  void set difficulty(int? difficulty) {
     internal['difficulty'] = difficulty;
   }
 
-  String get displayName {
+  String? get displayName {
     if (overheadText != null) return overheadText;
     if (playerPet) return '';
 
@@ -253,12 +253,12 @@ class Doll extends OnlineObject {
         return result;
       });
 
-  Map<String, dynamic> get equipped =>
-      account?.equipped ?? adjustedEquipment ?? info.equipped;
+  Map<String?, dynamic> get equipped =>
+      account?.equipped ?? adjustedEquipment ?? info!.equipped;
 
   int get evasion => calculateEvasion(this);
 
-  BigInt get experience => BigIntUtil.max(BigInt.one, maxHealth ~/ big(10));
+  BigInt get experience => BigIntUtil.max(BigInt.one, maxHealth! ~/ big(10)!);
 
   bool get expired {
     if (account != null ||
@@ -270,7 +270,7 @@ class Doll extends OnlineObject {
 
     // 5 minutes.
 
-    return Clock.time - combatStartTime > 1500;
+    return Clock.time - combatStartTime! > 1500;
   }
 
   int get foodEaten => internal['eat'] ?? 0;
@@ -302,14 +302,14 @@ class Doll extends OnlineObject {
         list.every((weapon) => weapon.egos.contains(Ego.healing));
   }
 
-  BigInt get health => maxHealth - totalDamageTaken;
+  BigInt get health => maxHealth! - totalDamageTaken!;
 
   void set health(BigInt value) {
-    var damage = BigIntUtil.max(BigInt.zero, maxHealth - value);
+    var damage = BigIntUtil.max(BigInt.zero, maxHealth! - value);
     internal['dmg'] = '$damage';
   }
 
-  Item get helmet {
+  Item? get helmet {
     var helmets = inSlot(#helmet);
     if (helmets.isNotEmpty) return helmets.first;
     return null;
@@ -322,7 +322,7 @@ class Doll extends OnlineObject {
 
   /// Used client side to hide old overhead messages.
 
-  bool get hideMessage => now - messageTime > 5000;
+  bool get hideMessage => now - messageTime! > 5000;
 
   String get image => info?.image ?? internal['img'] ?? _missingImage;
 
@@ -333,19 +333,19 @@ class Doll extends OnlineObject {
     if (account != null && inCombatWith.any((doll) => doll.inCombat))
       return true;
 
-    return Clock.time < lastCombatTime + 25;
+    return Clock.time < lastCombatTime! + 25;
   }
 
   Set<Doll> get inCombatWith =>
       _inCombatWith..retainWhere((doll) => doll.inCombat);
 
-  DollInfo get info =>
+  DollInfo? get info =>
       account?.info ?? _dollInfo[internal['info']] ?? _dollInfo['missing'];
 
-  String get infoName => internal['info'];
+  String? get infoName => internal['info'];
 
   int get intelligence =>
-      _buff('int', _sheet?.intelligence ?? _adjustedLevel(info.intelligence));
+      _buff('int', _sheet?.intelligence ?? _adjustedLevel(info!.intelligence));
 
   /// Returns true if the doll has a target that can be interacted with.
 
@@ -365,7 +365,7 @@ class Doll extends OnlineObject {
 
   int get maxEnergy => internal['mmp'] ?? 0;
 
-  BigInt get maxHealth {
+  BigInt? get maxHealth {
     // The internal value is needed client side.
 
     if (vitality == 0) return big(internal['mhp'] ?? 0);
@@ -390,9 +390,9 @@ class Doll extends OnlineObject {
       (item) => item?.info?.slot != #weapon && item?.info?.slot != #thrown);
 
   int get nonWeaponEquipmentDamage =>
-      nonWeaponEquipment.fold(0, (total, item) => total + item.damage);
+      nonWeaponEquipment.fold(0, (total, item) => total + item.damage as int);
 
-  String get overheadText => internal['overhead'];
+  String? get overheadText => internal['overhead'];
 
   int get petRequirement => boss ? level * 2 : level;
 
@@ -402,10 +402,10 @@ class Doll extends OnlineObject {
 
   bool get playerPet => internal['pet'] ?? false;
 
-  Iterable<Account> get playersInRange =>
+  Iterable<Account?> get playersInRange =>
       search(ServerGlobals.sight, ServerGlobals.sight)
-          .where((doll) => doll.account != null)
-          .map<Account>((doll) => doll.account);
+          .where((doll) => doll!.account != null)
+          .map<Account?>((doll) => doll!.account);
 
   bool get poisoned => buffs.containsKey('poisoned');
 
@@ -422,16 +422,16 @@ class Doll extends OnlineObject {
       .where((Item item) => item.egos.contains(Ego.power))
       .length;
 
-  int get primaryAttackRange => primaryWeapon?.attackRange ?? info.attackRange;
+  int get primaryAttackRange => primaryWeapon?.attackRange ?? info!.attackRange;
 
-  Item get primaryWeapon {
+  Item? get primaryWeapon {
     var iterable = weapons;
     if (iterable.isEmpty) return null;
     return iterable.first;
   }
 
   BigInt get regenAmount =>
-      BigIntUtil.max(BigInt.one, _vitalityToHealth(_vitality) ~/ big(20));
+      BigIntUtil.max(BigInt.one, _vitalityToHealth(_vitality) ~/ big(20)!);
 
   bool get regenerating =>
       buffs.containsKey('regen') || equipmentEgos.containsKey(Ego.regen);
@@ -444,13 +444,13 @@ class Doll extends OnlineObject {
 
   bool get resource => info?.resource ?? false;
 
-  String get sanitizedName =>
-      account?.id == null ? infoName : sanitizeName(account.id);
+  String? get sanitizedName =>
+      account?.id == null ? infoName : sanitizeName(account!.id!);
 
   int get secondaryAttackRange =>
-      secondaryWeapon?.attackRange ?? info.attackRange;
+      secondaryWeapon?.attackRange ?? info!.attackRange;
 
-  Item get secondaryWeapon {
+  Item? get secondaryWeapon {
     var iterable = weapons;
     if (iterable.length < 2) return null;
     return iterable.skip(1).first;
@@ -466,11 +466,11 @@ class Doll extends OnlineObject {
 
   Sprite get sprite => _sprite ??= Sprite(this);
 
-  Stage<Doll> get stage => _stage;
+  Stage<Doll?>? get stage => _stage;
 
   int get stealth {
     if (account == null) return 0;
-    num result = account.sheet.crime.level;
+    num result = account!.sheet.crime!.level;
     result += result * stealthItems / 4;
     if (account?.god == 'dithmenos') result *= 2;
     result += result * thievingBonus / 100;
@@ -488,15 +488,15 @@ class Doll extends OnlineObject {
   }
 
   int get strength =>
-      _buff('str', _sheet?.strength ?? _adjustedLevel(info.strength));
+      _buff('str', _sheet?.strength ?? _adjustedLevel(info!.strength));
 
-  String get tappedImage => info?.tappedImage ?? internal['timg'];
+  String? get tappedImage => info?.tappedImage ?? internal['timg'];
 
-  Doll get targetDoll => _targetDoll;
+  Doll? get targetDoll => _targetDoll;
 
-  void set targetDoll(Doll doll) {
+  void set targetDoll(Doll? doll) {
     _targetDoll = doll;
-    if (account != null) account.internal['target'] = doll?.id;
+    if (account != null) account!.internal['target'] = doll?.id;
   }
 
   bool get temporary => internal['temporary'] ?? false;
@@ -509,21 +509,21 @@ class Doll extends OnlineObject {
       // like a mining helmet for stealth.
 
       equipped?.values
-          ?.where((item) => item.egos.contains(Ego.thieving))
-          ?.fold(0, (result, item) => result + item.bonus) ??
+          .where((item) => item.egos.contains(Ego.thieving))
+          .fold(0, ((result, item) => result + item.bonus as int?) as int? Function(int?, dynamic)) ??
       0;
 
-  int get thisCanPass {
-    var result = info.thisCanPass;
-    if (summoned) return max(result, Terrain.doll);
+  int? get thisCanPass {
+    var result = info!.thisCanPass;
+    if (summoned) return max(result!, Terrain.doll);
     return result;
   }
 
-  BigInt get totalDamageTaken => big(internal['dmg'] ?? 0);
+  BigInt? get totalDamageTaken => big(internal['dmg'] ?? 0);
 
   int get vitality => _vitality;
 
-  int get walkingCoolDown {
+  int? get walkingCoolDown {
     var value = info?.walkingCoolDown ?? internal['speed'], result = value;
     if (result == null) return null;
 
@@ -545,7 +545,7 @@ class Doll extends OnlineObject {
 
     // The result should be either 200, 400, or 600.
 
-    return clamp(result, 200, 600);
+    return clamp(result, 200, 600) as int?;
   }
 
   Iterable<Item> get weapons => inSlot(#weapon);
@@ -554,7 +554,7 @@ class Doll extends OnlineObject {
       targetLocation != null && targetLocation != currentLocation ||
       targetDoll != null;
 
-  CharacterSheet get _sheet => account?.sheet;
+  CharacterSheet? get _sheet => account?.sheet;
 
   int get _vitality =>
       _buff('vit', _sheet?.vitality ?? _adjustedLevel(info?.vitality ?? 0));
@@ -576,12 +576,12 @@ class Doll extends OnlineObject {
         ..updateLastSeen()
         ..timeBonus = max(
             0,
-            account.timeBonus -
+            account!.timeBonus -
                 ServerGlobals.tickDelay * ServerGlobals.timeBonusMultiplier);
 
       // Automatically uses potions.
 
-      if (!dead && account.autoPotion) {
+      if (!dead && account!.autoPotion) {
         var whitelist = [
           'agility potion',
           'strength potion',
@@ -614,10 +614,10 @@ class Doll extends OnlineObject {
           throw ArgumentError(item.infoName);
         }
 
-        account.actions.values
-            .map((item) => account.items.getItem(item))
+        account!.actions.values
+            .map((item) => account!.items.getItem(item))
             .where(
-                (item) => whitelist.contains(item?.infoName) && !buffed(item))
+                (item) => whitelist.contains(item?.infoName) && !buffed(item!))
             .forEach((potion) => _useItem(potion));
       }
     }
@@ -629,7 +629,7 @@ class Doll extends OnlineObject {
 
     // Prevents monsters from getting stuck behind walls.
 
-    if (stuck && targetDoll != null && !canFireAt(targetDoll))
+    if (stuck && targetDoll != null && !canFireAt(targetDoll!))
       targetDoll = null;
 
     if (summoned) {
@@ -637,7 +637,7 @@ class Doll extends OnlineObject {
 
       if (masterDoll?.stage != stage || masterDoll?.dead != false) {
         if (!summoned) masterDoll = null;
-      } else if (_abilities[masterDoll.ability]?.combat != false &&
+      } else if (_abilities[masterDoll!.ability]?.combat != false &&
           masterDoll?.interacting != true &&
           masterDoll?.healer != true) targetDoll ??= masterDoll?.targetDoll;
     }
@@ -669,18 +669,18 @@ class Doll extends OnlineObject {
     if (dead) return;
 
     if (account?.petSpawned == true &&
-        account.pet?.dead == true &&
+        account!.pet?.dead == true &&
         _petSpawningTime == null) {
       _petSpawningTime = now + 30000;
     }
 
     if (account?.petSpawned == true &&
         _petSpawningTime != null &&
-        now >= _petSpawningTime) {
+        now >= _petSpawningTime!) {
       _petSpawningTime = null;
-      account.pet?.spawning = false;
-      account.pet?.health = account.pet?.maxHealth;
-      account.doll?.summon();
+      account!.pet?.spawning = false;
+      account!.pet?.health = account!.pet?.maxHealth!;
+      account!.doll?.summon();
     }
 
     // Prevents a monster from targeting itself.
@@ -693,7 +693,7 @@ class Doll extends OnlineObject {
     // Prevents monsters from searching the entire floor for a player.
 
     if (targetDoll != null &&
-        chessDistanceTo(targetDoll.currentLocation) > ServerGlobals.sight * 2) {
+        chessDistanceTo(targetDoll!.currentLocation) > ServerGlobals.sight * 2) {
       targetDoll = null;
       targetLocation = null;
     }
@@ -704,14 +704,14 @@ class Doll extends OnlineObject {
     }
 
     void getOffMaster() {
-      if (masterDoll.currentLocation != currentLocation) return;
+      if (masterDoll!.currentLocation != currentLocation) return;
       walk(randomValue(List.from(adjacent(currentLocation))));
     }
 
     if (_abilities[ability]?.combat != false) if (summoned) {
       if (targetDoll == null && masterDoll != null)
-        chessDistanceTo(masterDoll.currentLocation) > 1
-            ? walk(masterDoll.currentLocation)
+        chessDistanceTo(masterDoll!.currentLocation) > 1
+            ? walk(masterDoll!.currentLocation)
             : getOffMaster();
     } else
       walk();
@@ -730,7 +730,7 @@ class Doll extends OnlineObject {
 
     if (ability == 'trade' &&
         targetDoll != null &&
-        targetDoll.account == null) {
+        targetDoll!.account == null) {
       targetDoll = null;
       targetLocation = null;
       return;
@@ -738,14 +738,14 @@ class Doll extends OnlineObject {
 
     if (account != null &&
         interacting &&
-        (ability == null || !targetDoll.resource)) {
+        (ability == null || !targetDoll!.resource)) {
       walk();
 
-      if (chessDistanceTo(targetDoll.currentLocation) > 1) return;
+      if (chessDistanceTo(targetDoll!.currentLocation) > 1) return;
       targetLocation = null;
 
-      if (!account.doll.warm(#walk)) {
-        targetDoll.info.interaction(account, targetDoll);
+      if (!account!.doll!.warm(#walk)) {
+        targetDoll!.info!.interaction!(account, targetDoll);
 
         // [targetDoll] is reset while using portals.
 
@@ -757,10 +757,10 @@ class Doll extends OnlineObject {
       return;
     }
 
-    String randomAbility() {
-      var distanceToTarget = chessDistanceTo(targetDoll.currentLocation);
+    String? randomAbility() {
+      var distanceToTarget = chessDistanceTo(targetDoll!.currentLocation);
 
-      var result = List<String>.from(abilities.where((String ability) {
+      var result = List<String>.from(abilities.where((String? ability) {
         if (ability == null) return distanceToTarget <= attackRange();
         var range = _abilities[ability]?.range ?? 0;
         return distanceToTarget <= range;
@@ -774,15 +774,15 @@ class Doll extends OnlineObject {
     if (targetDoll != null) {
       var approach = _abilities[ability]?.combat ?? true;
 
-      if (approach && attackRange() > 1 && !canFireAt(targetDoll)) {
+      if (approach && attackRange() > 1 && !canFireAt(targetDoll!)) {
         prepareAttack(targetDoll, 1);
         return;
       }
 
       var pickpocketing = ability == 'pickpocket' && canPickpocket(targetDoll);
 
-      if (pickpocketing && chessDistanceTo(targetDoll.currentLocation) > 1)
-        walk(targetDoll.currentLocation);
+      if (pickpocketing && chessDistanceTo(targetDoll!.currentLocation) > 1)
+        walk(targetDoll!.currentLocation);
       else
         prepareAttack(targetDoll, attackRange(false));
     }
@@ -810,10 +810,10 @@ class Doll extends OnlineObject {
       if (weaponList.isEmpty) {
         if (warm(#left)) return;
 
-        if (chessDistanceTo(targetDoll.currentLocation) > primaryAttackRange)
+        if (chessDistanceTo(targetDoll!.currentLocation) > primaryAttackRange)
           return;
 
-        targetDoll.effects.add(Effect(this,
+        targetDoll!.effects.add(Effect(this,
             damage: calculateDamage(this), accuracy: calculateAccuracy(this)));
 
         warmUp(#left, calculateCoolDown(this));
@@ -827,17 +827,17 @@ class Doll extends OnlineObject {
             i++) {
           if (warm(hands[i])) continue;
 
-          if (chessDistanceTo(targetDoll.currentLocation) > range[i]) {
+          if (chessDistanceTo(targetDoll!.currentLocation) > range[i]) {
             continue;
           }
 
           List<int> egos = weaponList[i].egos;
 
-          effect([Doll doll, bool aoe = false]) {
+          effect([Doll? doll, bool aoe = false]) {
             if (doll?.info?.interaction != null) return;
             var missile = weaponList[i].missile ?? weaponList[i].info.missile;
 
-            (doll ?? targetDoll).effects.add(Effect(this,
+            (doll ?? targetDoll)!.effects.add(Effect(this,
                 delay: missile != null
                     ? aoe
                         ? fireAoe(doll, missile)
@@ -871,12 +871,12 @@ class Doll extends OnlineObject {
 
   /// Alerts this [Doll]'s user if one exists.
 
-  void alert(String message, [String classes]) =>
+  void alert(String? message, [String? classes]) =>
       account?.alert(message, classes);
 
   /// Reduces [damage].
 
-  BigInt applyDefense(BigInt damage, [List<int> egos]) {
+  BigInt applyDefense(BigInt damage, [List<int>? egos]) {
     if (damage <= BigInt.zero) return BigInt.zero;
     egos ??= const [];
 
@@ -887,7 +887,7 @@ class Doll extends OnlineObject {
 
     var bonus = nonWeaponEquipment
         .where((item) => !item.upgradesIncreaseEvasion)
-        .fold(defense, (result, item) => result + item.bonus / 10);
+        .fold(defense, (dynamic result, item) => result + item.bonus / 10);
 
     // Acid attacks ignore defense, including from shields and spirit items.
 
@@ -905,10 +905,10 @@ class Doll extends OnlineObject {
 
       if (egos.contains(Ego.ballistic) &&
           resists.containsKey(Ego.resistBallistic))
-        damage ~/= BigInt.one << resists[Ego.resistBallistic];
+        damage ~/= BigInt.one << resists[Ego.resistBallistic]!;
 
       if (egos.contains(Ego.magic) && resists.containsKey(Ego.resistMagic))
-        damage ~/= BigInt.one << resists[Ego.resistMagic];
+        damage ~/= BigInt.one << resists[Ego.resistMagic]!;
     }
 
     if (!shields.isEmpty)
@@ -924,7 +924,7 @@ class Doll extends OnlineObject {
     if (bonus > 0)
       damage = BigIntUtil.multiplyByDouble(
               damage, 100 - adjustedDamageReductionPercent) ~/
-          big(100);
+          big(100)!;
 
     return BigIntUtil.max(BigInt.zero, damage);
   }
@@ -946,22 +946,22 @@ class Doll extends OnlineObject {
     if (inSlot(#thrown).isNotEmpty) return 5;
 
     if (withAbility && ability != null && _abilities[ability] != null)
-      return _abilities[ability].range;
+      return _abilities[ability]!.range;
 
-    if (weapons.isEmpty) return info.attackRange;
+    if (weapons.isEmpty) return info!.attackRange;
     return weapons.fold(1, (result, weapon) => max(result, weapon.attackRange));
   }
 
-  bool canAreaEffect(Doll doll, [bool healing = false]) {
+  bool canAreaEffect(Doll? doll, [bool healing = false]) {
     if (player && healing) {
       // Player AOE healing is special cased to heal all players and pets, even
       // if an enemy is being targeted.
 
-      if (doll.player || doll.playerPet) return true;
+      if (doll!.player || doll.playerPet) return true;
       return false;
     }
 
-    if (doll.dead) return false;
+    if (doll!.dead) return false;
     if (doll.id == id || doll.hasInteraction) return false;
     if (!canFireAt(doll)) return false;
     if (!canTarget(doll)) return false;
@@ -981,7 +981,7 @@ class Doll extends OnlineObject {
   bool canFireAt(Doll target) => ray(currentLocation, target.currentLocation)
       .every((point) => traversable(point, Terrain.obstacles));
 
-  bool canPickpocket(Doll doll, [bool showAlert = false]) {
+  bool canPickpocket(Doll? doll, [bool showAlert = false]) {
     if (doll == null ||
         doll.info?.interaction != null ||
         doll.summoned ||
@@ -990,10 +990,10 @@ class Doll extends OnlineObject {
     return true;
   }
 
-  bool canTarget(Doll doll) {
+  bool canTarget(Doll? doll) {
     // Pets can't target players.
 
-    if (playerPet && doll.player) return false;
+    if (playerPet && doll!.player) return false;
     return true;
   }
 
@@ -1027,62 +1027,62 @@ class Doll extends OnlineObject {
     lastCombatTime = Clock.time;
   }
 
-  void equip(Item item) {
+  void equip(Item? item) {
     if (item?.info?.slot == null) return;
 
-    if (item.info.slot == #weapon || item.info.slot == #shield) {
+    if (item!.info!.slot == #weapon || item.info!.slot == #shield) {
       if (item.twoHanded) {
-        if (account.equipped.remove(item.id) == null) {
+        if (account!.equipped.remove(item.id) == null) {
           _disarm();
-          account.equipped[item.id] = item;
+          account!.equipped[item.id] = item;
         }
-      } else if (account.equipped.remove(item.id) == null) {
+      } else if (account!.equipped.remove(item.id) == null) {
         for (var list = List.from(inSlot(#shield))..addAll(weapons), i = 0;
             i < list.length;
             i++) if (i > 0 || list[i].twoHanded) equipped.remove(list[i].id);
 
-        var other = account.equipped['double equipped'];
+        var other = account!.equipped['double equipped'];
 
         if (other != null && other.id != item.id)
-          account.equipped[other.id] =
-              account.equipped.remove('double equipped');
+          account!.equipped[other.id] =
+              account!.equipped.remove('double equipped');
 
-        account.equipped[item.id] = item;
+        account!.equipped[item.id] = item;
       } else if (item.amount >=
-          2) if (account.equipped['double equipped']?.id == item.id)
-        account.equipped.remove('double equipped');
+          2) if (account!.equipped['double equipped']?.id == item.id)
+        account!.equipped.remove('double equipped');
       else {
         _disarm();
 
-        account.equipped
+        account!.equipped
           ..[item.id] = item
           ..['double equipped'] = item;
       }
-    } else if (account.equipped.remove(item.id) == null) {
-      var slot = inSlot(item.info.slot);
+    } else if (account!.equipped.remove(item.id) == null) {
+      var slot = inSlot(item.info!.slot);
       if (slot.isNotEmpty) equipped.remove(slot.first.id);
-      account.equipped[item.id] = item;
+      account!.equipped[item.id] = item;
     }
   }
 
-  int fireAoe(Doll target, String image) {
+  int fireAoe(Doll? target, String image) {
     if (image == null) return 0;
 
     internal.addEvent(ObservableEvent(
         type: 'aoe',
-        data: {'image': image, 'source': id, 'target': target.id}));
+        data: {'image': image, 'source': id, 'target': target!.id}));
 
     return 100;
   }
 
-  int fireMissile(String image) {
+  int fireMissile(String? image) {
     if (image == null) return 0;
 
     internal.addEvent(ObservableEvent(
         type: 'missile',
-        data: {'image': image, 'source': id, 'target': targetDoll.id}));
+        data: {'image': image, 'source': id, 'target': targetDoll!.id}));
 
-    return (currentLocation.distanceTo(targetDoll.currentLocation) * 100)
+    return (currentLocation.distanceTo(targetDoll!.currentLocation) * 100)
         .floor();
   }
 
@@ -1108,7 +1108,7 @@ class Doll extends OnlineObject {
     var point = _gridApproach(currentLocation, target);
 
     if (currentLocation != point) {
-      currentLocation = point;
+      currentLocation = point as Point<int>;
       return true;
     } else
       return false;
@@ -1139,7 +1139,7 @@ class Doll extends OnlineObject {
   }
 
   void hurt(Doll damageSource, dynamic amount,
-      [String message, String classes]) {
+      [String? message, String? classes]) {
     if (info?.interaction != null || health <= BigInt.zero) return;
     amount = big(amount);
     if (account?.god == 'elyvilon') amount ~/= BigInt.two;
@@ -1156,7 +1156,7 @@ class Doll extends OnlineObject {
         equipmentEgos.containsKey(Ego.life) &&
         buffs['extra life'] == null) {
       splat('extra life', 'effect-text');
-      health = maxHealth;
+      health = maxHealth!;
 
       // Prevents losing multiple lives to a single burst attack.
 
@@ -1175,16 +1175,16 @@ class Doll extends OnlineObject {
     // Auto heal.
 
     while (account != null &&
-        account.autoHeal > 0 &&
+        account!.autoHeal > 0 &&
         health > BigInt.zero &&
-        health < maxHealth &&
-        health < big(account.autoHeal) &&
+        health < maxHealth! &&
+        health < big(account!.autoHeal)! &&
         foodEaten < _healLimit &&
         !burned) {
       // Automatically uses the food that heals the least.
 
-      var items = List.from(account.actions.values
-          .map((item) => account.items.getItem(item))
+      var items = List.from(account!.actions.values
+          .map((item) => account!.items.getItem(item))
           .where((item) => item?.egos?.contains(Ego.food) == true))
         ..sort((dynamic first, dynamic second) =>
             first.healingAmount.compareTo(second.healingAmount));
@@ -1197,16 +1197,16 @@ class Doll extends OnlineObject {
 
   void informationPrompt(String message) => account?.informationPrompt(message);
 
-  Iterable<Item> inSlot(Symbol symbol) => List<Item>.from(
+  Iterable<Item> inSlot(Symbol? symbol) => List<Item>.from(
       equipped.values.where((item) => item.info?.slot == symbol));
 
-  void jump(Stage<Doll> newStage,
-      [Point<int> newLocation, bool showSplat = false, heal = false]) {
+  void jump(Stage<Doll?>? newStage,
+      [Point<int>? newLocation, bool showSplat = false, heal = false]) {
     // Enemies do not continue to target players or pets after they jump.
 
     if (account != null || playerPet)
-      stage?.dolls?.values?.forEach((doll) {
-        if (doll.targetDoll?.id == id) doll.targetDoll = null;
+      stage?.dolls?.values.forEach((doll) {
+        if (doll!.targetDoll?.id == id) doll.targetDoll = null;
       });
 
     if (newLocation == null)
@@ -1230,7 +1230,7 @@ class Doll extends OnlineObject {
 
     // Handles pets.
 
-    if (pet) account.pet.jump(newStage, newLocation);
+    if (pet) account!.pet!.jump(newStage, newLocation);
 
     // Leaves combat, which heals.
 
@@ -1266,10 +1266,10 @@ class Doll extends OnlineObject {
     // 1 item is worth 10 wei.
 
     var amount = stealth ~/ 20,
-        bigAmount = big(max(1, amount.floor())) +
+        bigAmount = big(max(1, amount.floor()))! +
             extraResources(target.level, amount.floor());
 
-    bigAmount *= big(10);
+    bigAmount *= big(10)!;
 
     // This is correct. The experience is later multiplied by the time bonus in
     // the [gainExperience] method.
@@ -1278,11 +1278,11 @@ class Doll extends OnlineObject {
 
     // A player gets extra experience and loot for being offline.
 
-    bigAmount = bigAmount * big(account.timeBonusMultiplier);
+    bigAmount = bigAmount * big(account!.timeBonusMultiplier)!;
 
     account
       ..gainExperience(
-          account.hasCrystalGloves ? experience * BigInt.two : experience,
+          account!.hasCrystalGloves ? experience * BigInt.two : experience,
           'crime')
       ..money += bigAmount
       ..alert('You gain: ${formatCurrency(bigAmount)}.');
@@ -1291,7 +1291,7 @@ class Doll extends OnlineObject {
   /// Approaches [target] if needed, then returns true if in [range].
   /// Non-players always approach melee range.
 
-  bool prepareAttack(Doll target, int range) {
+  bool prepareAttack(Doll? target, int range) {
     if (target == null) return false;
     if (account != null && ability != null) return true;
     if (account == null) range = 1;
@@ -1302,7 +1302,7 @@ class Doll extends OnlineObject {
     return chessDistanceTo(target.currentLocation) <= range;
   }
 
-  void randomJump(Stage<Doll> stage) => account.doll
+  void randomJump(Stage<Doll?> stage) => account!.doll!
       .jump(stage, stage.randomTraversableLocation(this) ?? const Point(0, 0));
 
   void regenerate(int duration) {
@@ -1317,7 +1317,7 @@ class Doll extends OnlineObject {
   void reward(Account looter, [int count = 1]) {
     // The same formula is used for gathering.
 
-    num looterSlayingLevel = looter.sheet.slaying.level,
+    num looterSlayingLevel = looter.sheet.slaying!.level,
         luckyItems = looter.doll?.equipmentEgos[Ego.lucky] ?? 0;
 
     looterSlayingLevel += looterSlayingLevel * luckyItems / 4;
@@ -1330,12 +1330,12 @@ class Doll extends OnlineObject {
 
     amount += amount * level / 100;
     amount = amount.floor();
-    var multiplier = big(max(1, amount)) + extraResources(level, amount);
+    var multiplier = big(max(1, amount))! + extraResources(level, amount as int);
 
     // A player gets extra experience and loot for being offline.
 
     count *= looter.timeBonusMultiplier;
-    var drops = List.from(info.loot?.drops ?? []);
+    var drops = List.from(info!.loot?.drops ?? []);
 
     // Secret rares.
 
@@ -1347,20 +1347,20 @@ class Doll extends OnlineObject {
       // To prevent inventory clutter, randomness is not used.
 
       copy.canUpgrade && !copy.food && !copy.potion
-          ? copy.bonus = calculateDropBonus(looterSlayingLevel, multiplier)
-          : copy.setAmount(copy.getAmount() * multiplier);
+          ? copy.bonus = calculateDropBonus(looterSlayingLevel as int, multiplier)
+          : copy.setAmount(copy.getAmount()! * multiplier);
 
-      copy.setAmount(copy.getAmount() * big(count));
+      copy.setAmount(copy.getAmount()! * big(count)!);
       looter.lootItem(copy);
     });
   }
 
   /// If searching for players, use [userSearch] instead.
 
-  Iterable<Doll> search(num width, num height) {
+  Iterable<Doll?> search(num width, num height) {
     assert(width >= 0 && height >= 0);
     if (stage == null) return [this];
-    return stage.search(rectangleFromCenter(currentLocation, width, height));
+    return stage!.search(rectangleFromCenter(currentLocation, width, height));
   }
 
   void setDebuff(int ego, bool value) {
@@ -1373,17 +1373,17 @@ class Doll extends OnlineObject {
 
   /// Used server side to show effects over this [Doll] client side.
 
-  void splat(String text, [String classes]) =>
+  void splat(String text, [String? classes]) =>
       internal.addEvent(ObservableEvent(
           type: 'splat', data: {'value': text, 'classes': classes}));
 
   void summon() {
     if (stage == null) return;
-    account.petSpawned = true;
-    account.pet ??= Doll('puppy');
-    account.pet.internal['pet'] = true;
+    account!.petSpawned = true;
+    account!.pet ??= Doll('puppy');
+    account!.pet!.internal['pet'] = true;
 
-    account.pet
+    account!.pet
       ..masterDoll = this
       ..summoned = true
       ..jump(stage, currentLocation, false, false);
@@ -1404,10 +1404,10 @@ class Doll extends OnlineObject {
     if (thrown.isEmpty || ability != null) return;
     var item = thrown.first;
     if (item == null || item.amount < 1) return;
-    if (item.info.use(this, item)) account.items.removeItem(item.id);
+    if (item.info!.use!(this, item)) account!.items.removeItem(item.id);
   }
 
-  bool traversable(Point<int> point, [int overrideThisCanPass]) =>
+  bool traversable(Point<int> point, [int? overrideThisCanPass]) =>
       point == currentLocation || _traversable(point, overrideThisCanPass);
 
   void updateLastTeleportTime() {
@@ -1428,7 +1428,7 @@ class Doll extends OnlineObject {
       Future.delayed(const Duration(minutes: 1), () {
         // Resets doll locations for dolls that have been inactive for too long.
 
-        if (!summoned && !temporary && now - _lastUpkeep >= 30000) {
+        if (!summoned && !temporary && now - _lastUpkeep! >= 30000) {
           if (Config.debug && boss) Logger.root.info('resetting $infoName');
           _lastUpkeep = now;
           jump(spawnStage, spawnLocation);
@@ -1443,8 +1443,8 @@ class Doll extends OnlineObject {
     account?.sessions?.forEach((session) => session.updateClient());
 
     if (account != null) {
-      account.updateCanPvP();
-      account.preventLogout(inCombat);
+      account!.updateCanPvP();
+      account!.preventLogout(inCombat);
     }
 
     if (!dead && !inCombat) {
@@ -1471,7 +1471,7 @@ class Doll extends OnlineObject {
         'pker'
       ]);
 
-      health = maxHealth;
+      health = maxHealth!;
     }
 
     Map.from(buffs).forEach((key, value) {
@@ -1483,26 +1483,26 @@ class Doll extends OnlineObject {
       value.tick(1);
     });
 
-    if (_poisonCycle++ % 25 == 0) {
+    if (_poisonCycle++! % 25 == 0) {
       // Regeneration is done before poison to make killing bosses with only
       // gravity and poison harder.
 
-      if (regenerating && health < maxHealth) {
+      if (regenerating && health < maxHealth!) {
         var count = equipmentEgos[Ego.regen] ?? 0;
         if (buffs.containsKey('regen')) count++;
-        heal(regenAmount * big(count));
+        heal(regenAmount * big(count)!);
       }
 
       // Handles poison. Poison hits every 25 ticks (5 seconds).
 
       if (poisoned) {
-        var amount = BigIntUtil.max(BigInt.one, _poisonDamage ~/ big(4));
+        var amount = BigIntUtil.max(BigInt.one, _poisonDamage ~/ big(4)!);
         hurt(this, amount, 'poison', 'poison-text');
       }
     }
   }
 
-  bool useAbility(String ability) {
+  bool useAbility(String? ability) {
     if (ability == null || _abilities[ability] == null || warm(#left))
       return false;
 
@@ -1512,14 +1512,14 @@ class Doll extends OnlineObject {
 
         // Only combat abilities need a range.
 
-        _abilities[ability].combat &&
-        chessDistanceTo(targetDoll.currentLocation) > _abilities[ability].range)
+        _abilities[ability]!.combat &&
+        chessDistanceTo(targetDoll!.currentLocation) > _abilities[ability]!.range)
       return false;
 
     // Abilities always use the primary hand. The secondary hand is only used
     // for dual wielding.
 
-    if (_abilities[ability].use(this)) {
+    if (_abilities[ability]!.use!(this)) {
       warmUp(#left, calculateCoolDown(this));
       return true;
     }
@@ -1529,30 +1529,30 @@ class Doll extends OnlineObject {
 
   void usePendingItems() {
     if (pendingUsedItems.isNotEmpty)
-      _useItem(account.items.getItem(pendingUsedItems.removeAt(0)));
+      _useItem(account!.items.getItem(pendingUsedItems.removeAt(0)));
   }
 
-  Iterable<Doll> userSearch(num width, num height) {
+  Iterable<Doll?> userSearch(num width, num height) {
     assert(width >= 0 && height >= 0);
     if (stage == null) return [this];
 
-    return stage
+    return stage!
         .userSearch(rectangleFromCenter(currentLocation, width, height));
   }
 
-  void walk([Point<int> location]) {
-    if (info.interaction != null || !info.moves) return;
+  void walk([Point<int>? location]) {
+    if (info!.interaction != null || !info!.moves) return;
 
-    if (interacting && chessDistanceTo(targetDoll.currentLocation) > 1)
-      targetLocation = targetDoll.currentLocation;
+    if (interacting && chessDistanceTo(targetDoll!.currentLocation) > 1)
+      targetLocation = targetDoll!.currentLocation;
 
     var result;
 
     if (canWalk() &&
         (location ??= targetLocation) != null &&
         !warm(#walk) &&
-        (result = _path(location ?? targetLocation)))
-      warmUp(#walk, walkingCoolDown);
+        (result = _path(location ?? targetLocation!)))
+      warmUp(#walk, walkingCoolDown!);
 
     // A [Doll] is stuck if it fails to move.
 
@@ -1570,7 +1570,7 @@ class Doll extends OnlineObject {
 
   int _adjustedLevel(int level) {
     if (info == null || difficulty == null) return level ?? 1;
-    return info.adjustedAttribute(difficulty);
+    return info!.adjustedAttribute(difficulty!);
   }
 
   void _aggro() {
@@ -1587,17 +1587,17 @@ class Doll extends OnlineObject {
 
     var length = ServerGlobals.sight * 2,
         function = summoned
-            ? () => masterDoll.search(length, length)
+            ? () => masterDoll!.search(length, length)
             : () => userSearch(length, length);
 
     // Monsters don't aggro pets for the same reason they don't aggro other
     // monsters. However, they do retaliate when attacked.
 
-    List<Doll> targets = List.from(function().where((Doll target) {
+    List<Doll> targets = List.from(function().where((Doll? target) {
       // Pets shouldn't aggro players or other pets.
 
       if (summoned &&
-          (target.account != null ||
+          (target!.account != null ||
               target.info?.interaction != null ||
               target.summoned)) return false;
 
@@ -1605,10 +1605,10 @@ class Doll extends OnlineObject {
 
       var moves = info?.moves ?? false;
 
-      if ((!moves || frozen) && chessDistanceTo(target.currentLocation) > 5)
+      if ((!moves || frozen) && chessDistanceTo(target!.currentLocation) > 5)
         return false;
 
-      return !target.dead && _visible(target) && canFireAt(target);
+      return !target!.dead && _visible(target) && canFireAt(target);
     }));
 
     if (targets.isNotEmpty) {
@@ -1620,7 +1620,7 @@ class Doll extends OnlineObject {
   void _applyEffect(Effect effect) {
     // Prevents missiles from the previous stage from working.
 
-    if (effect.source?.stage != stage || Clock.time - _lastTeleport < 25)
+    if (effect.source?.stage != stage || Clock.time - _lastTeleport! < 25)
       return;
 
     if (effect.source?.canTarget(this) == false) {
@@ -1647,7 +1647,7 @@ class Doll extends OnlineObject {
       if (sourceAccount != null && account != null) {
         // Handles non-pvp areas.
 
-        if (!account.canPvP || !sourceAccount.canPvP) {
+        if (!account!.canPvP || !sourceAccount.canPvP) {
           splat('pvp disabled', 'effect-text');
           return;
         }
@@ -1667,8 +1667,8 @@ class Doll extends OnlineObject {
         !player &&
         (targetDoll == null ||
             stuck ||
-            !canFireAt(targetDoll) ||
-            chessDistanceTo(targetDoll.currentLocation) > 5)) {
+            !canFireAt(targetDoll!) ||
+            chessDistanceTo(targetDoll!.currentLocation) > 5)) {
       targetLocation = null;
       targetDoll = effect.source;
     }
@@ -1690,7 +1690,7 @@ class Doll extends OnlineObject {
     // Only effects that deal damage can be critical.
 
     var critical =
-        !healing && !charming && effect.damage > BigInt.zero && random(20) == 0;
+        !healing && !charming && effect.damage! > BigInt.zero && random(20) == 0;
 
     // Handles misses. Healing, charming, and electric attacks ignore evasion.
 
@@ -1718,12 +1718,12 @@ class Doll extends OnlineObject {
     // Handles damage.
 
     if (effect.damage != null) {
-      assert(effect.damage >= BigInt.zero);
+      assert(effect.damage! >= BigInt.zero);
 
       // Critical hits never miss and deal maximum damage. Healing and charming
       // effects always deal maximum damage.
 
-      BigInt maxDamage = applyDefense(effect.damage, effect.egos),
+      BigInt? maxDamage = applyDefense(effect.damage!, effect.egos),
           damage = effect.egos.contains(Ego.maximumDamage) ||
                   critical ||
                   healing ||
@@ -1734,7 +1734,7 @@ class Doll extends OnlineObject {
       // Extra ego damage to make up for being resisted (not including blood
       // or ballistic).
 
-      BigInt base = damage;
+      BigInt? base = damage;
       int blood = 0;
 
       const [
@@ -1759,15 +1759,15 @@ class Doll extends OnlineObject {
           .where((ego) =>
               effect.egos.contains(ego) &&
               !resists.containsKey(Ego.resistedBy[ego]))
-          .forEach((ego) => damage += base);
+          .forEach((ego) => damage += base!);
 
       // Berserk, like burst, does not stack.
 
       if (effect.egos.contains(Ego.berserk) ||
           effect.sourceNonWeaponEgos.keys.contains(Ego.berserk))
-        damage *= big(3);
+        damage *= big(3)!;
 
-      BigInt rebase = damage;
+      BigInt? rebase = damage;
 
       // Handles egos from the source's armor.
 
@@ -1775,7 +1775,7 @@ class Doll extends OnlineObject {
         if (ego == Ego.blood) blood += amount;
 
         if (ego == Ego.arcane && effect.egos.contains(Ego.magic))
-          damage += rebase * big(amount);
+          damage += rebase! * big(amount)!;
       });
 
       if (healing) {
@@ -1803,24 +1803,24 @@ class Doll extends OnlineObject {
         // There is no need for Elyvilon to reduce charm damage, because players
         // can't be charmed.
 
-        damage = BigIntUtil.max(BigInt.one, damage);
-        _charmDamage += big(damage);
+        damage = BigIntUtil.max(BigInt.one, damage!);
+        _charmDamage += big(damage)!;
 
         BigInt percentage =
-            BigIntUtil.min(big(100), _charmDamage * big(100) ~/ maxHealth);
+            BigIntUtil.min(big(100)!, _charmDamage * big(100)! ~/ maxHealth!);
 
         var text = '$percentage% tamed';
 
         splat(critical ? '$damage ($text, critical)' : '$damage ($text)',
             'charm-text');
 
-        if (_charmDamage >= maxHealth) {
-          if (effect.source.account.pet != null)
-            effect.source.account.pet.stage
-                ?.removeDoll(effect.source.account.pet);
+        if (_charmDamage >= maxHealth!) {
+          if (effect.source.account!.pet != null)
+            effect.source.account!.pet!.stage
+                ?.removeDoll(effect.source.account!.pet);
 
-          effect.source.account.pet = Doll(infoName, null, false, difficulty);
-          effect.source.account.doll.summon();
+          effect.source.account!.pet = Doll(infoName, null, false, difficulty);
+          effect.source.account!.doll!.summon();
           killWithNoReward();
         }
       } else
@@ -1830,7 +1830,7 @@ class Doll extends OnlineObject {
 
       if (effect.egos.contains(Ego.gravity) &&
           !equipmentEgos.containsKey(Ego.resistGravity))
-        hurt(effect.source, BigIntUtil.max(BigInt.one, health ~/ big(40)),
+        hurt(effect.source, BigIntUtil.max(BigInt.one, health ~/ big(40)!),
             'gravity', 'gravity-text');
 
       if (effect.source != null && !healing && !charming) {
@@ -1845,7 +1845,7 @@ class Doll extends OnlineObject {
           reflectedDamage = effect.source.applyDefense(reflectedDamage);
 
           reflectedDamage = BigIntUtil.max(
-              BigInt.one, BigIntUtil.random(reflectedDamage + BigInt.one));
+              BigInt.one, BigIntUtil.random(reflectedDamage + BigInt.one)!);
 
           effect.source
               .hurt(this, reflectedDamage, 'reflection', 'reflection-text');
@@ -1870,11 +1870,11 @@ class Doll extends OnlineObject {
 
       if (blood > 0 && !equipmentEgos.containsKey(Ego.resistEvil))
         effect.source?.heal(
-            BigIntUtil.max(BigInt.one, big(damage) * big(blood) ~/ big(4)));
+            BigIntUtil.max(BigInt.one, big(damage)! * big(blood)! ~/ big(4)!));
 
       if (effect.egos.contains(Ego.poison) &&
           !equipmentEgos.containsKey(Ego.resistPoison)) {
-        _poisonDamage += damage;
+        _poisonDamage += damage!;
         poisoned = true;
       }
     }
@@ -1896,7 +1896,7 @@ class Doll extends OnlineObject {
     // Handles stun.
 
     if (effect.egos.contains(Ego.stun)) {
-      if (Clock.time - _lastStun >=
+      if (Clock.time - _lastStun! >=
           CoolDown.average ~/ ServerGlobals.tickDelay * 2) {
         splat('stun', 'effect-text');
         _lastStun = Clock.time;
@@ -1911,11 +1911,11 @@ class Doll extends OnlineObject {
   int _buff(String key, int value) {
     int attributeBuff() {
       if (account == null) return level;
-      if (key == 'str') return _sheet.strengthBuffs;
-      if (key == 'dex') return _sheet.dexterityBuffs;
-      if (key == 'int') return _sheet.intelligenceBuffs;
-      if (key == 'agi') return _sheet.agilityBuffs;
-      if (key == 'vit') return _sheet.healthBuffs;
+      if (key == 'str') return _sheet!.strengthBuffs;
+      if (key == 'dex') return _sheet!.dexterityBuffs;
+      if (key == 'int') return _sheet!.intelligenceBuffs;
+      if (key == 'agi') return _sheet!.agilityBuffs;
+      if (key == 'vit') return _sheet!.healthBuffs;
       throw ArgumentError(key);
     }
 
@@ -1931,22 +1931,22 @@ class Doll extends OnlineObject {
       var point = _gridApproach(current, target);
       if (point == target) return true;
       if (point == current) return false;
-      current = point;
+      current = point as Point<int>;
     }
   }
 
   void _disarm() {
-    account.equipped.remove('double equipped');
+    account!.equipped.remove('double equipped');
 
     (List.from(inSlot(#shield))..addAll(weapons))
         .forEach((item) => equipped.remove(item.id));
   }
 
   void _dropLoot() => playersInRange
-      .where((looter) => looter.canLoot(this))
-      .forEach((looter) => reward(looter));
+      .where((looter) => looter!.canLoot(this))
+      .forEach((looter) => reward(looter!));
 
-  List<List<int>> _findPath(
+  List<List<int?>> _findPath(
       Point<int> start, Point<int> end, dynamic at(dynamic point)) {
     _getNeighbors(node, at(point)) {
       var x = node.x,
@@ -1992,8 +1992,8 @@ class Doll extends OnlineObject {
       return neighbors;
     }
 
-    List<List<int>> _backtrace(node) {
-      var path = <List<int>>[
+    List<List<int?>> _backtrace(node) {
+      var path = <List<int?>>[
         [node.x, node.y]
       ];
       while (node.parent != null) {
@@ -2117,7 +2117,7 @@ class Doll extends OnlineObject {
 
     // Prevents pets from keeping bosses in combat after their masters die.
 
-    if (account?.pet != null) stage?.removeDoll(account.pet);
+    if (account?.pet != null) stage?.removeDoll(account!.pet);
 
     // The spawn delay should allow splats to display. If too many splats appear
     // they may not all display. That's OK. The spawn delay also allows monsters
@@ -2127,15 +2127,15 @@ class Doll extends OnlineObject {
       // Will run even if a player logs in while dead.
 
       Future.delayed(const Duration(seconds: 5), () {
-        if (account.online) {
+        if (account!.online) {
           leaveCombat();
           lastPlayerCombatTime = -25;
-          _abilities['respawn'].use(this);
+          _abilities['respawn']!.use!(this);
           spawning = false;
           _noReward = false;
-          health = maxHealth;
+          health = maxHealth!;
         } else
-          Logger.root.info('${account.id} died while offline.');
+          Logger.root.info('${account!.id} died while offline.');
       });
 
       return;
@@ -2148,10 +2148,10 @@ class Doll extends OnlineObject {
         _dropLoot();
         _rewardExperience();
 
-        playersInRange.forEach((Account looter) {
-          if (!looter.canLoot(this)) return;
+        playersInRange.forEach((Account? looter) {
+          if (!looter!.canLoot(this)) return;
 
-          if (info.boss) {
+          if (info!.boss) {
             // The floor after the current floor is unlocked.
 
             var unlocked = stageToFloor(stage?.id) + 1;
@@ -2175,7 +2175,7 @@ class Doll extends OnlineObject {
             }
           }
 
-          info.killFlags.forEach((flag) => looter.flags[flag] = true);
+          info!.killFlags.forEach((flag) => looter.flags[flag] = true);
         });
       }
 
@@ -2187,7 +2187,7 @@ class Doll extends OnlineObject {
           leaveCombat();
           spawning = false;
           _noReward = false;
-          health = maxHealth;
+          health = maxHealth!;
         }
       });
     }
@@ -2198,12 +2198,12 @@ class Doll extends OnlineObject {
     alert('You die.');
   }
 
-  Point<int> _handleStairs(Stage stage, Point<int> location) {
+  Point<int>? _handleStairs(Stage? stage, Point<int> location) {
     // Only players can use stairs.
 
     if (account == null ||
         stage == null ||
-        stage.id == ServerGlobals.playerSpawnStage.id) return location;
+        stage.id == ServerGlobals.playerSpawnStage!.id) return location;
 
     // Stairs allow players to teleport on top of other dolls, but not obstacles
     // like resources.
@@ -2220,13 +2220,13 @@ class Doll extends OnlineObject {
   }
 
   void _idle() {
-    if (!info.moves || targetDoll != null || random(50) != 0) return;
+    if (!info!.moves || targetDoll != null || random(50) != 0) return;
 
     var home = Rectangle(
-        spawnLocation.x - _wanderingRange,
-        spawnLocation.y - _wanderingRange,
-        _wanderingRange * 2,
-        _wanderingRange * 2);
+        spawnLocation!.x - _wanderingRange!,
+        spawnLocation!.y - _wanderingRange!,
+        _wanderingRange! * 2,
+        _wanderingRange! * 2);
 
     targetLocation = randomPoint(home);
   }
@@ -2240,8 +2240,8 @@ class Doll extends OnlineObject {
     // Prevents hanging on very distant targets.
 
     target = Point(
-        clamp(target.x, currentLocation.x - 100, currentLocation.x + 100),
-        clamp(target.y, currentLocation.y - 100, currentLocation.y + 100));
+        clamp(target.x, currentLocation.x - 100, currentLocation.x + 100) as int,
+        clamp(target.y, currentLocation.y - 100, currentLocation.y + 100) as int);
 
     // FIXME: this is buggy and sometimes the correct path isn't found.
 
@@ -2250,26 +2250,26 @@ class Doll extends OnlineObject {
       return gridApproach(target);
     }
 
-    if (_pathFinder == null || _pathFinder.target != target)
+    if (_pathFinder == null || _pathFinder!.target != target)
       _pathFinder = PathFinder(target);
 
-    _pathFinder.path ??= _findPath(
+    _pathFinder!.path ??= _findPath(
         currentLocation,
         target,
-        (point) => _pathFinder.nodes[point] ??=
+        (point) => _pathFinder!.nodes[point] ??=
             Node(point.x, point.y, point == target || traversable(point)));
 
-    if (_pathFinder.path.length < 2) return gridApproach(target);
-    var list = _pathFinder.path.removeAt(1);
-    return gridApproach(Point(list[0], list[1]));
+    if (_pathFinder!.path!.length < 2) return gridApproach(target);
+    var list = _pathFinder!.path!.removeAt(1);
+    return gridApproach(Point(list[0]!, list[1]!));
   }
 
   void _rewardExperience() =>
-      playersInRange.where((looter) => looter.canLoot(this)).forEach((looter) {
+      playersInRange.where((looter) => looter!.canLoot(this)).forEach((looter) {
         BigInt result = experience;
-        if (looter.hasCrystalPrimaryWeapon) result += experience;
+        if (looter!.hasCrystalPrimaryWeapon) result += experience;
         if (looter.hasCrystalSecondaryWeapon) result += experience;
-        result += big(looter.doll.crystalShields) * experience;
+        result += big(looter.doll!.crystalShields)! * experience;
         var mode = looter.options['xp mode'];
 
         if (mode == 'summoning')
@@ -2280,51 +2280,51 @@ class Doll extends OnlineObject {
           looter.gainExperience(result, 'combat');
       });
 
-  bool _traversable(Point<int> point, [int overrideThisCanPass]) =>
+  bool _traversable(Point<int> point, [int? overrideThisCanPass]) =>
       stage?.traversable(this, point, overrideThisCanPass ?? thisCanPass) ==
       true;
 
-  bool _useItem(Item item) {
+  bool _useItem(Item? item) {
     if (item == null || item.amount < 1) return false;
 
-    if (item.info?.use != null && item.info.use(this, item)) {
-      if (item.info.consumed) account.items.removeItem(item.id);
+    if (item.info?.use != null && item.info!.use!(this, item)) {
+      if (item.info!.consumed) account!.items.removeItem(item.id);
       return true;
     }
 
     item.egos.contains(Ego.food)
-        ? account.alert(alerts[#noEat])
-        : account.alert(alerts[#noUse]);
+        ? account!.alert(alerts[#noEat])
+        : account!.alert(alerts[#noUse]);
 
     return false;
   }
 
-  bool _visible(Doll target) {
+  bool _visible(Doll? target) {
     // Prevents players from being attacked after teleporting.
 
-    if (target?.account != null && Clock.time - target._lastTeleport < 25)
+    if (target?.account != null && Clock.time - target!._lastTeleport! < 25)
       return false;
 
     if (target?.account == null || targetDoll?.id == target?.id) return true;
 
     // Bosses always attack players.
 
-    return boss || target.account.options['stealth'] == false;
+    return boss || target!.account!.options['stealth'] == false;
   }
 
   BigInt _vitalityToHealth(int vitality) {
-    var result = big(vitality) * big(10);
+    var result = big(vitality)! * big(10)!;
 
     // Non-players have additional health to make up for not having food.
 
-    if (account == null) result += result * big(level) ~/ big(100);
+    if (account == null) result += result * big(level)! ~/ big(100)!;
     return BigIntUtil.max(BigInt.one, result);
   }
 
-  int _weaponAttribute([Item weapon]) {
+  int _weaponAttribute([Item? weapon]) {
     if (weapon == null) return strength;
-    if (weapon.info.egos.contains(Ego.magic)) return intelligence;
-    if (weapon.info.egos.contains(Ego.ballistic)) return dexterity;
+    if (weapon.info!.egos.contains(Ego.magic)) return intelligence;
+    if (weapon.info!.egos.contains(Ego.ballistic)) return dexterity;
     return strength;
   }
 }

@@ -2,7 +2,7 @@ part of util;
 
 class Idler {
   final Duration duration;
-  Object _object;
+  Object? _object;
   Function _onIdle;
 
   Idler(this.duration, this._onIdle());

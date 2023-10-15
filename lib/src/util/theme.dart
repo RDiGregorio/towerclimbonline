@@ -289,7 +289,7 @@ class Theme {
     'seaweed'
   ]);
 
-  String floor, wall, water;
+  String? floor, wall, water;
   List<String> dolls, bosses, resources, flags;
 
   Theme(
@@ -301,7 +301,7 @@ class Theme {
       this.bosses = const [],
       this.resources = const []});
 
-  static Theme random(int floor) {
+  static Theme? random(int? floor) {
     // Floor x (as displayed in the game) has a [floor] of x - 1.
 
     var result = [

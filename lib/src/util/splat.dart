@@ -4,7 +4,7 @@ part of util;
 
 class Splat {
   final int time;
-  final String text, classes, id = uuid();
+  final String? text, classes, id = uuid();
   final Map<String, String> style = {};
 
   Splat(this.text, this.time, this.classes);

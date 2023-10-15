@@ -8,7 +8,7 @@ import 'package:towerclimbonline/util.dart';
     directives: [coreDirectives, formDirectives],
     templateUrl: 'int_input_modal.html')
 class IntInputModal {
-  String input;
+  String? input;
 
   IntInputModal() {
     ClientGlobals.inputModals.add(this);
@@ -16,13 +16,13 @@ class IntInputModal {
 
   bool get disabled =>
       input == null ||
-      input.isEmpty ||
-      !input.toLowerCase().contains(numberPattern) ||
-      parseBigInteger(input) < BigInt.one;
+      input!.isEmpty ||
+      !input!.toLowerCase().contains(numberPattern) ||
+      parseBigInteger(input)! < BigInt.one;
 
   void add(int amount) {
     var parsed = parseBigInteger(input) ?? BigInt.zero,
-        result = BigIntUtil.max(BigInt.zero, parsed + big(amount));
+        result = BigIntUtil.max(BigInt.zero, parsed + big(amount)!);
 
     input = '$result';
   }

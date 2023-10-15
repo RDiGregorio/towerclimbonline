@@ -14,21 +14,21 @@ import 'package:towerclimbonline/util.dart';
 class CraftingModal implements OnDestroy {
   // The modals with search inputs are: action, item, crafting, and trade.
 
-  String selected, searchInput = '', action = 'craft';
+  String? selected, searchInput = '', action = 'craft';
 
   List<String> options = const [],
       upgradeOptions = const [],
       ingredients = const [];
 
   bool _resetFlag = true, loading = false, canCleanup = true;
-  Map<String, String> _upgradeOptionsCache = {}, _amountsCache = {};
-  Map<String, Item> _itemFromDisplayTextCache = {};
-  StreamSubscription<ObservableEvent> _subscription;
+  Map<String?, String> _upgradeOptionsCache = {}, _amountsCache = {};
+  Map<String?, Item> _itemFromDisplayTextCache = {};
+  late StreamSubscription<ObservableEvent> _subscription;
   final ChangeDetectorRef _changeDetectorRef;
-  BigInt _startingExperience;
+  BigInt? _startingExperience;
 
   CraftingModal(this._changeDetectorRef) {
-    _subscription = ClientGlobals.session.items.internal
+    _subscription = ClientGlobals.session!.items!.internal
         .getEvents(type: 'change', path: ['items']).listen((event) async {
       // A flag is used to improve performance when repeatedly upgrading items.
 
@@ -46,51 +46,51 @@ class CraftingModal implements OnDestroy {
 
   bool get canRepeatUpgrade =>
       _crafted != null &&
-      _crafted.amount > 1 &&
-      _crafted.bonus > 0 &&
-      _crafted.canUpgrade;
+      _crafted!.amount > 1 &&
+      _crafted!.bonus > 0 &&
+      _crafted!.canUpgrade;
 
-  String get crafted => _crafted?.displayText;
+  String? get crafted => _crafted?.displayText;
 
   int get craftedAmount => _crafted?.amount ?? 0;
 
   Iterable<String> get filteredOptions {
     var list = action == 'craft' ? options : upgradeOptions;
 
-    return searchInput.isEmpty
+    return searchInput!.isEmpty
         ? list
-        : list.where((value) => formatOption(value.toLowerCase())
-            .contains(searchInput.toLowerCase()));
+        : list.where((value) => formatOption(value.toLowerCase())!
+            .contains(searchInput!.toLowerCase()));
   }
 
   String get formattedGainedExperience =>
       formatCurrency(gainedExperience, false);
 
   BigInt get gainedExperience {
-    var experience = sheet.crafting.experience +
-        sheet.metalworking.experience +
-        sheet.cooking.experience;
+    var experience = sheet!.crafting!.experience! +
+        sheet!.metalworking!.experience! +
+        sheet!.cooking!.experience!;
 
-    return experience - startingExperience;
+    return experience - startingExperience!;
   }
 
   Map<String, Item> get items =>
-      Map<String, Item>.from(ClientGlobals.session.items?.items ?? const {});
+      Map<String, Item>.from(ClientGlobals.session!.items?.items ?? const {});
 
-  CharacterSheet get sheet => ClientGlobals.session?.sheet;
+  CharacterSheet? get sheet => ClientGlobals.session?.sheet;
 
   bool get showMessage => crafted != null && craftedAmount > 0;
 
-  BigInt get startingExperience {
+  BigInt? get startingExperience {
     if (_startingExperience == null)
-      _startingExperience = sheet.crafting.experience +
-          sheet.metalworking.experience +
-          sheet.cooking.experience;
+      _startingExperience = sheet!.crafting!.experience! +
+          sheet!.metalworking!.experience! +
+          sheet!.cooking!.experience!;
 
     return _startingExperience;
   }
 
-  Item get _crafted => ClientGlobals.session.crafted;
+  Item? get _crafted => ClientGlobals.session!.crafted;
 
   Symbol get _remoteAction => action == 'craft' ? #craft : #upgrade;
 
@@ -102,20 +102,20 @@ class CraftingModal implements OnDestroy {
     } else
       // Upgrade options have an extra +1 that must be removed.
 
-      ingredients = [setBonus(option, getBonus(option) - 1)];
+      ingredients = [setBonus(option, getBonus(option)! - 1)];
 
     _changeDetectorRef.markForCheck();
   }
 
   void askAmount() {
     showInputModal('Amount (${formatOption(selected)})', 'craft item', (input) {
-      ClientGlobals.session.remote(_remoteAction, [selected, input]);
+      ClientGlobals.session!.remote(_remoteAction, [selected, input]);
       selected = null;
       ingredients = const [];
       canCleanup = true;
     });
 
-    querySelector('#input-modal-toggle').click();
+    querySelector('#input-modal-toggle')!.click();
   }
 
   void cleanupItems() {
@@ -123,13 +123,13 @@ class CraftingModal implements OnDestroy {
 
     if (canCleanup) {
       canCleanup = false;
-      ClientGlobals.session.remote(#cleanupItems, []);
+      ClientGlobals.session!.remote(#cleanupItems, []);
     }
   }
 
   void craftAll() {
     if (ingredients.isNotEmpty) {
-      ClientGlobals.session.remote(_remoteAction, [selected, null]);
+      ClientGlobals.session!.remote(_remoteAction, [selected, null]);
       selected = null;
       ingredients = const [];
       canCleanup = true;
@@ -137,7 +137,7 @@ class CraftingModal implements OnDestroy {
     }
   }
 
-  String formatOption(String option) {
+  String? formatOption(String? option) {
     if (action == 'craft') return option;
 
     if (_upgradeOptionsCache.containsKey(option))
@@ -146,10 +146,10 @@ class CraftingModal implements OnDestroy {
     // Upgrade options have an extra +1 that must be removed.
 
     return _upgradeOptionsCache[option] =
-        setBonus(option, getBonus(option) - 1);
+        setBonus(option!, getBonus(option)! - 1);
   }
 
-  String ingredientAmount(String ingredient) {
+  String? ingredientAmount(String ingredient) {
     if (_amountsCache.containsKey(ingredient)) return _amountsCache[ingredient];
     _amountsCache[ingredient] = '';
 
@@ -157,7 +157,7 @@ class CraftingModal implements OnDestroy {
       _changeDetectorRef.markForCheck();
 
       return _amountsCache[ingredient] = formatCurrency(
-          ClientGlobals.session.items
+          ClientGlobals.session!.items!
                   .getItemByDisplayText(ingredient)
                   ?.amount ??
               0,
@@ -167,7 +167,7 @@ class CraftingModal implements OnDestroy {
     return _amountsCache[ingredient];
   }
 
-  String itemName(Item item) {
+  String? itemName(Item item) {
     try {
       return item.displayText;
     } catch (error) {
@@ -176,16 +176,16 @@ class CraftingModal implements OnDestroy {
   }
 
   void maxUpgrade() {
-    var text = Item.fromDisplayText(selected).comparisonText;
+    var text = Item.fromDisplayText(selected!).comparisonText;
 
     showInputModal('Remaining amount ($text)', 'craft item', (input) {
-      ClientGlobals.session.remote(#maxUpgrade, [selected, input]);
+      ClientGlobals.session!.remote(#maxUpgrade, [selected, input]);
 
       selected = null;
       ingredients = const [];
     });
 
-    querySelector('#input-modal-toggle').click();
+    querySelector('#input-modal-toggle')!.click();
   }
 
   void ngOnDestroy() {
@@ -213,7 +213,7 @@ class CraftingModal implements OnDestroy {
                 Crafting.optionsWithBonuses(items.values).map((text) =>
                     _itemFromDisplayTextCache[text] ??=
                         Item.fromDisplayText(text)))
-              ..sort(compareItems);
+              ..sort(compareItems as int Function(Item, Item)?);
 
             options = List.from(
                 optionItems.map((item) => item.displayTextWithoutAmount));
@@ -229,8 +229,8 @@ class CraftingModal implements OnDestroy {
             List<Item> upgradeOptionItems = List<Item>.from(
                 Crafting.upgradeOptions(items.values).map((text) =>
                     _itemFromDisplayTextCache[text] ??=
-                        Item.fromDisplayText(text)))
-              ..sort(compareItems);
+                        Item.fromDisplayText(text!)))
+              ..sort(compareItems as int Function(Item, Item)?);
 
             upgradeOptions = List.from(upgradeOptionItems
                 .map((item) => item.displayTextWithoutAmount));

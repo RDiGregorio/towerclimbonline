@@ -3,25 +3,25 @@ part of util;
 /// Receives events from wrapped and unwrapped [ObservableMap] children. Unlike
 /// other designs, dirty checking isn't needed here.
 
-class ObservableMap extends MapBase<String, dynamic> {
-  Stream<ObservableEvent> _events;
+class ObservableMap extends MapBase<String?, dynamic> {
+  late Stream<ObservableEvent> _events;
   StreamController<ObservableEvent> _controller = StreamController();
-  Map<String, dynamic> _map = {};
-  SetMultimap<String, ObservableMap> _parents = SetMultimap();
+  Map<String?, dynamic> _map = {};
+  SetMultimap<String?, ObservableMap> _parents = SetMultimap();
 
-  ObservableMap([Map<String, dynamic> map = const {}]) {
+  ObservableMap([Map<String?, dynamic> map = const {}]) {
     addAll(map);
     _events = _controller.stream.asBroadcastStream();
   }
 
-  Iterable<String> get keys => _map.keys;
+  Iterable<String?> get keys => _map.keys;
 
   dynamic operator [](dynamic key) => _map[key];
 
   /// [key] is removed if [value] is [null]. This allows removals to use
   /// "change" events.
 
-  void operator []=(String key, dynamic value) {
+  void operator []=(String? key, dynamic value) {
     assert(primitive(value) ||
         primitiveList(value) ||
         unwrap(value) is ObservableMap);
@@ -44,16 +44,16 @@ class ObservableMap extends MapBase<String, dynamic> {
   }
 
   Stream<ObservableEvent> getEvents(
-      {String type, Iterable<String> path = const []}) {
+      {String? type, Iterable<String> path = const []}) {
     var list = List<String>.from(path);
 
     return _events.where((event) =>
         (type == null || event.type == type) &&
-        listsEqual(List.from(event.path.take(path.length)), list));
+        listsEqual(List.from(event.path!.take(path.length)), list));
   }
 
   dynamic getPath(Iterable<String> path) =>
-      path.fold(this, (value, key) => unwrap(value)[key]);
+      path.fold(this, (dynamic value, key) => unwrap(value)[key]);
 
   dynamic remove(dynamic key) {
     if (!containsKey(key)) return null;
@@ -76,15 +76,15 @@ class ObservableMap extends MapBase<String, dynamic> {
     if (_controller.hasListener) _controller.add(event);
 
     _parents.forEach((key, parent) => parent.addEvent(ObservableEvent(
-        type: event.type, path: [key]..addAll(event.path), data: event.data)));
+        type: event.type, path: [key]..addAll(event.path!), data: event.data)));
   }
 
-  void _register(String key, dynamic value) {
+  void _register(String? key, dynamic value) {
     value = unwrap(value);
     if (value is ObservableMap) value._parents.add(key, this);
   }
 
-  void _unregister(String key, dynamic value) {
+  void _unregister(String? key, dynamic value) {
     value = unwrap(value);
     if (value is ObservableMap) value._parents.remove(key, this);
   }

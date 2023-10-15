@@ -3,9 +3,9 @@ part of client;
 /// Holds variables used by multiple components.
 
 class ClientGlobals {
-  static int clickedActionIndex, fps = 0, start = now;
+  static int? clickedActionIndex, fps = 0, start = now;
 
-  static String currentView = '',
+  static String? currentView = '',
       currentModal,
       currentModalTitle,
       currentInputModal,
@@ -18,17 +18,17 @@ class ClientGlobals {
 
   static final List<dynamic> inputModals = [];
   static final List<Item> craftingOptions = [];
-  static Session session;
+  static Session? session;
   static bool tradeAccepted = false;
   static String loginMessage = '';
-  static Future<dynamic> _zoomThrottle;
+  static Future<dynamic>? _zoomThrottle;
 
   static num get zoom => _options['zoom'] ?? 3;
 
   static void set zoom(dynamic value) {
     if (value is String) value = double.parse(value);
     if (value == zoom) return;
-    if (session?.options != null) session.options['zoom'] = value;
+    if (session?.options != null) session!.options!['zoom'] = value;
 
     // Messages to the server are throttled because some players like to play
     // with the zoom and that can cause spam.

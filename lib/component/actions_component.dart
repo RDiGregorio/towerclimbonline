@@ -15,7 +15,7 @@ import 'package:towerclimbonline/util.dart';
 class ActionsComponent {
   bool showMenu = false;
   final Map<String, String> eraserStyle = {};
-  final List<String> _actions = List.filled(100, null);
+  final List<String?> _actions = List.filled(100, null);
   final List<String> buffs = [];
   String _pressed = '';
   BigInt _hp = BigInt.zero, _maxHp = BigInt.zero;
@@ -41,7 +41,7 @@ class ActionsComponent {
 
       buffs
         ..clear()
-        ..addAll(ClientGlobals.session?.buffs?.keys?.map(_buffDescription) ??
+        ..addAll(ClientGlobals.session?.buffs?.keys.map(_buffDescription) ??
             const []);
     });
 
@@ -56,12 +56,12 @@ class ActionsComponent {
             'so players with more free time aren\'t advantaged.</p>'
       ].join('');
 
-      if (!ClientGlobals.session.getFlag('read guide')) {
+      if (!ClientGlobals.session!.getFlag('read guide')) {
         showInputModal(
             'Information',
             'text',
             (result) =>
-                ClientGlobals.session.remote(#setFlag, ['read guide', true]));
+                ClientGlobals.session!.remote(#setFlag, ['read guide', true]));
 
         querySelector('#input-modal-toggle')?.click();
       }
@@ -73,7 +73,7 @@ class ActionsComponent {
 
     window.onKeyDown.forEach((event) {
       if (event.keyCode == KeyCode.ESC) {
-        document.activeElement.blur();
+        document.activeElement!.blur();
         hideModal();
         return;
       }
@@ -102,24 +102,24 @@ class ActionsComponent {
         return;
       }
 
-      querySelector('input').focus();
+      querySelector('input')!.focus();
     });
 
-    ClientGlobals.session.internal
+    ClientGlobals.session!.internal
       ..getEvents(type: 'change', path: const ['actions']).forEach((event) =>
-          event.path.length < 2
-              ? ClientGlobals.session.actions
+          event.path!.length < 2
+              ? ClientGlobals.session!.actions
                   .forEach((key, value) => _actions[key] = value)
-              : _actions[int.parse(event.path[1])] = event.data['value']);
+              : _actions[int.parse(event.path![1])] = event.data!['value']);
   }
 
-  Iterable<String> get actions =>
+  Iterable<String?> get actions =>
 
       // Actions are reduced for performance.
 
-      _actions.take(window.innerWidth ~/ 70);
+      _actions.take(window.innerWidth! ~/ 70);
 
-  bool get canPvP => ClientGlobals.session.canPvP ?? false;
+  bool get canPvP => ClientGlobals.session!.canPvP ?? false;
 
   int get floor {
     var stage = ClientGlobals.session?.stage;
@@ -129,15 +129,15 @@ class ActionsComponent {
         stage.startsWith('bonus')) return 0;
 
     return parseInteger(
-            RegExp(r'\d+').firstMatch(ClientGlobals.session.stage).group(0)) +
+            RegExp(r'\d+').firstMatch(ClientGlobals.session!.stage!)!.group(0))! +
         1;
   }
 
   int get foodEaten => ClientGlobals.session?.doll?.foodEaten ?? 0;
 
-  int get fps => ClientGlobals.fps;
+  int? get fps => ClientGlobals.fps;
 
-  BigInt get gold => ClientGlobals.session.gold;
+  BigInt? get gold => ClientGlobals.session!.gold;
 
   Map<String, String> get goldStyle => const {};
 
@@ -151,25 +151,25 @@ class ActionsComponent {
     return result == null ? _maxHp : _maxHp = result;
   }
 
-  List<String> get pendingActions => ClientGlobals.session.pendingActions;
+  List<String> get pendingActions => ClientGlobals.session!.pendingActions;
 
   String get progress {
     num percent = 0;
     var sheet = ClientGlobals.session?.sheet;
     if (sheet == null) return formatNumberWithPrecision(0);
-    Stat stat = sheet.internal[progressDisplay ?? 'combat'];
+    Stat? stat = sheet.internal[progressDisplay ?? 'combat'];
 
     try {
       percent = stat == null
           ? 0
-          : (stat.experience - stat.previousLevelExperience) *
+          : (stat.experience! - stat.previousLevelExperience) *
               BigInt.from(100) /
               (stat.nextLevelExperience - stat.previousLevelExperience);
     } catch (error) {
       // Caused by very large numbers.
     }
 
-    String formatStat(String key) {
+    String formatStat(String? key) {
       // Some stats have been renamed.
 
       if (key == 'slay') return 'luck';
@@ -182,7 +182,7 @@ class ActionsComponent {
         ' (${formatNumberWithPrecision(percent)}%)';
   }
 
-  String get progressDisplay {
+  String? get progressDisplay {
     var map = ClientGlobals.session?.options;
     if (map == null) return null;
     return map['progress'] ?? 'combat';
@@ -239,24 +239,24 @@ class ActionsComponent {
 
   /// The result is formatted for use on the action bar.
 
-  String displayText(String action) {
-    var result = '';
+  String? displayText(String action) {
+    String? result = '';
     if (action == null || action == '') return result;
 
     if (hasAbility(action))
       result = action;
     else if (hasItem(action))
       result =
-          ClientGlobals.session.items.getItem(action).displayTextWithoutAmount;
+          ClientGlobals.session!.items!.getItem(action)!.displayTextWithoutAmount;
 
-    return addEllipsis(result);
+    return addEllipsis(result!);
   }
 
   bool doubleEquipped(String action) =>
-      ClientGlobals.session.equipped['double equipped']?.id == action;
+      ClientGlobals.session!.equipped!['double equipped']?.id == action;
 
   bool equipped(String action) =>
-      ClientGlobals.session.equipped?.containsKey(action) == true;
+      ClientGlobals.session!.equipped?.containsKey(action) == true;
 
   String format(BigInt value) =>
       formatCurrency(BigIntUtil.max(BigInt.zero, value), false);
@@ -272,7 +272,7 @@ class ActionsComponent {
       if (missingAction(action))
         showModal('Actions', 'actions');
       else if (hasItem(action))
-        ClientGlobals.session.remote(#useItem, [action]);
+        ClientGlobals.session!.remote(#useItem, [action]);
       else if (hasAbility(action)) {
         if (action == 'teleport') {
           _closeAll();
@@ -282,10 +282,10 @@ class ActionsComponent {
           showInputModal('Floor', 'teleport', (input) {
             _closeAll();
 
-            ClientGlobals.session.remote(#teleport, [
-              BigIntUtil.min(big(Session.maxFloor), parseBigInteger(input))
+            ClientGlobals.session!.remote(#teleport, [
+              BigIntUtil.min(big(Session.maxFloor)!, parseBigInteger(input)!)
                   .toInt(),
-              ClientGlobals.session.options['teleport mode'] == 'proc gen'
+              ClientGlobals.session!.options!['teleport mode'] == 'proc gen'
             ]);
           });
 
@@ -295,11 +295,11 @@ class ActionsComponent {
 
         _pressed = action;
 
-        ClientGlobals.session
+        ClientGlobals.session!
             .remote(#useAbility, [action]).then(_updatePressed);
       }
     } else
-      ClientGlobals.session.remote(#setAction, [null, index]);
+      ClientGlobals.session!.remote(#setAction, [null, index]);
   }
 
   void handleEraserClick() {
@@ -315,13 +315,13 @@ class ActionsComponent {
     switch (action) {
       case 'logout':
         Future(() async {
-          if (await ClientGlobals.session.remote(#logout, const [])) {
+          if (await (ClientGlobals.session!.remote(#logout, const []) as FutureOr<bool>)) {
             window.localStorage
                 .remove('towerclimbonline/${ClientGlobals.username}');
 
             reload();
           } else
-            ClientGlobals.session.alert(alerts[#noCombat]);
+            ClientGlobals.session!.alert(alerts[#noCombat]);
         });
 
         return;
@@ -360,20 +360,20 @@ class ActionsComponent {
   }
 
   bool hasAbility(String name) =>
-      ClientGlobals.session.abilities?.containsKey(name) == true;
+      ClientGlobals.session!.abilities?.containsKey(name) == true;
 
   bool hasItem(String id) {
     // FIXME: [hasItem] is taking 19% of the performance.
 
     if (id == null) return false;
-    return ClientGlobals.session.items?.getItem(id) != null;
+    return ClientGlobals.session!.items?.getItem(id) != null;
   }
 
   bool missingAction(String action) =>
       action == null || action == '' || !hasAbility(action) && !hasItem(action);
 
   String _buffDescription(String key) {
-    num remainingEstimate = ClientGlobals.session.buffs[key]?.remainingMs ?? 0;
+    num remainingEstimate = ClientGlobals.session!.buffs[key]?.remainingMs ?? 0;
 
     Map<String, String> longDescription = {
       'regen': 'regenerating',
@@ -410,7 +410,7 @@ class ActionsComponent {
 
   void _closeAll() {
     querySelectorAll('.modal-header button.close')
-        ?.forEach((element) => element.click());
+        .forEach((element) => element.click());
   }
 
   void _updatePressed(dynamic result) {

@@ -14,8 +14,8 @@ import 'package:towerclimbonline/util.dart';
     templateUrl: 'app_component.html',
     directives: [coreDirectives, formDirectives, GameComponent])
 class AppComponent {
-  WebSocket socket;
-  int _players;
+  WebSocket? socket;
+  int? _players;
   String message = '';
   bool tooManyConnections = false;
 
@@ -61,7 +61,7 @@ class AppComponent {
           message = ClientGlobals.loginMessage = 'unable to connect';
           Future(function);
         } else {
-          socket.onClose.first.then((event) {
+          socket!.onClose.first.then((event) {
             if (event.code == 4000) tooManyConnections = true;
           });
 
@@ -105,6 +105,6 @@ class AppComponent {
   }
 
   Future<dynamic> _updatePlayersOnline() async {
-    _players = await ClientGlobals.session.remote(#playersOnline, const []);
+    _players = await (ClientGlobals.session!.remote(#playersOnline, const []) as FutureOr<int?>);
   }
 }

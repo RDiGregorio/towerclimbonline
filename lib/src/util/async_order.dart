@@ -1,7 +1,7 @@
 part of util;
 
 class AsyncOrder {
-  Future<dynamic> _future;
+  Future<dynamic>? _future;
 
   /// Waits for the futures returned from each [function] to complete before
   /// calling the next one.

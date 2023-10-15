@@ -11,32 +11,32 @@ import 'package:towerclimbonline/util.dart';
     templateUrl: 'channel_modal.html')
 class ChannelModal {
   Iterable<String> get channelMods =>
-      ClientGlobals.session.channelMods ?? const [];
+      ClientGlobals.session!.channelMods ?? const [];
 
   Iterable<String> get channelOwners =>
-      ClientGlobals.session.channelOwners ?? const [];
+      ClientGlobals.session!.channelOwners ?? const [];
 
   void addChannelMod() =>
       showInputModal('Add channel moderator', 'add mod', (user) {
-        if (sanitizeName(user) == ClientGlobals.session.username)
-          querySelector('button.close').click();
+        if (sanitizeName(user) == ClientGlobals.session!.username)
+          querySelector('button.close')!.click();
 
-        return ClientGlobals.session.remote(#addChannelMod, [user]);
+        return ClientGlobals.session!.remote(#addChannelMod, [user]);
       });
 
   void addChannelOwner() => showInputModal('Add channel owner', 'add owner',
-      (user) => ClientGlobals.session.remote(#addChannelOwner, [user]));
+      (user) => ClientGlobals.session!.remote(#addChannelOwner, [user]));
 
   void removeChannelMod() => showInputModal(
       'Remove channel moderator',
       'remove mod',
-      (user) => ClientGlobals.session.remote(#removeChannelMod, [user]));
+      (user) => ClientGlobals.session!.remote(#removeChannelMod, [user]));
 
   void removeChannelOwner() =>
       showInputModal('Remove channel owner', 'remove owner', (user) {
-        if (sanitizeName(user) == ClientGlobals.session.username)
-          querySelector('button.close').click();
+        if (sanitizeName(user) == ClientGlobals.session!.username)
+          querySelector('button.close')!.click();
 
-        return ClientGlobals.session.remote(#removeChannelOwner, [user]);
+        return ClientGlobals.session!.remote(#removeChannelOwner, [user]);
       });
 }

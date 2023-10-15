@@ -10,9 +10,9 @@ import 'package:towerclimbonline/util.dart';
     directives: [coreDirectives, formDirectives],
     templateUrl: 'login_component.html')
 class LoginComponent {
-  String username = '', password = '', captchaResponse = '';
+  String? username = '', password = '', captchaResponse = '';
   bool showPassword = false, newAccount = false, loginDisabled = false;
-  int _players;
+  int? _players;
 
   LoginComponent() {
     var cookies = List.from(window.localStorage.keys
@@ -39,7 +39,7 @@ class LoginComponent {
     }
 
     until(() => ClientGlobals.session != null).then((result) async => _players =
-        await ClientGlobals.session.remote(#playersOnline, const []));
+        await (ClientGlobals.session!.remote(#playersOnline, const []) as FutureOr<int?>));
   }
 
   String get message => ClientGlobals.loginMessage;
@@ -61,17 +61,17 @@ class LoginComponent {
 
     if (ClientGlobals.session != null)
       Future(() async {
-        if (await ClientGlobals.session.remote(
-            #login, [captchaResponse, username, password, newAccount])) {
+        if (await (ClientGlobals.session!.remote(
+            #login, [captchaResponse, username, password, newAccount]) as FutureOr<bool>)) {
           // Saving the cookie is delayed to allow alts in different browser
           // tabs to automatically log back in after updates.
 
           Future.delayed(const Duration(seconds: 1), () {
             ClientGlobals.username = username;
-            return window.localStorage['towerclimbonline/$username'] = password;
+            return window.localStorage['towerclimbonline/$username'] = password!;
           });
 
-          ClientGlobals.session.internal.getEvents(type: 'end').listen((event) {
+          ClientGlobals.session!.internal.getEvents(type: 'end').listen((event) {
             // An "end" event happens when a session is kicked because a player
             // logs in somewhere else (for example, when duplicating a browser
             // tab).

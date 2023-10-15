@@ -11,9 +11,9 @@ import 'package:towerclimbonline/util.dart';
     directives: [coreDirectives, formDirectives],
     templateUrl: 'editor_component.html')
 class EditorComponent {
-  WebSocket _socket;
+  WebSocket? _socket;
 
-  String mode = 'default',
+  String? mode = 'default',
       text = '',
       flags = '',
       object = '',
@@ -22,11 +22,11 @@ class EditorComponent {
 
   int mouseX = 0, mouseY = 0;
   bool fill = false;
-  List<dynamic> cells = const [];
+  List<dynamic>? cells = const [];
 
   EditorComponent() {
     getSocket('localhost', 9998)
-        .then((socket) => (_socket = socket).onMessage.listen((event) {
+        .then((socket) => (_socket = socket)!.onMessage.listen((event) {
               try {
                 var map = json.decode(event.data);
                 cells = map['cells'];
@@ -70,7 +70,7 @@ class EditorComponent {
 
     fill
         ? _fill(x, y, _cell(mouseX = x, mouseY = y), list)
-        : cells[mouseX = x][mouseY = y] = list;
+        : cells![mouseX = x][mouseY = y] = list;
   }
 
   void handleRightClick(MouseEvent event, int x, int y) {
@@ -82,9 +82,9 @@ class EditorComponent {
 
   void handleSubmit() {
     if (mode == 'input')
-      _socket.send(json.encode(['load', text]));
+      _socket!.send(json.encode(['load', text]));
     else if (mode == 'output')
-      _socket.send(json.encode([
+      _socket!.send(json.encode([
         'save',
         text,
         {'flags': flags, 'cells': cells}
@@ -93,22 +93,22 @@ class EditorComponent {
     mode = 'default';
   }
 
-  void regen() => _socket.send(json.encode(const ['gen']));
+  void regen() => _socket!.send(json.encode(const ['gen']));
 
   List<String> _cell(int x, int y) {
-    var list = cells.length > x ? cells[x] : const [];
+    var list = cells!.length > x ? cells![x] : const [];
 
     return List<String>.from(
         (list.length > y ? list[y] : null) ?? const [null, null, null]);
   }
 
-  void _fill(int x, int y, List<String> oldCell, List<String> newCell) {
+  void _fill(int x, int y, List<String> oldCell, List<String?> newCell) {
     if (x < 0 || y < 0 || x > 99 || y > 99) return;
 
     if (_cell(x, y)[0] == oldCell[0] &&
         _cell(x, y)[1] == oldCell[1] &&
         _cell(x, y)[2] == oldCell[2]) {
-      cells[x][y] = List.from(newCell);
+      cells![x][y] = List.from(newCell);
       _fill(x - 1, y, oldCell, newCell);
       _fill(x + 1, y, oldCell, newCell);
       _fill(x, y - 1, oldCell, newCell);

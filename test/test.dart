@@ -13,7 +13,7 @@ void main() {
     var value = 0;
     Clock.start();
     expect(Clock.time, value);
-    await for (var tick in Clock.ticks.take(3)) expect(tick, value++);
+    await for (var tick in Clock.ticks!.take(3)) expect(tick, value++);
   });
 
   test('round', () async {
@@ -74,28 +74,28 @@ void main() {
   });
 
   test('attack', () async {
-    var stage = Stage<Doll>(null, 100, 100),
+    var stage = Stage<Doll?>(null, 100, 100),
         session = Session(
             () => Account(Doll(), DollInfo()), newMockResourceManager()),
         target = Doll();
 
     await session.login(null, 'test', 'test', true);
-    stage..addDoll(session.account.doll)..addDoll(target);
+    stage..addDoll(session.account!.doll)..addDoll(target);
   });
 
   test('walk', () async {
     var session = Session(() => Account(Doll()), newMockResourceManager());
 
     await session.login(null, 'test', 'test', true);
-    expect(session.account.id, equals('test'));
+    expect(session.account!.id, equals('test'));
 
     expect(
-        (Stage(null, 100, 100)..addDoll(session.account.doll))
+        (Stage(null, 100, 100)..addDoll(session.account!.doll))
             .search(Rectangle(0, 0, 0, 0)),
-        equals([session.account.doll]));
+        equals([session.account!.doll]));
 
     session.walk(2, 3);
-    expect(session.account.doll.targetLocation, equals(const Point(2, 3)));
+    expect(session.account!.doll!.targetLocation, equals(const Point(2, 3)));
   });
 
   test('space', () {
@@ -247,23 +247,23 @@ void main() {
         user = Session(() => Account(Doll(), DollInfo(), 'test'),
             newMockResourceManager(), newMockResourceManager(), stageManager);
 
-    Stage stage = await stageManager.getResource(
-        () => Stage('test', 100, 100), 'test', user.onLogout);
+    Stage? stage = await (stageManager.getResource(
+        () => Stage('test', 100, 100), 'test', user.onLogout) as FutureOr<Stage<Doll>?>);
 
     await user.login(null, 'user', 'test', true);
 
     Future(() async {
       await user.onLogin;
-      expect(user.account.doll.stage, equals(stage));
+      expect(user.account!.doll!.stage, equals(stage));
       user.logout();
       await user.onLogout;
-      expect(user.account.doll.stage, equals(null));
+      expect(user.account!.doll!.stage, equals(null));
 
       await (user = Session(() => Account(Doll(), DollInfo(), 'test'),
               newMockResourceManager(), newMockResourceManager(), stageManager))
           .onLogin;
 
-      expect(user.account.doll.stage, equals(stage));
+      expect(user.account!.doll!.stage, equals(stage));
     });
   });
 
@@ -272,12 +272,12 @@ void main() {
         user = Session(() => Account(Doll()), manager);
 
     await user.login(null, 'user', 'test', true);
-    Stage(null, 100, 100).addDoll(user.account.doll);
+    Stage(null, 100, 100).addDoll(user.account!.doll);
 
     user
-      ..account.doll.internal.getEvents(type: 'public chat').listen((event) {
-        expect(event.data['from'], equals('user'));
-        expect(event.data['value'], equals('a'));
+      ..account!.doll!.internal.getEvents(type: 'public chat').listen((event) {
+        expect(event.data!['from'], equals('user'));
+        expect(event.data!['value'], equals('a'));
       })
       ..messagePublic('a');
   });
@@ -298,11 +298,11 @@ void main() {
 
     await user.internal
         .getEvents()
-        .firstWhere((event) => event.data['value'] == 'hello');
+        .firstWhere((event) => event.data!['value'] == 'hello');
 
     await contact.internal
         .getEvents()
-        .firstWhere((event) => event.data['value'] == 'hello');
+        .firstWhere((event) => event.data!['value'] == 'hello');
 
     expect(await user.kickChannelUser('contact', 0), equals(true));
     expect(await user.kickChannelUser('contact', 0), equals(false));
@@ -310,7 +310,7 @@ void main() {
     expect(await user.kickChannelUser('contact', 2), equals(true));
     expect(await contact.leaveChannel(), equals(true));
     expect(await contact.joinChannel('test'), equals(false));
-    await Clock.ticks.first;
+    await Clock.ticks!.first;
     expect(await contact.joinChannel('test'), equals(true));
     expect(await user.leaveChannel(), equals(true));
     expect(await user.allowChannelUser('contact'), equals(false));
@@ -385,8 +385,8 @@ void main() {
     registerDollInfo('a', DollInfo(equipped: {'0': Item('ballistic armor')}));
 
     var doll = Doll('a')..equipped.values.forEach((item) => item.bonus = 0);
-    expect(doll.applyDefense(big(1000), const [Ego.ballistic]), big(500));
-    expect(doll.applyDefense(big(999), const [Ego.ballistic]), big(499));
+    expect(doll.applyDefense(big(1000)!, const [Ego.ballistic]), big(500));
+    expect(doll.applyDefense(big(999)!, const [Ego.ballistic]), big(499));
   });
 
   test('stacked ballistic resistance', () {
@@ -399,9 +399,9 @@ void main() {
     registerDollInfo('a', DollInfo(equipped: {'0': Item('ballistic armor')}));
 
     var doll = Doll('a')..equipped.values.forEach((item) => item.bonus = 0);
-    expect(doll.applyDefense(big(1000), const [Ego.ballistic]), big(250));
+    expect(doll.applyDefense(big(1000)!, const [Ego.ballistic]), big(250));
 
-    expect(doll.applyDefense(big(1000), const [Ego.ballistic, Ego.acid]),
+    expect(doll.applyDefense(big(1000)!, const [Ego.ballistic, Ego.acid]),
         big(1000));
   });
 
@@ -411,13 +411,13 @@ void main() {
     registerDollInfo('b', DollInfo(equipped: {'0': Item('armor')}));
     registerDollInfo('c', DollInfo(equipped: {'0': Item('armor')}));
     var doll = Doll('b')..equipped.values.forEach((item) => item.bonus = 500);
-    expect(doll.applyDefense(big(1000)), big(500));
+    expect(doll.applyDefense(big(1000)!), big(500));
     doll = Doll('c')..equipped.values.forEach((item) => item.bonus = 999);
-    expect(doll.applyDefense(big(1000)), big(250));
+    expect(doll.applyDefense(big(1000)!), big(250));
     doll = Doll('c')..equipped.values.forEach((item) => item.bonus = 2000);
-    expect(doll.applyDefense(big(1000)), big(125));
+    expect(doll.applyDefense(big(1000)!), big(125));
     doll = Doll('c')..equipped.values.forEach((item) => item.bonus = 4000);
-    expect(doll.applyDefense(big(1000)), big(62));
+    expect(doll.applyDefense(big(1000)!), big(62));
   });
 
   test('spirit', () {
@@ -434,13 +434,13 @@ void main() {
         'e', DollInfo(equipped: {'0': Item('spirit'), '1': Item('spirit')}));
 
     var doll = Doll('b');
-    expect(doll.applyDefense(big(1000)), big(500));
+    expect(doll.applyDefense(big(1000)!), big(500));
     doll = Doll('c');
-    expect(doll.applyDefense(big(1000)), big(750));
+    expect(doll.applyDefense(big(1000)!), big(750));
     doll = Doll('d');
-    expect(doll.applyDefense(big(1000)), big(250));
+    expect(doll.applyDefense(big(1000)!), big(250));
     doll = Doll('e');
-    expect(doll.applyDefense(big(1000)), big(562));
+    expect(doll.applyDefense(big(1000)!), big(562));
   });
 
   test('crafting', () {
@@ -563,7 +563,7 @@ void main() {
       expect(stat.level, i);
 
       expect(
-          (stat..setExperienceWithoutSplat(stat.experience)).level, stat.level);
+          (stat..setExperienceWithoutSplat(stat.experience!)).level, stat.level);
     }
 
     stat.setLevel(Stat.maxLevel + 1);
@@ -582,7 +582,7 @@ void main() {
         stat.setLevel(i);
         expect(stat.internalLevel, i);
 
-        expect((stat..setExperienceWithoutSplat(stat.experience)).internalLevel,
+        expect((stat..setExperienceWithoutSplat(stat.experience!)).internalLevel,
             stat.internalLevel);
       }
 
@@ -590,7 +590,7 @@ void main() {
       expect(stat.internalLevel, Stat.maxLevel);
 
       expect(stat.experience,
-          big(Stat.maxLevelExperience) * stat.ascensionMultiplier);
+          big(Stat.maxLevelExperience)! * stat.ascensionMultiplier);
     }
 
     for (int i = 0; i < 1000; i++) test(i);
@@ -617,11 +617,11 @@ void main() {
 
   test('format currency', () {
     expect(formatCurrency(maxFinite), 'Ξ9,223P');
-    expect(formatCurrency(big(maxFinite) * big(1000)), 'Ξ9,223E');
-    expect(formatCurrency(big(maxFinite) * big(100000)), 'Ξ922,337E');
-    expect(formatCurrency(big(maxFinite) * big(million)), 'Ξ9,223Z');
-    expect(formatCurrency(big(maxFinite) * big(billion)), 'Ξ9,223Y');
-    expect(formatCurrency(big(maxFinite) * big(trillion)), 'Ξ9,223X');
+    expect(formatCurrency(big(maxFinite)! * big(1000)!), 'Ξ9,223E');
+    expect(formatCurrency(big(maxFinite)! * big(100000)!), 'Ξ922,337E');
+    expect(formatCurrency(big(maxFinite)! * big(million)!), 'Ξ9,223Z');
+    expect(formatCurrency(big(maxFinite)! * big(billion)!), 'Ξ9,223Y');
+    expect(formatCurrency(big(maxFinite)! * big(trillion)!), 'Ξ9,223X');
     expect(formatCurrency(parseBigInteger('9,223E'), false), '9,223E');
     expect(formatCurrency(parseBigInteger('922,337E'), false), '922,337E');
     expect(formatCurrency(parseBigInteger('9,223Z'), false), '9,223Z');

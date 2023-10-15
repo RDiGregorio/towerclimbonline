@@ -62,7 +62,7 @@ class DollCustomization extends OnlineObject {
 
   CustomizationLayer get top => internal['top'] ??= CustomizationLayer();
 
-  String getImage(String layer) {
+  String? getImage(String layer) {
     if (layer == 'back') return back.getImage(gender, layer);
     if (layer == 'base') return base.getImage(gender, layer);
     if (layer == 'bottom') return bottom.getImage(gender, layer);

@@ -1,9 +1,9 @@
 part of util;
 
 class Buff extends OnlineObject {
-  int _now;
+  late int _now;
 
-  Buff({int duration, Iterable<int> egos}) {
+  Buff({int? duration, Iterable<int>? egos}) {
     internal
       ..['dur'] = duration
       ..['epoch'] = _now = Clock.time

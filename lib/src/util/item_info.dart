@@ -18,10 +18,10 @@ class ItemInfo {
   ];
 
   final bool consumed;
-  final Symbol slot;
-  final Function use;
+  final Symbol? slot;
+  final Function? use;
   final int coolDown, damage, defense, evasion, accuracy, heal;
-  final String image, missile;
+  final String? image, missile;
   final List<int> egos;
 
   ItemInfo(
@@ -36,7 +36,7 @@ class ItemInfo {
       this.missile,
       this.image = 'image/missing.png',
       this.egos = const [],
-      bool this.use(Doll doll, Item item)}) {
+      bool this.use(Doll doll, Item item)?}) {
     assert(slot == null || equipmentSlots.contains(slot));
   }
 }

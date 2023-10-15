@@ -10,7 +10,7 @@ import 'package:towerclimbonline/util.dart';
     directives: [coreDirectives, formDirectives],
     templateUrl: 'high_scores_modal.html')
 class HighScoresModal {
-  static Timer _timer;
+  static Timer? _timer;
 
   // Admin accounts should not appear on the high scores.
 
@@ -50,7 +50,7 @@ class HighScoresModal {
   }
 
   void _update(String key) async {
-    scores = List.from((await ClientGlobals.session.remote(#scores, [key]))
+    scores = List.from((await ClientGlobals.session!.remote(#scores, [key]))
         .where((score) => !_filteredAccounts.contains(score[0]))
         .take(20));
   }

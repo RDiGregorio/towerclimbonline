@@ -2,8 +2,8 @@ part of util;
 
 class ExperienceRate {
   CharacterSheet _sheet;
-  int _startingMilliseconds;
-  BigInt _startingExperience;
+  late int _startingMilliseconds;
+  late BigInt _startingExperience;
 
   ExperienceRate(this._sheet) {
     _startingMilliseconds = now;

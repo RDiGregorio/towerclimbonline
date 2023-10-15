@@ -30,16 +30,16 @@ class MiniMapComponent {
     return map['map size'] ?? 100;
   }
 
-  Map<String, String> get style => {
+  Map<String, String?> get style => {
         'background-image': terrain,
         'width': '${width}px',
         'height': '${height}px'
       };
 
-  String get terrain {
+  String? get terrain {
     var location = ClientGlobals.session?.doll?.currentLocation;
     if (location == null) return null;
-    var result = ClientGlobals.session.terrainSections[sectionKey(location)];
+    var result = ClientGlobals.session!.terrainSections[sectionKey(location)];
     if (result == null) return null;
 
     // The cache is cleared when the browser is refreshed.
@@ -52,7 +52,7 @@ class MiniMapComponent {
     return map['map size'] ?? 100;
   }
 
-  Map<String, String> pointStyle(Doll doll) {
+  Map<String, String> pointStyle(Doll? doll) {
     num x = doll?.currentLocation?.x ?? 0, y = doll?.currentLocation?.y ?? 0;
     x = (x % 100) * width ~/ 100;
     y = (y % 100) * height ~/ 100;
@@ -68,7 +68,7 @@ class MiniMapComponent {
         doll?.infoName == 'gravestone') color = 'gold';
 
     if (doll?.infoName == 'chest')
-      color = ClientGlobals.session.recentChests[doll.id] != true
+      color = ClientGlobals.session!.recentChests[doll!.id] != true
           ? 'cyan'
           : 'black';
 
@@ -80,7 +80,7 @@ class MiniMapComponent {
       var difficulty =
           doll?.difficulty ?? stageToFloor(ClientGlobals.session?.stage) ?? 0;
 
-      if (ClientGlobals.session.highestFloor <= difficulty)
+      if (ClientGlobals.session!.highestFloor <= difficulty)
         result['animation'] = 'blinker 1s step-start infinite';
     }
 
@@ -91,7 +91,7 @@ class MiniMapComponent {
     return result;
   }
 
-  Point<int> sectionKey(Point<int> location) => location == null
+  Point<int> sectionKey(Point<int>? location) => location == null
       ? Point<int>(0, 0)
       : Point<int>(location.x ~/ 100 * 100, location.y ~/ 100 * 100);
 }

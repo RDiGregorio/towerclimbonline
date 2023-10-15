@@ -26,20 +26,20 @@ class Crafting {
 
     ingredients.forEach((ingredient) {
       _craftedFrom[ingredient] ??= Set();
-      _craftedFrom[ingredient].add(result);
+      _craftedFrom[ingredient]!.add(result);
     });
   }
 
   /// Returns what is crafted from [key].
 
-  static Set<String> craftedFrom(String key) =>
-      Set<String>.from(_craftedFrom[key] ?? const []);
+  static Set<String> craftedFrom(String? key) =>
+      Set<String>.from((_craftedFrom[key] ?? const []) as Iterable<dynamic>);
 
   /// Returns what is crafted to [key].
 
-  static Set<String> craftedTo(String key, [bool upgrade = false]) => upgrade
-      ? Set<String>.from([setBonus(key, getBonus(key) - 1)])
-      : Set<String>.from(_craftedTo[key] ?? const []);
+  static Set<String> craftedTo(String? key, [bool upgrade = false]) => upgrade
+      ? Set<String>.from([setBonus(key!, getBonus(key)! - 1)])
+      : Set<String>.from((_craftedTo[key] ?? const []) as Iterable<dynamic>);
 
   static void init() {
     // The items that can't be crafted are:
@@ -408,22 +408,22 @@ class Crafting {
     var result = Set<String>();
 
     CraftingOption.fromIngredients(items).forEach((option) =>
-        option.bonuses.isEmpty
+        option.bonuses!.isEmpty
             ? result.add(option.item)
-            : option.bonuses
-                .forEach((bonus) => result.add(setBonus(option.item, bonus))));
+            : option.bonuses!
+                .forEach((bonus) => result.add(setBonus(option.item, bonus!))));
 
     return result;
   }
 
-  static Set<String> upgradeOptions(Iterable<Item> items) {
-    var result = Set<String>();
+  static Set<String?> upgradeOptions(Iterable<Item> items) {
+    var result = Set<String?>();
 
     result.addAll(items.where((item) => item.canUpgrade).map((item) =>
         _upgradeText.containsKey(item)
             ? _upgradeText[item]
             : _upgradeText[item] =
-                setBonus(item.displayTextWithoutAmount, item.bonus + 1)));
+                setBonus(item.displayTextWithoutAmount!, item.bonus + 1)));
 
     return result;
   }

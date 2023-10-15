@@ -1,10 +1,10 @@
 part of util;
 
 class DollInfo extends OnlineObject {
-  final Function interaction, passive;
-  final DropTable loot;
+  final Function? interaction, passive;
+  final DropTable? loot;
   final Map<String, dynamic> equipped = {};
-  final Symbol source;
+  final Symbol? source;
   final int attackRange, difficulty;
 
   final bool aggro,
@@ -15,7 +15,7 @@ class DollInfo extends OnlineObject {
       preventsPvP,
       resource;
 
-  final String image, tappedImage, overheadText;
+  final String? image, tappedImage, overheadText;
 
   final List<String> abilities, killFlags;
 
@@ -37,11 +37,11 @@ class DollInfo extends OnlineObject {
       this.tappedImage,
       this.loot,
       this.overheadText,
-      Map<String, dynamic> equipped,
+      Map<String, dynamic>? equipped,
       this.abilities = const [],
       this.killFlags = const [],
-      void this.passive(Account account, Doll doll),
-      void this.interaction(Account account, Doll doll)}) {
+      void this.passive(Account account, Doll doll)?,
+      void this.interaction(Account account, Doll doll)?}) {
     assert(difficulty > 0);
     equipped ??= {};
     this.equipped.addAll(equipped);
@@ -58,7 +58,7 @@ class DollInfo extends OnlineObject {
 
   int get agility => _points ~/ 5;
 
-  int get canPassThis => internal['can pass this'];
+  int? get canPassThis => internal['can pass this'];
 
   int get dexterity => _points ~/ 5;
 
@@ -68,11 +68,11 @@ class DollInfo extends OnlineObject {
 
   int get strength => _points ~/ 5;
 
-  int get thisCanPass => internal['this can pass'];
+  int? get thisCanPass => internal['this can pass'];
 
   int get vitality => _points ~/ 5;
 
-  int get walkingCoolDown => internal['speed'];
+  int? get walkingCoolDown => internal['speed'];
 
   int get _points => 50 + triangleNumber(level);
 

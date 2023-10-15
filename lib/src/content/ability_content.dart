@@ -1,6 +1,6 @@
 part of content;
 
-void registerAbilities(Map<String, Stage<Doll>> stages) {
+void registerAbilities(Map<String?, Stage<Doll?>?> stages) {
   registerAbility(
       'trade',
       Ability(
@@ -11,20 +11,20 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
 
           range: ServerGlobals.sight,
           use: (source) {
-            if (source.targetDoll != null && source.targetDoll.account == null)
+            if (source.targetDoll != null && source.targetDoll!.account == null)
               return false;
             else if (source.prepareAttack(
                 source.targetDoll, ServerGlobals.sight)) {
-              if (source.targetDoll.account.tradeTarget == source.account)
-                source.account.openTrade(source.targetDoll.account);
+              if (source.targetDoll!.account!.tradeTarget == source.account)
+                source.account!.openTrade(source.targetDoll!.account!);
               else {
                 source.alert('You offer to trade.');
 
-                (source.account.tradeTarget = source.targetDoll.account)
+                (source.account!.tradeTarget = source.targetDoll!.account)!
                     .sessions
                     .forEach((session) => session.internal.addEvent(
                             ObservableEvent(type: 'trade', data: {
-                          'from': source.account.displayedName,
+                          'from': source.account!.displayedName,
                           'doll': source.id
                         })));
               }
@@ -75,7 +75,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
           use: (Doll source) {
             if (source?.stage != null)
               source.jump(
-                  source.stage, source.stage.randomTraversableLocation(source));
+                  source.stage, source.stage!.randomTraversableLocation(source));
 
             source
               ..targetDoll = null
@@ -90,10 +90,10 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
           combat: false,
           use: (Doll source) {
             if (source?.stage != null &&
-                source.account.sessions.isNotEmpty &&
-                source.account.currentFloor < Session.maxFloor)
-              source.account.sessions.first
-                  .teleport(source.account.currentFloor + 1);
+                source.account!.sessions.isNotEmpty &&
+                source.account!.currentFloor < Session.maxFloor)
+              source.account!.sessions.first
+                  .teleport(source.account!.currentFloor + 1);
 
             source
               ..targetDoll = null
@@ -108,10 +108,10 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
           combat: false,
           use: (Doll source) {
             if (source?.stage != null &&
-                source.account.sessions.isNotEmpty &&
-                source.account.currentFloor > 1)
-              source.account.sessions.first
-                  .teleport(source.account.currentFloor - 1);
+                source.account!.sessions.isNotEmpty &&
+                source.account!.currentFloor > 1)
+              source.account!.sessions.first
+                  .teleport(source.account!.currentFloor - 1);
 
             source
               ..targetDoll = null
@@ -139,7 +139,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
           range: ServerGlobals.sight,
           use: (Doll source) {
             if (source.targetDoll != null) {
-              source.account.pet?.targetDoll = source.targetDoll;
+              source.account!.pet?.targetDoll = source.targetDoll;
               source.ability = null;
               source.targetDoll = null;
             }
@@ -152,12 +152,12 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
       Ability(
           combat: false,
           use: (Doll source) {
-            if (source.account.pet != null)
+            if (source.account!.pet != null)
               source
-                ..account.pet.stage?.removeDoll(source.account.pet)
+                ..account!.pet!.stage?.removeDoll(source.account!.pet)
                 ..ability = null;
 
-            source.account.petSpawned = false;
+            source.account!.petSpawned = false;
             return false;
           }));
 
@@ -166,7 +166,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
       Ability(
           combat: false,
           use: (Doll source) {
-            source.account.internal['pickpocket target'] =
+            source.account!.internal['pickpocket target'] =
                 source.targetDoll?.infoName;
 
             if (!source.canPickpocket(source.targetDoll, true)) {
@@ -179,7 +179,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
               return false;
             }
 
-            if (source.chessDistanceTo(source.targetDoll.currentLocation) > 1)
+            if (source.chessDistanceTo(source.targetDoll!.currentLocation) > 1)
               return false;
             else {
               var doll = source.targetDoll, account = source.account;
@@ -189,8 +189,8 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
 
                 doll.playersInRange
                     .where((looter) =>
-                        looter.id != account.id && looter.canLoot(doll))
-                    .forEach((looter) => looter.doll?.pickpocket(doll));
+                        looter!.id != account!.id && looter.canLoot(doll))
+                    .forEach((looter) => looter!.doll?.pickpocket(doll));
               }
 
               return true;
@@ -202,7 +202,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
   registerAbility('poison attack', Ability(use: (source) {
     if (source.targetDoll == null) return false;
 
-    source.targetDoll.effects.add(Effect(source,
+    source.targetDoll!.effects.add(Effect(source,
         damage: calculateDamage(source, source.primaryWeapon),
         accuracy: calculateAccuracy(source, source.primaryWeapon),
         egos: const [Ego.poison]));
@@ -213,7 +213,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
   registerAbility('blood attack', Ability(use: (source) {
     if (source.targetDoll == null) return false;
 
-    source.targetDoll.effects.add(Effect(source,
+    source.targetDoll!.effects.add(Effect(source,
         damage: calculateDamage(source, source.primaryWeapon),
         accuracy: calculateAccuracy(source, source.primaryWeapon),
         egos: const [Ego.blood]));
@@ -224,7 +224,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
   registerAbility('sickness attack', Ability(use: (source) {
     if (source.targetDoll == null) return false;
 
-    source.targetDoll.effects.add(Effect(source,
+    source.targetDoll!.effects.add(Effect(source,
         damage: calculateDamage(source, source.primaryWeapon),
         accuracy: calculateAccuracy(source, source.primaryWeapon),
         egos: const [Ego.sickness]));
@@ -235,7 +235,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
   registerAbility('blindness attack', Ability(use: (source) {
     if (source.targetDoll == null) return false;
 
-    source.targetDoll.effects.add(Effect(source,
+    source.targetDoll!.effects.add(Effect(source,
         damage: calculateDamage(source, source.primaryWeapon),
         accuracy: calculateAccuracy(source, source.primaryWeapon),
         egos: const [Ego.blindness]));
@@ -246,7 +246,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
   registerAbility('confusion attack', Ability(use: (source) {
     if (source.targetDoll == null) return false;
 
-    source.targetDoll.effects.add(Effect(source,
+    source.targetDoll!.effects.add(Effect(source,
         damage: calculateDamage(source, source.primaryWeapon),
         accuracy: calculateAccuracy(source, source.primaryWeapon),
         egos: const [Ego.confusion]));
@@ -257,7 +257,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
   registerAbility('acid attack', Ability(use: (source) {
     if (source.targetDoll == null) return false;
 
-    source.targetDoll.effects.add(Effect(source,
+    source.targetDoll!.effects.add(Effect(source,
         damage: calculateDamage(source, source.primaryWeapon),
         accuracy: calculateAccuracy(source, source.primaryWeapon),
         egos: const [Ego.acid]));
@@ -269,7 +269,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
     if (source.targetDoll == null) return false;
 
     for (var i = 0; i < 3; i++)
-      source.targetDoll.effects.add(Effect(source,
+      source.targetDoll!.effects.add(Effect(source,
           damage: calculateDamage(source, source.primaryWeapon),
           accuracy: calculateAccuracy(source, source.primaryWeapon),
           egos: const [Ego.burst]));
@@ -281,7 +281,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
     if (source.targetDoll == null) return false;
 
     for (var i = 0; i < 3; i++)
-      source.targetDoll.effects.add(Effect(source,
+      source.targetDoll!.effects.add(Effect(source,
           damage: calculateDamage(source, source.primaryWeapon),
           accuracy: calculateAccuracy(source, source.primaryWeapon),
           egos: const [Ego.blood, Ego.burst]));
@@ -293,7 +293,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
     if (source.targetDoll == null) return false;
 
     for (var i = 0; i < 3; i++)
-      source.targetDoll.effects.add(Effect(source,
+      source.targetDoll!.effects.add(Effect(source,
           damage: calculateDamage(source, source.primaryWeapon),
           accuracy: calculateAccuracy(source, source.primaryWeapon),
           egos: const [Ego.poison, Ego.burst]));
@@ -305,7 +305,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
     if (source.targetDoll == null) return false;
 
     for (var i = 0; i < 3; i++)
-      source.targetDoll.effects.add(Effect(source,
+      source.targetDoll!.effects.add(Effect(source,
           damage: calculateDamage(source, source.primaryWeapon),
           accuracy: calculateAccuracy(source, source.primaryWeapon),
           egos: const [Ego.burst, Ego.energy]));
@@ -317,7 +317,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
     if (source.targetDoll == null) return false;
 
     for (var i = 0; i < 3; i++)
-      source.targetDoll.effects.add(Effect(source,
+      source.targetDoll!.effects.add(Effect(source,
           damage: calculateDamage(source, source.primaryWeapon),
           accuracy: calculateAccuracy(source, source.primaryWeapon),
           egos: const [Ego.fire, Ego.burst]));
@@ -329,7 +329,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
     if (source.targetDoll == null) return false;
 
     for (var i = 0; i < 3; i++)
-      source.targetDoll.effects.add(Effect(source,
+      source.targetDoll!.effects.add(Effect(source,
           damage: calculateDamage(source, source.primaryWeapon),
           accuracy: calculateAccuracy(source, source.primaryWeapon),
           egos: const [Ego.acid, Ego.burst]));
@@ -341,7 +341,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
     if (source.targetDoll == null) return false;
 
     source
-      ..targetDoll
+      ..targetDoll!
           .effects
           .add(Effect(source, damage: source.health, egos: const [Ego.fire]))
       ..health = BigInt.zero;
@@ -352,7 +352,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
   registerAbility('death attack', Ability(use: (source) {
     if (source.targetDoll == null) return false;
 
-    source.targetDoll.effects.add(Effect(source,
+    source.targetDoll!.effects.add(Effect(source,
         damage: calculateDamage(source, source.primaryWeapon),
         accuracy: calculateAccuracy(source, source.primaryWeapon),
         egos: const [Ego.death]));
@@ -368,7 +368,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
             if (source.targetDoll == null) return false;
 
             source.search(10, 10).where(source.canAreaEffect).forEach(
-                (target) => target.effects.add(Effect(source,
+                (target) => target!.effects.add(Effect(source,
                     delay:
                         source.fireAoe(target, 'image/missile/white_bolt.png'),
                     damage: calculateDamage(source, source.primaryWeapon),
@@ -389,7 +389,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
 
             for (int i = 0; i < 3; i++)
               source.search(10, 10).where(source.canAreaEffect).forEach(
-                  (target) => target.effects.add(Effect(source,
+                  (target) => target!.effects.add(Effect(source,
                       delay: source.fireAoe(
                           target, 'image/missile/white_bolt.png'),
                       damage: calculateDamage(source, source.primaryWeapon),
@@ -410,7 +410,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
 
             for (int i = 0; i < 3; i++)
               source.search(10, 10).where(source.canAreaEffect).forEach(
-                  (target) => target.effects
+                  (target) => target!.effects
                           .add(
                               Effect(source,
                                   delay: source.fireAoe(
@@ -437,7 +437,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
             if (source.targetDoll == null) return false;
 
             source.search(10, 10).where(source.canAreaEffect).forEach(
-                (target) => target.effects
+                (target) => target!.effects
                         .add(
                             Effect(source,
                                 delay: source.fireAoe(target,
@@ -457,7 +457,7 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
             return true;
           }));
 
-  registerBolt(key, image, egos, [int damage]) => registerAbility(
+  registerBolt(key, image, egos, [int? damage]) => registerAbility(
       key,
       Ability(
           range: 5,
@@ -466,10 +466,10 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
             int count = egos.contains(Ego.burst) ? 3 : 1;
 
             for (var i = 0; i < count; i++)
-              source.targetDoll.effects.add(Effect(source,
+              source.targetDoll!.effects.add(Effect(source,
                   delay: source.fireMissile(image),
                   damage:
-                      damage ?? calculateDamage(source, source.primaryWeapon),
+                      damage as BigInt? ?? calculateDamage(source, source.primaryWeapon),
                   accuracy: calculateAccuracy(source, source.primaryWeapon),
                   egos: egos));
 
@@ -529,12 +529,12 @@ void registerAbilities(Map<String, Stage<Doll>> stages) {
         // place instead.
 
         damageWeapon = Item('scroll')
-          ..bonus = source.account.sheet.intelligenceBuffs,
+          ..bonus = source.account!.sheet.intelligenceBuffs,
         accuracyWeapon = Item('scroll')
-          ..bonus = source.account.sheet.dexterityBuffs;
+          ..bonus = source.account!.sheet.dexterityBuffs;
 
     for (int i = 0; i < count; i++)
-      source.targetDoll.effects.add(Effect(source,
+      source.targetDoll!.effects.add(Effect(source,
           delay: source.fireMissile(image),
           damage: calculateDamage(source, damageWeapon),
           accuracy: calculateAccuracy(source, accuracyWeapon),

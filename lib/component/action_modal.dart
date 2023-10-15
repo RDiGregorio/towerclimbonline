@@ -18,21 +18,21 @@ class ActionModal {
 
   ActionModal(this._changeDetectorRef) {
     Future(() {
-      _sortedItems = List.from(items.values)..sort(compareItems);
+      _sortedItems = List.from(items.values)..sort(compareItems as int Function(Item, Item)?);
       _changeDetectorRef.markForCheck();
     });
   }
 
   Map<String, bool> get abilities =>
-      Map<String, bool>.from(ClientGlobals.session.abilities ?? const {});
+      Map<String, bool>.from(ClientGlobals.session!.abilities ?? const {});
 
   Map<String, Item> get items =>
-      Map<String, Item>.from(ClientGlobals.session.items?.items ?? const {});
+      Map<String, Item>.from(ClientGlobals.session!.items?.items ?? const {});
 
   List<String> get sortedAbilities => List.from(abilities.keys)..sort();
 
   Iterable<Item> get sortedItems =>
-      _sortedItems.where((item) => item.displayTextWithoutAmount
+      _sortedItems.where((item) => item.displayTextWithoutAmount!
           .toLowerCase()
           .contains(searchInput.toLowerCase()));
 
@@ -41,28 +41,28 @@ class ActionModal {
   String abilityName(String ability) => abilityDisplayName(ability);
 
   bool doubleEquipped(String action) =>
-      ClientGlobals.session.equipped['double equipped']?.id == action;
+      ClientGlobals.session!.equipped!['double equipped']?.id == action;
 
   void handleAbilityClick(String ability) {
-    ClientGlobals.session
+    ClientGlobals.session!
         .remote(#setAction, [ability, ClientGlobals.clickedActionIndex]);
 
     hideModal();
   }
 
   void handleItemClick(Item item) {
-    ClientGlobals.session
+    ClientGlobals.session!
         .remote(#setAction, [item.id, ClientGlobals.clickedActionIndex]);
 
     hideModal();
   }
 
   String itemClasses(Item item) =>
-      ClientGlobals.session.equipped?.containsKey(item.id) == true
+      ClientGlobals.session!.equipped?.containsKey(item.id) == true
           ? 'active'
           : 'transparent';
 
-  String itemName(Item item) {
+  String? itemName(Item item) {
     try {
       return item.displayText;
     } catch (error) {

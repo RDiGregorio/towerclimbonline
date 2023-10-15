@@ -6,7 +6,7 @@ class Tile {
   final int x, y;
   Map<String, dynamic> _properties = {};
 
-  Tile(this.x, this.y, List<dynamic> cell) {
+  Tile(this.x, this.y, List<dynamic>? cell) {
     cell ??= const [null, null, null];
     cell = List<String>.from(cell);
 
@@ -14,7 +14,7 @@ class Tile {
       _properties
         ..['spawn'] = cell[0].replaceFirst('@', '')
         ..['value'] = Terrain.land;
-    else if (const [null, ''].contains(cell[0]) && _traversable(cell))
+    else if (const [null, ''].contains(cell[0]) && _traversable(cell as List<String>))
       _properties['value'] = Terrain.land;
 
     if (cell[2] == 'blue' || cell[2] == 'orange')

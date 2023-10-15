@@ -94,7 +94,7 @@ Map<Symbol, String> alerts = {
 };
 
 final int maxFinite = double.maxFinite.floor();
-final BigInt maxInput = big(100000) * big('1X') - BigInt.one;
+final BigInt maxInput = big(100000)! * big('1X')! - BigInt.one;
 final String missingItemName = '????',
 
     // Thin spaces are the international standard for digit grouping.
@@ -113,7 +113,7 @@ Map<String, Ability> _abilities = {};
 Map<String, DollInfo> _dollInfo = {};
 Map<Symbol, Function> _factories = {};
 Map<String, ItemInfo> _itemInfo = {};
-int _now, _performanceCheckpoint;
+int? _now, _performanceCheckpoint;
 NumberFormat _precisionNumberFormat = NumberFormat('#,##0.00');
 Random _random = Random();
 
@@ -213,10 +213,10 @@ Item get secretRare {
   ]));
 
   List<int> egos = [];
-  int egoCount;
+  int? egoCount;
   Item item = Item.fromDisplayText(info);
 
-  if (item.info.slot == #weapon) {
+  if (item.info!.slot == #weapon) {
     egoCount = 3;
 
     egos.addAll([
@@ -236,19 +236,19 @@ Item get secretRare {
       Ego.crystal,
       Ego.lucky
     ].where((ego) => !item.egos.contains(ego)));
-  } else if (item.info.slot == #shield)
+  } else if (item.info!.slot == #shield)
     egos.addAll([
       // Universal armor egos (crystal is used instead of experience).
 
       Ego.crystal, Ego.reflection, Ego.regen, Ego.arcane, Ego.spirit
     ].where((ego) => !item.egos.contains(ego)));
-  else if ([#helmet, #body, #cloak, #gloves].contains(item.info.slot))
+  else if ([#helmet, #body, #cloak, #gloves].contains(item.info!.slot))
     egos.addAll([
       // Universal armor egos.
 
       Ego.experience, Ego.reflection, Ego.regen, Ego.arcane, Ego.spirit
     ].where((ego) => !item.egos.contains(ego)));
-  else if (item.info.slot == #boots)
+  else if (item.info!.slot == #boots)
     egos.addAll([
       Ego.fast,
 
@@ -256,7 +256,7 @@ Item get secretRare {
 
       Ego.experience, Ego.reflection, Ego.regen, Ego.arcane, Ego.spirit
     ].where((ego) => !item.egos.contains(ego)));
-  else if (item.info.slot == #ring)
+  else if (item.info!.slot == #ring)
     egos.addAll([
       Ego.berserk,
       Ego.burst,
@@ -269,7 +269,7 @@ Item get secretRare {
       Ego.arcane,
       Ego.spirit
     ].where((ego) => !item.egos.contains(ego)));
-  else if (item.info.slot == #amulet)
+  else if (item.info!.slot == #amulet)
     egos.addAll([
       Ego.shield,
       Ego.lucky,
@@ -307,12 +307,12 @@ void addPerformanceCheckpoint() {
   _performanceCheckpoint = now;
 }
 
-Set<Point<int>> adjacent(Point<int> point) {
+Set<Point<int>> adjacent(Point<int>? point) {
   var result = Set<Point<int>>();
 
   for (var i = -1; i <= 1; i++)
     for (var j = -1; j <= 1; j++)
-      result.add(Point<int>(point.x + i, point.y + j));
+      result.add(Point<int>(point!.x + i, point.y + j));
 
   return result..remove(point);
 }
@@ -325,7 +325,7 @@ Set<Point<int>> allPoints(Rectangle<int> rectangle) {
   for (int x = 0; x < rectangle.width; x++)
     for (int y = 0; y < rectangle.height; y++) result.add(Point(x, y));
 
-  return result;
+  return result as Set<Point<int>>;
 }
 
 Point<num> approachPoint(Point<num> location, Point<num> target,
@@ -341,7 +341,7 @@ Point<num> approachPoint(Point<num> location, Point<num> target,
 /// [value] is a [num], it is floored. If [value] is null, [BigInt.zero] is
 /// returned.
 
-BigInt big(dynamic value) {
+BigInt? big(dynamic value) {
   if (value == null) return BigInt.zero;
   if (value is BigInt) return value;
 
@@ -356,7 +356,7 @@ BigInt big(dynamic value) {
   throw ArgumentError(value);
 }
 
-BigInt calculateAccuracy(Doll doll, [Item weapon]) {
+BigInt calculateAccuracy(Doll doll, [Item? weapon]) {
   // FIXME BIG HP: This doesn't look safe! The double could become too large!
 
   var result = doll.dexterity +
@@ -364,13 +364,13 @@ BigInt calculateAccuracy(Doll doll, [Item weapon]) {
           calculateAccuracyPercentBonus(weapon, doll.nonWeaponEquipment) /
           100;
 
-  return big(result) + big(result) * big(doll.accuracyItems) ~/ big(4);
+  return big(result)! + big(result)! * big(doll.accuracyItems)! ~/ big(4)!;
 }
 
 int calculateAccuracyPercentBonus(
-    Item weapon, Iterable<dynamic> nonWeaponEquipment) {
+    Item? weapon, Iterable<dynamic> nonWeaponEquipment) {
   var increasePercent = damageIncreasePercent(nonWeaponEquipment.fold(
-          weapon?.bonus ?? 0, (accuracy, item) => accuracy + item.accuracy)),
+          weapon?.bonus ?? 0, (accuracy, item) => accuracy + item.accuracy as int)),
       weaponAccuracy = weapon?.accuracy ?? 0;
 
   var result = increasePercent + weaponAccuracy;
@@ -385,11 +385,11 @@ int calculateCharmAttribute(Doll doll, Item weapon) {
   return (result + result * weapon.bonus / 100).floor();
 }
 
-int calculateCoolDown(Doll doll, [Item weapon]) =>
-    weapon == null ? CoolDown.average : weapon.info.coolDown;
+int calculateCoolDown(Doll doll, [Item? weapon]) =>
+    weapon == null ? CoolDown.average : weapon.info!.coolDown;
 
-BigInt calculateDamage(Doll doll, [Item weapon]) {
-  BigInt damage = BigInt.zero;
+BigInt calculateDamage(Doll doll, [Item? weapon]) {
+  BigInt? damage = BigInt.zero;
   int bonus = 0;
 
   if (weapon != null) {
@@ -403,28 +403,28 @@ BigInt calculateDamage(Doll doll, [Item weapon]) {
   var charm = weapon?.egos?.contains(Ego.charm) == true;
 
   BigInt attribute = charm
-      ? big(calculateCharmAttribute(doll, weapon))
-      : big(doll._weaponAttribute(weapon));
+      ? big(calculateCharmAttribute(doll, weapon!))!
+      : big(doll._weaponAttribute(weapon))!;
 
   BigInt result = BigIntUtil.percent(
       doll.nonWeaponEquipment.fold(
-          attribute + damage, (damage, item) => damage + big(item.damage)),
+          attribute + damage!, (damage, item) => damage + big(item.damage)!),
       100 + damageIncreasePercent(bonus));
 
   if (doll?.account?.god == 'trog') result *= BigInt.two;
 
   // Power items are done last because of the division.
 
-  BigInt sourcePowerItems = big(doll?.powerItems ?? 0);
-  result += result * sourcePowerItems ~/ big(4);
+  BigInt sourcePowerItems = big(doll?.powerItems ?? 0)!;
+  result += result * sourcePowerItems ~/ big(4)!;
 
   if (doll?.account == null) {
     // Non-players deal extra damage to compensate for the damage reduction from
     // player equipment. Note that damage reduction can't be symmetrical because
     // that would make acid attacks disproportionally powerful.
 
-    BigInt level = big(doll?.level ?? 0);
-    result += result * level ~/ big(100);
+    BigInt level = big(doll?.level ?? 0)!;
+    result += result * level ~/ big(100)!;
   }
 
   return result;
@@ -434,7 +434,7 @@ int calculateDropBonus(int level, dynamic amount) {
   amount = big(amount);
   if (amount < BigInt.two) return 0;
   var bonusPerUpgrade = level ~/ 20 + 1;
-  return bonusPerUpgrade * (amount.bitLength - 1);
+  return bonusPerUpgrade * (amount.bitLength - 1) as int;
 }
 
 int calculateEvasion(Doll doll) =>
@@ -452,7 +452,7 @@ int calculateEvasionPercentBonus(Iterable<dynamic> equipment) {
 
   var increasePercent = damageIncreasePercent(equipment.fold(0, (result, item) {
     base += item.evasion;
-    if (item.upgradesIncreaseEvasion) return result + item.bonus;
+    if (item.upgradesIncreaseEvasion) return result + item.bonus as int;
     return result;
   }));
 
@@ -461,7 +461,7 @@ int calculateEvasionPercentBonus(Iterable<dynamic> equipment) {
 
 /// Calculates if an attack hits or not.
 
-bool calculateHit(Doll doll, num accuracy, num evasion,
+bool calculateHit(Doll? doll, num accuracy, num evasion,
     [num rateMultiplier = 1]) {
   var rate = invertPercentage(accuracy * 50 / evasion) * rateMultiplier,
       result = rate > randomDouble * 100;
@@ -470,10 +470,10 @@ bool calculateHit(Doll doll, num accuracy, num evasion,
   return result;
 }
 
-int calculateLevel(Doll doll) {
+int calculateLevel(Doll? doll) {
   if (doll?.info == null) return 0;
 
-  var points = doll.agility +
+  var points = doll!.agility +
       doll.vitality +
       doll.dexterity +
       doll.strength +
@@ -496,17 +496,17 @@ BigInt calculateReflectedDamage(Doll doll) {
 
   var equipped = List<Item>.from(doll.equipped.values
           .where((item) => item.egos.contains(Ego.reflection))),
-      bonus = equipped.fold(0, (result, item) => result + upgrades(item)) ~/
+      bonus = equipped.fold(0, (dynamic result, item) => result + upgrades(item)) ~/
           equipped.length;
 
   // Reflection uses vitality for damage.
 
-  BigInt attribute = big(doll.vitality),
-      result = attribute + attribute * big(bonus) ~/ big(100);
+  BigInt? attribute = big(doll.vitality),
+      result = attribute! + attribute * big(bonus)! ~/ big(100)!;
 
   // Reflection deals 25% damage.
 
-  return result * big(equipped.length) ~/ big(4);
+  return result * big(equipped.length)! ~/ big(4)!;
 }
 
 /// Capitalizes the first letter of [string].
@@ -555,7 +555,7 @@ int compareItemNames(String first, String second) {
   return firstWithoutBonus.compareTo(secondWithoutBonus);
 }
 
-int compareItems(dynamic first, dynamic second) {
+int? compareItems(dynamic first, dynamic second) {
   if (first.comparisonText == second.comparisonText)
     return first.bonus.compareTo(second.bonus);
 
@@ -593,7 +593,7 @@ bool equalElements(Iterable<dynamic> first, Iterable<dynamic> second) =>
     first.every(Set.from(second).contains) &&
     second.every(Set.from(first).contains);
 
-bool examine(Doll source, Doll target, bool showLocation) {
+bool examine(Doll? source, Doll? target, bool showLocation) {
   if (target != null) {
     if (target.resource) {
       var messages = [], item = target?.sanitizedName;
@@ -618,14 +618,14 @@ bool examine(Doll source, Doll target, bool showLocation) {
 
       messages.add('item: $item');
 
-      if (item.contains('fish') || item.contains('shark')) {
+      if (item!.contains('fish') || item.contains('shark')) {
         var hats =
             ['fishing hat', 'lumberjack hat', 'mining helmet'].join(', ');
 
         messages.add('rare: $hats');
       }
 
-      source.informationPrompt(messages.join('<br>'));
+      source!.informationPrompt(messages.join('<br>'));
       return false;
     }
 
@@ -646,11 +646,11 @@ bool examine(Doll source, Doll target, bool showLocation) {
           ..remove(null),
         abilityDisplay = '$abilityList';
 
-    Account targetAccount = target.account;
+    Account? targetAccount = target.account;
     abilityDisplay = abilityDisplay.substring(1, abilityDisplay.length - 1);
     var health = target?.maxHealth ?? 0, messages = [];
 
-    String formatWalkingCoolDown(int walkingCoolDown) {
+    String? formatWalkingCoolDown(int? walkingCoolDown) {
       if (walkingCoolDown == 200) return 'fast';
       if (walkingCoolDown == 400) return 'normal';
       if (walkingCoolDown == 600) return 'slow';
@@ -669,16 +669,16 @@ bool examine(Doll source, Doll target, bool showLocation) {
       ..add('attributes: $agi agi, $dex dex, $intel int, $str str, $vit vit');
 
     if (targetAccount != null) {
-      messages.add('skills: ${compactFormatInteger(targetAccount.sheet.combat.level)} combat, ' +
-          '${compactFormatInteger(targetAccount.sheet.summoning.level)} summoning, ' +
-          '${compactFormatInteger(targetAccount.sheet.slaying.level)} luck, ' +
-          '${compactFormatInteger(targetAccount.sheet.fishing.level)} fishing, ' +
-          '${compactFormatInteger(targetAccount.sheet.mining.level)} mining, ' +
-          '${compactFormatInteger(targetAccount.sheet.woodcutting.level)} gathering, ' +
-          '${compactFormatInteger(targetAccount.sheet.cooking.level)} cooking, ' +
-          '${compactFormatInteger(targetAccount.sheet.metalworking.level)} metalworking, ' +
-          '${compactFormatInteger(targetAccount.sheet.crafting.level)} crafting, ' +
-          '${compactFormatInteger(targetAccount.sheet.crime.level)} stealth');
+      messages.add('skills: ${compactFormatInteger(targetAccount.sheet.combat!.level)} combat, ' +
+          '${compactFormatInteger(targetAccount.sheet.summoning!.level)} summoning, ' +
+          '${compactFormatInteger(targetAccount.sheet.slaying!.level)} luck, ' +
+          '${compactFormatInteger(targetAccount.sheet.fishing!.level)} fishing, ' +
+          '${compactFormatInteger(targetAccount.sheet.mining!.level)} mining, ' +
+          '${compactFormatInteger(targetAccount.sheet.woodcutting!.level)} gathering, ' +
+          '${compactFormatInteger(targetAccount.sheet.cooking!.level)} cooking, ' +
+          '${compactFormatInteger(targetAccount.sheet.metalworking!.level)} metalworking, ' +
+          '${compactFormatInteger(targetAccount.sheet.crafting!.level)} crafting, ' +
+          '${compactFormatInteger(targetAccount.sheet.crime!.level)} stealth');
 
       messages.add('god: ${godName(targetAccount?.god)}');
     }
@@ -702,14 +702,14 @@ bool examine(Doll source, Doll target, bool showLocation) {
       messages.add('location: floor ${targetAccount?.currentFloor} ' +
           '(${targetAccount?.doll?.currentLocation?.x}, ${targetAccount?.doll?.currentLocation?.y})');
 
-    source.informationPrompt(messages.join('<br>'));
+    source!.informationPrompt(messages.join('<br>'));
   }
 
   return false;
 }
 
 BigInt extraResources(int level, int amount) {
-  return big(max(1, amount)) * big(triangleNumber(level)) ~/ big(1000);
+  return big(max(1, amount))! * big(triangleNumber(level))! ~/ big(1000)!;
 }
 
 Map<dynamic, dynamic> filterMap(
@@ -727,7 +727,7 @@ Map<dynamic, dynamic> filterMap(
 
 int floorToLevel(int floor) => Doll(null, null, false, floor ?? 1).level;
 
-String formatBigInt(BigInt value) => reverseString(reverseString('$value')
+String formatBigInt(BigInt? value) => reverseString(reverseString('$value')
     .replaceAllMapped(_splitDigits, (match) => '${match.group(0)}$separator')
     .replaceFirst(_trailingSeparator, ''));
 
@@ -735,25 +735,25 @@ String formatCurrency(dynamic amount, [bool prefix = true]) {
   var suffix = '';
   amount = big(amount);
 
-  if (amount >= big(quintillion) * big(trillion)) {
-    amount ~/= big(quintillion) * big(billion);
+  if (amount >= big(quintillion)! * big(trillion)!) {
+    amount ~/= big(quintillion)! * big(billion)!;
 
     // An unofficial continuation of the pattern.
 
     suffix = 'X';
-  } else if (amount >= big(quintillion) * big(billion)) {
-    amount ~/= big(quintillion) * big(million);
+  } else if (amount >= big(quintillion)! * big(billion)!) {
+    amount ~/= big(quintillion)! * big(million)!;
 
     // Yotta.
 
     suffix = 'Y';
-  } else if (amount >= big(quintillion) * big(million)) {
-    amount ~/= big(quintillion) * big(1000);
+  } else if (amount >= big(quintillion)! * big(million)!) {
+    amount ~/= big(quintillion)! * big(1000)!;
 
     // Zetta.
 
     suffix = 'Z';
-  } else if (amount >= big(quintillion) * big(1000)) {
+  } else if (amount >= big(quintillion)! * big(1000)!) {
     amount ~/= big(quintillion);
 
     // Exa.
@@ -801,8 +801,8 @@ String formatNumber(dynamic value) => formatBigInt(big(value));
 String formatNumberWithPrecision(num value) =>
     _precisionNumberFormat.format(value);
 
-int getBonus(String text) => text.startsWith(_upgradePattern)
-    ? parseInteger(_upgradePattern.firstMatch(text).group(0).substring(1))
+int? getBonus(String text) => text.startsWith(_upgradePattern)
+    ? parseInteger(_upgradePattern.firstMatch(text)!.group(0)!.substring(1))
     : 0;
 
 String getName(Symbol symbol) {
@@ -810,7 +810,7 @@ String getName(Symbol symbol) {
   return string.substring(8, string.length - 2);
 }
 
-String godName(String value) => value == null ? 'none' : capitalize(value);
+String godName(String? value) => value == null ? 'none' : capitalize(value);
 
 /// Moves like a king in chess.
 
@@ -824,7 +824,7 @@ Point<num> gridApproachPoint(Point<num> location, Point<num> target,
 
 /// Helps avoid errors.
 
-num increase(Map<dynamic, dynamic> map, num key, [num amount = 1]) =>
+num? increase(Map<dynamic, dynamic> map, num key, [num amount = 1]) =>
     (map..[key] ??= 0)[key] += amount;
 
 num invertPercentage(num percent) =>
@@ -836,7 +836,7 @@ bool itemExists(String value) {
   return Item.fromDisplayText(value).displayTextWithoutAmount == value;
 }
 
-String itemInfoName(String itemName) {
+String? itemInfoName(String itemName) {
   if (_itemInfo.containsKey(itemName)) return itemName;
   var matches = _itemInfo.keys.where((key) => ' $itemName'.endsWith(' $key'));
 
@@ -856,7 +856,7 @@ void kick(dynamic session) {
 Map<Point<int>, int> listKeyMapToPointKeyMap(Map<List<int>, int> map) {
   var result = {};
   map.forEach((list, value) => result[Point(list[0], list[1])] = value);
-  return result;
+  return result as Map<Point<int>, int>;
 }
 
 num log2(num value) => log(value) / ln2;
@@ -868,7 +868,7 @@ Map<String, bool> mapFromList(List<String> list) {
 }
 
 dynamic mapWrapperDecoder(dynamic key, dynamic value,
-    {dynamic safety(dynamic key, dynamic value)}) {
+    {dynamic safety(dynamic key, dynamic value)?}) {
   dynamic instance(String type) {
     try {
       return newInstanceFromFactory(Symbol(type));
@@ -915,26 +915,26 @@ Set<Doll> nearbyDolls(Iterable<dynamic> dolls, int horizontalDistance,
 /// Used with [registerFactory].
 
 dynamic newInstanceFromFactory(Symbol symbol) => _factories.containsKey(symbol)
-    ? _factories[symbol]()
+    ? _factories[symbol]!()
     : throw StateError('You haven\'t registered ' + getName(symbol) + ' yet!');
 
 /// The underlying resource is a map.
 
-ResourceManager newMockResourceManager([Map<dynamic, dynamic> map]) {
+ResourceManager newMockResourceManager([Map<dynamic, dynamic>? map]) {
   map ??= {};
 
   return ResourceManager(
       exists: map.containsKey,
       save: (key, value, cleanup) {
-        map[key] = value;
+        map![key] = value;
         cleanup();
       },
-      load: (key) => map[key]);
+      load: (key) => map![key]);
 }
 
 /// Parses [integer]. Can handle values like 1K, 1M, 1G, 1T, 1P, and 1E.
 
-BigInt parseBigInteger(String integer) {
+BigInt? parseBigInteger(String? integer) {
   if (integer == null) return null;
   integer = integer.trim().toLowerCase().replaceAll(_nonAlphaNumeric, '');
   var negative = integer.startsWith('-');
@@ -957,7 +957,7 @@ BigInt parseFormattedBigInt(String text) =>
 
 /// Parses [integer]. Can handle values like 1K, 1M, 1G, 1T, 1P, and 1E.
 
-int parseInteger(String integer) => parseBigInteger(integer)?.toInt();
+int? parseInteger(String? integer) => parseBigInteger(integer)?.toInt();
 
 int percent(num value, num percent) => value * percent ~/ 100;
 
@@ -968,7 +968,7 @@ String plural(String singular, String plural, int amount) {
 Map<List<int>, int> pointKeyMapToListKeyMap(Map<Point<int>, int> map) {
   var result = {};
   map.forEach((point, value) => result[[point.x, point.y]] = value);
-  return result;
+  return result as Map<List<int>, int>;
 }
 
 /// Used to create portals.
@@ -1024,7 +1024,7 @@ String randomDigits(int count) {
   return result;
 }
 
-String randomHumanJson(String id) {
+String randomHumanJson(String? id) {
   // The JSON can be created in debug mode using the customization modal.
 
   var variations = [
@@ -1054,7 +1054,7 @@ Point<int> randomPoint(Rectangle<int> rectangle) {
   return result;
 }
 
-dynamic randomValue(List<dynamic> list) =>
+dynamic randomValue(List<dynamic>? list) =>
     list == null || list.isEmpty ? null : list[random(list.length)];
 
 List<Point<int>> ray(Point<int> start, Point<int> end) {
@@ -1104,7 +1104,7 @@ void registerAbility(String name, Ability ability) {
   _abilities[name] = ability;
 }
 
-void registerArmorInfo(String key, String image, Symbol slot, int defense,
+void registerArmorInfo(String key, String? image, Symbol slot, int defense,
         [int evasion = 0, List<int> egos = const []]) =>
     registerItemInfo(
         key,
@@ -1145,9 +1145,9 @@ void registerItemSource(String type, String image,
             repeatInteraction: repeatInteraction,
             interaction: (Account account, Doll doll) {
               if (!account.tappedItemSources.containsKey(doll.id) &&
-                  !account.doll.warm(#left) &&
+                  !account.doll!.warm(#left) &&
                   account.collectFromItemSource(doll, type)) {
-                account.doll.warmUp(#left, CoolDown.average);
+                account.doll!.warmUp(#left, CoolDown.average);
 
                 // Rewards nearby players. Chests are not shared because they
                 // are not repeatable.
@@ -1155,14 +1155,14 @@ void registerItemSource(String type, String image,
                 if (type != 'chest')
                   doll.playersInRange
                       .where((looter) =>
-                          looter.id != account.id && looter.canLoot(doll))
+                          looter!.id != account.id && looter.canLoot(doll))
                       .forEach(
-                          (looter) => looter.collectFromItemSource(doll, type));
+                          (looter) => looter!.collectFromItemSource(doll, type));
               }
             }));
 
 void registerWeaponInfo(String key, int damage,
-        [String missile, List<int> egos]) =>
+        [String? missile, List<int>? egos]) =>
     registerItemInfo(
         key,
         ItemInfo(
@@ -1239,10 +1239,10 @@ String setBonus(String text, int bonus) {
 /// Converts [value] from a [BigInt], [String], or [num] to an [int]. If
 /// [value] is a [num], it is floored. If [value] is null, 0 is returned.
 
-int small(dynamic value) => big(value).toInt();
+int small(dynamic value) => big(value)!.toInt();
 
 Map<dynamic, dynamic> sortMap(Map<dynamic, dynamic> map,
-    [int compare(dynamic first, dynamic second)]) {
+    [int compare(dynamic first, dynamic second)?]) {
   var result = {};
 
   List.from(map.keys)
@@ -1258,12 +1258,12 @@ List<Point<int>> sortPoints(List<Point<int>> points) =>
           ? first.y.compareTo(second.y)
           : first.x.compareTo(second.x));
 
-int stageToFloor(String stage) {
+int stageToFloor(String? stage) {
   if (stage == null ||
       stage.startsWith('tutorial') ||
       stage.startsWith('bonus')) return 0;
 
-  return parseInteger(RegExp(r'\d+').firstMatch(stage).group(0)) + 1;
+  return parseInteger(RegExp(r'\d+').firstMatch(stage)!.group(0))! + 1;
 }
 
 /// Converts an arbitrary string to an arbitrary HTML color.
@@ -1304,7 +1304,7 @@ int triangleNumber(int value) {
   return (value * value + value) ~/ 2;
 }
 
-Future<dynamic> until(bool function(), [int delay]) async {
+Future<dynamic> until(bool function(), [int? delay]) async {
   await Future.doWhile(() => Future.delayed(
       Duration(milliseconds: delay ?? ServerGlobals.tickDelay),
       () => !function()));
@@ -1328,8 +1328,8 @@ List<String> whatDrops(String comparisonText) {
   var result = <String>[];
 
   _dollInfo.forEach((key, info) {
-    if (info?.loot?.all?.any((Item item) =>
-            item.comparisonText ==
+    if (info?.loot?.all?.any((Item? item) =>
+            item!.comparisonText ==
             Item.fromDisplayText(comparisonText).comparisonText) ==
         true) result.add(key);
   });

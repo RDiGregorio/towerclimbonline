@@ -16,21 +16,21 @@ import 'package:towerclimbonline/util.dart';
 class CustomizeModal {
   bool get debug => Config.debug;
 
-  String get debugText => json.encode(ClientGlobals.session.doll.customization,
+  String get debugText => json.encode(ClientGlobals.session!.doll!.customization,
       toEncodable: mapWrapperEncoder);
 
   void set debugText(String text) {
     try {
-      ClientGlobals.session.doll.customization =
+      ClientGlobals.session!.doll!.customization =
           json.decode(text, reviver: mapWrapperDecoder);
     } catch (error) {
       Logger.root.warning('invalid JSON');
     }
   }
 
-  Doll get doll => ClientGlobals.session.doll;
+  Doll? get doll => ClientGlobals.session!.doll;
 
-  bool get female => doll.customization.gender == 'female';
+  bool get female => doll!.customization!.gender == 'female';
 
-  bool get male => doll.customization.gender == 'male';
+  bool get male => doll!.customization!.gender == 'male';
 }

@@ -9,13 +9,13 @@ class Space<E> {
   void add(Point<num> location, E value) {
     remove(value);
 
-    _tree.insert(_expando[value] =
+    _tree.insert(_expando[value!] =
         RTreeDatum(Rectangle(location.x, location.y, 1, 1), value));
   }
 
   void remove(E value) {
-    if (_expando[value] != null) {
-      _tree.remove(_expando[value]);
+    if (_expando[value!] != null) {
+      _tree.remove(_expando[value]!);
       _expando[value] = null;
     }
   }

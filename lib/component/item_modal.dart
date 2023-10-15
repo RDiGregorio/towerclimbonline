@@ -16,28 +16,28 @@ import 'package:towerclimbonline/util.dart';
 class ItemModal implements OnDestroy {
   // The modals with search inputs are: action, item, crafting, and trade.
 
-  String mode = 'use', filter, searchInput = '';
+  String? mode = 'use', filter, searchInput = '';
   List<Item> filteredItems = [];
   final ChangeDetectorRef _changeDetectorRef;
   StreamSubscription<ObservableEvent> _subscription, _equipmentSubscription;
 
   ItemModal(this._changeDetectorRef) {
-    _subscription = ClientGlobals.session.internal
+    _subscription = ClientGlobals.session!.internal
         .getEvents(path: ['items'], type: 'change').listen((event) {
       // Resets the item list because of a new item stack.
 
-      if (event.path.length == 3) reset();
+      if (event.path!.length == 3) reset();
 
       // Updates item amounts.
 
       _changeDetectorRef.markForCheck();
     });
 
-    _equipmentSubscription = ClientGlobals.session.internal
+    _equipmentSubscription = ClientGlobals.session!.internal
         .getEvents(type: 'change')
         .listen((event) {
-      if (event.path.isNotEmpty &&
-          ['equip', 'left', 'right', 'options'].contains(event.path.first))
+      if (event.path!.isNotEmpty &&
+          ['equip', 'left', 'right', 'options'].contains(event.path!.first))
         _changeDetectorRef.markForCheck();
     });
 
@@ -45,7 +45,7 @@ class ItemModal implements OnDestroy {
   }
 
   String get autoHeal {
-    var result = big(ClientGlobals.session.options['auto heal'] ?? 0);
+    var result = big(ClientGlobals.session!.options!['auto heal'] ?? 0)!;
     result = BigIntUtil.min(result, maxInput);
 
     return result == BigInt.zero
@@ -54,16 +54,16 @@ class ItemModal implements OnDestroy {
   }
 
   String get autoPotion {
-    var result = ClientGlobals.session.options['auto potion'] ?? false;
+    var result = ClientGlobals.session!.options!['auto potion'] ?? false;
     return result ? 'on' : 'off';
   }
 
   void set autoPotion(String mode) {
-    ClientGlobals.session.remote(#setOption, ['auto potion', mode == 'on']);
+    ClientGlobals.session!.remote(#setOption, ['auto potion', mode == 'on']);
   }
 
-  int get defenseBonus => ClientGlobals.session.equipped.values
-      .fold(0, (defense, item) => defense + item.defense);
+  int get defenseBonus => ClientGlobals.session!.equipped!.values
+      .fold(0, (defense, item) => defense + item.defense as int);
 
   num get defenseUpgrades => damageReductionPercent(_nonWeapons
       .where((item) => !item.upgradesIncreaseEvasion)
@@ -77,58 +77,58 @@ class ItemModal implements OnDestroy {
   }
 
   Iterable<Item> get displayedItems => filteredItems.where((item) =>
-      item.displayTextWithoutAmount
+      item.displayTextWithoutAmount!
           .toLowerCase()
-          .contains(searchInput.toLowerCase()) &&
+          .contains(searchInput!.toLowerCase()) &&
       item.amount > 0);
 
-  List<String> get equipment => List.from(ClientGlobals.session.equipped.values
+  List<String> get equipment => List.from(ClientGlobals.session!.equipped!.values
       .map((item) => item.displayTextWithoutAmount))
     ..sort();
 
   String get evasionBonus => formatNumber(
-      calculateEvasionPercentBonus(ClientGlobals.session.equipped.values));
+      calculateEvasionPercentBonus(ClientGlobals.session!.equipped!.values));
 
   Map<String, Item> get items =>
-      Map<String, Item>.from(ClientGlobals.session.items?.items ?? const {});
+      Map<String, Item>.from(ClientGlobals.session!.items?.items ?? const {});
 
   String get leftAccuracyBonus => formatNumber(calculateAccuracyPercentBonus(
-      ClientGlobals.session.primaryWeapon, _nonWeapons));
+      ClientGlobals.session!.primaryWeapon, _nonWeapons));
 
   int get leftDamageBonus => _nonWeapons.fold(
-      ClientGlobals.session.primaryWeapon?.damage ?? 0,
+      ClientGlobals.session!.primaryWeapon?.damage ?? 0,
       (result, item) => result + item.damage);
 
   String get leftDamageUpgrades {
-    var upgrades = ClientGlobals.session.primaryWeapon?.bonus ?? 0;
+    var upgrades = ClientGlobals.session!.primaryWeapon?.bonus ?? 0;
     return formatNumber(_upgrades(upgrades));
   }
 
-  String get loadout => ClientGlobals.session.options['loadout'] ?? '0';
+  String get loadout => ClientGlobals.session!.options!['loadout'] ?? '0';
 
   void set loadout(String selection) {
-    ClientGlobals.session.remote(#setOption, ['loadout', selection]);
+    ClientGlobals.session!.remote(#setOption, ['loadout', selection]);
   }
 
   List<String> get primaryEgos {
     var weapon = primaryWeapon, egos = weapon?.egos ?? const [];
 
     return List.from(
-        egos.map((ego) => Ego.longDescriptionFor(weapon, ego) ?? 'error'))
+        egos.map((ego) => Ego.longDescriptionFor(weapon!, ego) ?? 'error'))
       ..sort();
   }
 
-  Item get primaryWeapon => ClientGlobals.session.primaryWeapon;
+  Item? get primaryWeapon => ClientGlobals.session!.primaryWeapon;
 
   String get rightAccuracyBonus => formatNumber(calculateAccuracyPercentBonus(
-      ClientGlobals.session.secondaryWeapon, _nonWeapons));
+      ClientGlobals.session!.secondaryWeapon, _nonWeapons));
 
   int get rightDamageBonus => _nonWeapons.fold(
-      ClientGlobals.session.secondaryWeapon?.damage ?? 0,
+      ClientGlobals.session!.secondaryWeapon?.damage ?? 0,
       (result, item) => result + item.damage);
 
   String get rightDamageUpgrades {
-    var upgrades = ClientGlobals.session.secondaryWeapon?.bonus ?? 0;
+    var upgrades = ClientGlobals.session!.secondaryWeapon?.bonus ?? 0;
     return formatNumber(_upgrades(upgrades));
   }
 
@@ -136,17 +136,17 @@ class ItemModal implements OnDestroy {
     var weapon = secondaryWeapon, egos = secondaryWeapon?.egos ?? const [];
 
     return List.from(
-        egos.map((ego) => Ego.longDescriptionFor(weapon, ego) ?? 'error'))
+        egos.map((ego) => Ego.longDescriptionFor(weapon!, ego) ?? 'error'))
       ..sort();
   }
 
-  Item get secondaryWeapon => ClientGlobals.session.secondaryWeapon;
+  Item? get secondaryWeapon => ClientGlobals.session!.secondaryWeapon;
 
   List<Item> get sortedItems =>
-      List<Item>.from(items.values)..sort(compareItems);
+      List<Item>.from(items.values)..sort(compareItems as int Function(Item, Item)?);
 
-  String get weaponDisplay {
-    var list = List.from(ClientGlobals.session.equipped.values
+  String? get weaponDisplay {
+    var list = List.from(ClientGlobals.session!.equipped!.values
         .where(
             (item) => item.info?.slot == #weapon || item.info?.slot == #shield)
         .map((item) => item.displayTextWithoutAmount));
@@ -189,11 +189,11 @@ class ItemModal implements OnDestroy {
   }
 
   Iterable<Item> get _nonWeapons =>
-      List<Item>.from(ClientGlobals.session.equipped.values
+      List<Item>.from(ClientGlobals.session!.equipped!.values
           .where((item) => ![#weapon, #thrown].contains(item.info?.slot)));
 
   String buttonText(String key) {
-    function(slot) => ClientGlobals.session.equipped.values
+    function(slot) => ClientGlobals.session!.equipped!.values
         .firstWhere((item) => item.info?.slot == slot, orElse: () => null);
 
     var result;
@@ -229,21 +229,21 @@ class ItemModal implements OnDestroy {
   }
 
   void disableAutoHeal() {
-    ClientGlobals.session.remote(#setOption, ['auto heal', 0]).then(
+    ClientGlobals.session!.remote(#setOption, ['auto heal', 0]).then(
         (result) => _changeDetectorRef.markForCheck());
   }
 
   String displayImage(String action) => abilityDisplayImage(action);
 
   bool doubleEquipped(String action) =>
-      ClientGlobals.session.equipped['double equipped']?.id == action;
+      ClientGlobals.session!.equipped!['double equipped']?.id == action;
 
   bool equipped(String action) =>
-      ClientGlobals.session.equipped?.containsKey(action) == true;
+      ClientGlobals.session!.equipped?.containsKey(action) == true;
 
   void handleItemClick(Item item) {
     if (mode == 'use') {
-      ClientGlobals.session.remote(#useItem, [item.id]).then(
+      ClientGlobals.session!.remote(#useItem, [item.id]).then(
           (result) => _changeDetectorRef.markForCheck());
 
       return;
@@ -253,11 +253,11 @@ class ItemModal implements OnDestroy {
         '${item.displayTextWithoutAmount}', 'examine', (input) => null);
 
     ExamineItemModal.item = item;
-    querySelector('#input-modal-toggle').click();
+    querySelector('#input-modal-toggle')!.click();
   }
 
   String itemClasses(Item item) =>
-      ClientGlobals.session.equipped?.containsKey(item.id) == true
+      ClientGlobals.session!.equipped?.containsKey(item.id) == true
           ? 'active'
           : 'transparent';
 
@@ -272,9 +272,9 @@ class ItemModal implements OnDestroy {
     return '';
   }
 
-  String itemImage(Item item) => item.info?.image;
+  String? itemImage(Item item) => item.info?.image;
 
-  String itemName(Item item) {
+  String? itemName(Item item) {
     try {
       return item.displayText;
     } catch (error) {
@@ -294,13 +294,13 @@ class ItemModal implements OnDestroy {
 
   void setAutoHeal() {
     showInputModal('Threashold', 'auto heal', (input) {
-      return ClientGlobals.session.remote(#setOption, [
+      return ClientGlobals.session!.remote(#setOption, [
         'auto heal',
         min(maxFinite, parseInteger(input)),
       ]).then((result) => _changeDetectorRef.markForCheck());
     });
 
-    querySelector('#input-modal-toggle').click();
+    querySelector('#input-modal-toggle')!.click();
   }
 
   void toggleMode(String value) {
