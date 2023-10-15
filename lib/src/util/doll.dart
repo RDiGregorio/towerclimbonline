@@ -17,9 +17,9 @@ class Doll extends OnlineObject {
   Sprite? _sprite;
   String? message, _ability;
   DollCustomization? _customization;
+  int _poisonCycle = 0;
 
   int? _created,
-      _poisonCycle = 0,
       messageTime = 0,
       lastCombatTime = -25,
       lastPlayerCombatTime = -25,
