@@ -1,4 +1,4 @@
-import 'package:angular/angular.dart';
+import 'package:ngdart/angular.dart';
 
 import 'package:towerclimbonline/component/editor_component.template.dart'
     as ng;

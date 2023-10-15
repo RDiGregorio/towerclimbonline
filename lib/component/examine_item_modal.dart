@@ -1,5 +1,5 @@
-import 'package:angular/angular.dart';
-import 'package:angular_forms/angular_forms.dart';
+import 'package:ngdart/angular.dart';
+import 'package:ngforms/angular_forms.dart';
 import 'package:collection/collection.dart' show IterableNullableExtension;
 import 'package:towerclimbonline/client.dart';
 import 'package:towerclimbonline/util.dart';

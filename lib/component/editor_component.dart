@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:html';
 
-import 'package:angular/angular.dart';
-import 'package:angular_forms/angular_forms.dart';
+import 'package:ngdart/angular.dart';
+import 'package:ngforms/angular_forms.dart';
 import 'package:towerclimbonline/client.dart';
 import 'package:towerclimbonline/util.dart';
 

@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:html';
 import 'dart:math';
 
-import 'package:angular/angular.dart';
-import 'package:angular_forms/angular_forms.dart';
+import 'package:ngdart/angular.dart';
+import 'package:ngforms/angular_forms.dart';
 import 'package:towerclimbonline/client.dart';
 import 'package:towerclimbonline/component/examine_item_modal.dart';
 import 'package:towerclimbonline/util.dart';
