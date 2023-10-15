@@ -7,7 +7,7 @@ dependencies:
   angular: any
   angular_forms: any
   crypto: any
-  image: 2.1.13
+  image: ^2.1.13
   intl: any
   logging: any
   mailer: any

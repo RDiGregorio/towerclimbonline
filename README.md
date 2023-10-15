@@ -1,11 +1,14 @@
-**This project was originally written for Dart 1. I'm currently in the process of porting it to Dart 3.**
-
 ~~This project requires a PostgreSQL database.~~
 
 I need to update database drivers. The current code is using a mock database.
 
 **Setup**
 
+To get the correct version of Dart and Webdev (use an admin terminal):
+1. Run `choco install dart-sdk --version 2.10.5 --allow-downgrade --force`
+2. Run `dart pub global activate webdev`
+
+To build and run the application:
 1. Set `debug = true` in lib/config.dart when running locally.
 2. Run `webdev build` to build the project.
 3. Run `dart bin/main.dart` to start the server.
