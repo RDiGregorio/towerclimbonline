@@ -60,6 +60,6 @@ class ExchangeOffer extends OnlineObject {
     var copy = item.copy;
     copy.setAmount(amount);
     internal['bought'][copy.id] = copy;
-    progress += amount;
+    progress = progress! + amount;
   }
 }

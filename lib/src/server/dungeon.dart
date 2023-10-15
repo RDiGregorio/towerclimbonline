@@ -117,7 +117,7 @@ class Dungeon {
       if (overlaps) continue;
 
       _rooms.add(room);
-      _currentRegion++;
+      _currentRegion = _currentRegion! + 1;
       room.forEach(_carve);
 
       if (!fast) return true;
@@ -398,7 +398,7 @@ class Dungeon {
   void _startMazeCell() {
     var pos = Vec(_mazeStartX, _mazeStartY);
     _mazeCells.add(pos);
-    _currentRegion++;
+    _currentRegion = _currentRegion! + 1;
     _carve(pos);
   }
 

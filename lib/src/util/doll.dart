@@ -508,9 +508,10 @@ class Doll extends OnlineObject {
       // Having multiple +25% stealth items makes up for not having something
       // like a mining helmet for stealth.
 
-      equipped?.values
-          .where((item) => item.egos.contains(Ego.thieving))
-          .fold(0, ((result, item) => result + item.bonus as int?) as int? Function(int?, dynamic)) ??
+      equipped?.values.where((item) => item.egos.contains(Ego.thieving)).fold(
+          0,
+          ((result, item) => result + item.bonus as int?) as int? Function(
+              int?, dynamic)) ??
       0;
 
   int? get thisCanPass {
@@ -693,7 +694,8 @@ class Doll extends OnlineObject {
     // Prevents monsters from searching the entire floor for a player.
 
     if (targetDoll != null &&
-        chessDistanceTo(targetDoll!.currentLocation) > ServerGlobals.sight * 2) {
+        chessDistanceTo(targetDoll!.currentLocation) >
+            ServerGlobals.sight * 2) {
       targetDoll = null;
       targetLocation = null;
     }
@@ -1014,7 +1016,8 @@ class Doll extends OnlineObject {
       .first;
 
   void coolDown([int amount = 1]) => List.from(_delays.keys).forEach((symbol) {
-        if ((_delays[symbol] = _delays[symbol]! - amount) <= 0) _delays.remove(symbol);
+        if ((_delays[symbol] = _delays[symbol]! - amount) <= 0)
+          _delays.remove(symbol);
       });
 
   void enterCombat(Doll target) {
@@ -1330,7 +1333,8 @@ class Doll extends OnlineObject {
 
     amount += amount * level / 100;
     amount = amount.floor();
-    var multiplier = big(max(1, amount))! + extraResources(level, amount as int);
+    var multiplier =
+        big(max(1, amount))! + extraResources(level, amount as int);
 
     // A player gets extra experience and loot for being offline.
 
@@ -1347,7 +1351,8 @@ class Doll extends OnlineObject {
       // To prevent inventory clutter, randomness is not used.
 
       copy.canUpgrade && !copy.food && !copy.potion
-          ? copy.bonus = calculateDropBonus(looterSlayingLevel as int, multiplier)
+          ? copy.bonus =
+              calculateDropBonus(looterSlayingLevel as int, multiplier)
           : copy.setAmount(copy.getAmount()! * multiplier);
 
       copy.setAmount(copy.getAmount()! * big(count)!);
@@ -1513,8 +1518,8 @@ class Doll extends OnlineObject {
         // Only combat abilities need a range.
 
         _abilities[ability]!.combat &&
-        chessDistanceTo(targetDoll!.currentLocation) > _abilities[ability]!.range)
-      return false;
+        chessDistanceTo(targetDoll!.currentLocation) >
+            _abilities[ability]!.range) return false;
 
     // Abilities always use the primary hand. The secondary hand is only used
     // for dual wielding.
@@ -1689,8 +1694,10 @@ class Doll extends OnlineObject {
 
     // Only effects that deal damage can be critical.
 
-    var critical =
-        !healing && !charming && effect.damage! > BigInt.zero && random(20) == 0;
+    var critical = !healing &&
+        !charming &&
+        effect.damage! > BigInt.zero &&
+        random(20) == 0;
 
     // Handles misses. Healing, charming, and electric attacks ignore evasion.
 
@@ -1759,13 +1766,13 @@ class Doll extends OnlineObject {
           .where((ego) =>
               effect.egos.contains(ego) &&
               !resists.containsKey(Ego.resistedBy[ego]))
-          .forEach((ego) => damage += base!);
+          .forEach((ego) => damage = damage! + base!);
 
       // Berserk, like burst, does not stack.
 
       if (effect.egos.contains(Ego.berserk) ||
           effect.sourceNonWeaponEgos.keys.contains(Ego.berserk))
-        damage *= big(3)!;
+        damage = damage! * big(3)!;
 
       BigInt? rebase = damage;
 
@@ -2240,8 +2247,10 @@ class Doll extends OnlineObject {
     // Prevents hanging on very distant targets.
 
     target = Point(
-        clamp(target.x, currentLocation.x - 100, currentLocation.x + 100) as int,
-        clamp(target.y, currentLocation.y - 100, currentLocation.y + 100) as int);
+        clamp(target.x, currentLocation.x - 100, currentLocation.x + 100)
+            as int,
+        clamp(target.y, currentLocation.y - 100, currentLocation.y + 100)
+            as int);
 
     // FIXME: this is buggy and sometimes the correct path isn't found.
 

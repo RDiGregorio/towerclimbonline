@@ -330,7 +330,7 @@ class Account extends OnlineObject {
     }
 
     if (amount <= BigInt.zero) return;
-    money -= item.price! * amount;
+    money = money! - item.price! * amount;
 
     // A copy is used here to prevent obscure bugs caused by the shop item and
     // inventory item being the same.
@@ -559,7 +559,8 @@ class Account extends OnlineObject {
 
       // Higher floors give more materials.
 
-      amount += extraResources(floorToLevel(floor), baseAmount.floor());
+      amount =
+          amount! + extraResources(floorToLevel(floor), baseAmount.floor());
 
       // Good resources give double.
 
@@ -801,7 +802,7 @@ class Account extends OnlineObject {
       return;
     }
 
-    money -= price! * amount;
+    money = money! - price! * amount;
     var offer = exchange!.buy(id, key, price, amount, bonus);
     exchangeBuyOffers[offer.id] = offer;
   }
@@ -829,7 +830,7 @@ class Account extends OnlineObject {
         var value = offer.amount! * offer.price!;
 
         if (value > BigInt.zero) {
-          money += value;
+          money = money! + value;
           alert('You gain: ${formatCurrency(value)}.');
         }
 
@@ -838,7 +839,7 @@ class Account extends OnlineObject {
 
       offer.boughtItems.forEach((Item item) => lootItem(item));
       var value = offer.remaining * offer.price! + offer.change!;
-      money += big(value)!;
+      money = money! + big(value)!;
       if (value > BigInt.zero) alert('You gain: ${formatCurrency(value)}.');
     }
   }
@@ -909,7 +910,7 @@ class Account extends OnlineObject {
     value = big(value);
 
     if (value > BigInt.zero) {
-      money += value;
+      money = money! + value;
       alert('You gain: ${formatCurrency(value)}.');
     }
   }
@@ -1000,7 +1001,7 @@ class Account extends OnlineObject {
     var gold = big(item.sellingPrice)! * amount;
 
     if (gold > BigInt.zero) {
-      money += gold;
+      money = money! + gold;
       alert('You gain: ${formatCurrency(gold)}.');
     }
   }

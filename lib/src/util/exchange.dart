@@ -25,7 +25,8 @@ class Exchange extends OnlineObject {
       sellOffers[i].change += sellOffers[i].price * amount;
 
       if (buyOffer.price! > sellOffers[i].price)
-        buyOffer.change += (buyOffer.price! - sellOffers[i].price) * amount;
+        buyOffer.change =
+            buyOffer.change! + (buyOffer.price! - sellOffers[i].price) * amount;
     }
 
     return _buyOffers(key)[buyOffer.id] = buyOffer;
@@ -52,8 +53,8 @@ class Exchange extends OnlineObject {
         sellOffer.remaining > BigInt.zero && i < buyOffers.length;
         i++) {
       amount = BigIntUtil.min(sellOffer.remaining, buyOffers[i].remaining);
-      sellOffer.progress += amount;
-      sellOffer.change += buyOffers[i].price * amount;
+      sellOffer.progress = sellOffer.progress! + amount;
+      sellOffer.change = sellOffer.change! + buyOffers[i].price * amount;
       buyOffers[i].addBoughtItem(item, amount);
     }
 

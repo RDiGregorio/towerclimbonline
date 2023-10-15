@@ -19,7 +19,7 @@ class Effect {
     if (source != null)
       source.nonWeaponEquipment.forEach((item) => item.egos.forEach((ego) {
             sourceNonWeaponEgos[ego] ??= 0;
-            sourceNonWeaponEgos[ego]++;
+            sourceNonWeaponEgos[ego] = sourceNonWeaponEgos[ego]! + 1;
           }));
   }
 
