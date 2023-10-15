@@ -1782,7 +1782,7 @@ class Doll extends OnlineObject {
         if (ego == Ego.blood) blood += amount;
 
         if (ego == Ego.arcane && effect.egos.contains(Ego.magic))
-          damage += rebase! * big(amount)!;
+          damage = damage! + rebase! * big(amount)!;
       });
 
       if (healing) {

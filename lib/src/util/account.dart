@@ -645,12 +645,13 @@ class Account extends OnlineObject {
 
     // Handles gold.
 
-    tradeTarget!.money += big(tradeGold)! - big(tradeTarget!.tradeGold)!;
+    tradeTarget!.money =
+        tradeTarget!.money! + (big(tradeGold)! - big(tradeTarget!.tradeGold)!);
 
     if (tradeGold! > BigInt.zero)
       tradeTarget!.alert('You gain: ${formatCurrency(tradeGold)}.');
 
-    money += big(tradeTarget!.tradeGold)! - big(tradeGold)!;
+    money = money! + (big(tradeTarget!.tradeGold)! - big(tradeGold)!);
 
     if (tradeTarget!.tradeGold! > BigInt.zero)
       alert('You gain: ${formatCurrency(tradeTarget!.tradeGold)}.');
