@@ -21,7 +21,7 @@ class ChannelModal {
         if (sanitizeName(user) == ClientGlobals.session!.username)
           querySelector('button.close')!.click();
 
-        return ClientGlobals.session!.remote(#addChannelMod, [user]);
+        ClientGlobals.session!.remote(#addChannelMod, [user]);
       });
 
   void addChannelOwner() => showInputModal('Add channel owner', 'add owner',
@@ -37,6 +37,6 @@ class ChannelModal {
         if (sanitizeName(user) == ClientGlobals.session!.username)
           querySelector('button.close')!.click();
 
-        return ClientGlobals.session!.remote(#removeChannelOwner, [user]);
+        ClientGlobals.session!.remote(#removeChannelOwner, [user]);
       });
 }

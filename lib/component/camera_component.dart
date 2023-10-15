@@ -87,8 +87,8 @@ class CameraComponent {
 
       var zoomSpeed = .1;
       _zoom ??= ClientGlobals.zoom;
-      if (_zoom! < ClientGlobals.zoom) _zoom += zoomSpeed;
-      if (_zoom! > ClientGlobals.zoom) _zoom -= zoomSpeed;
+      if (_zoom! < ClientGlobals.zoom) _zoom = _zoom! + zoomSpeed;
+      if (_zoom! > ClientGlobals.zoom) _zoom = _zoom! - zoomSpeed;
 
       if ((_zoom! - ClientGlobals.zoom).abs() < zoomSpeed)
         _zoom = ClientGlobals.zoom;

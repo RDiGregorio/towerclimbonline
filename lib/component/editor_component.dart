@@ -60,7 +60,7 @@ class EditorComponent {
   }
 
   void generate() {
-    cells = List.generate(100, (index) => List(100));
+    cells = List.generate(100, (index) => List.filled(100, null, growable: false));
   }
 
   void handleClick(int x, int y) {

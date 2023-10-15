@@ -13,7 +13,7 @@ import 'package:towerclimbonline/util.dart';
     changeDetection: ChangeDetectionStrategy.OnPush)
 class ShopModal implements OnDestroy {
   List<Item> sortedItems = [];
-  String filter, searchInput = '';
+  String? filter, searchInput = '';
   final ChangeDetectorRef _changeDetectorRef;
 
   late StreamSubscription<ObservableEvent> _subscription;
@@ -27,7 +27,7 @@ class ShopModal implements OnDestroy {
   Iterable<Item> get displayedItems => sortedItems.where((item) =>
       item.displayTextWithoutAmount!
           .toLowerCase()
-          .contains(searchInput.toLowerCase()) &&
+          .contains(searchInput!.toLowerCase()) &&
       item.amount > 0);
 
   Map<String, dynamic> get items =>

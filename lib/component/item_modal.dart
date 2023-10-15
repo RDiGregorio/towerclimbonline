@@ -19,7 +19,7 @@ class ItemModal implements OnDestroy {
   String? mode = 'use', filter, searchInput = '';
   List<Item> filteredItems = [];
   final ChangeDetectorRef _changeDetectorRef;
-  StreamSubscription<ObservableEvent> _subscription, _equipmentSubscription;
+  StreamSubscription<ObservableEvent>? _subscription, _equipmentSubscription;
 
   ItemModal(this._changeDetectorRef) {
     _subscription = ClientGlobals.session!.internal
@@ -283,8 +283,8 @@ class ItemModal implements OnDestroy {
   }
 
   void ngOnDestroy() {
-    _subscription.cancel();
-    _equipmentSubscription.cancel();
+    _subscription!.cancel();
+    _equipmentSubscription!.cancel();
   }
 
   reset() {
@@ -294,7 +294,7 @@ class ItemModal implements OnDestroy {
 
   void setAutoHeal() {
     showInputModal('Threashold', 'auto heal', (input) {
-      return ClientGlobals.session!.remote(#setOption, [
+      ClientGlobals.session!.remote(#setOption, [
         'auto heal',
         min(maxFinite, parseInteger(input)),
       ]).then((result) => _changeDetectorRef.markForCheck());
