@@ -215,7 +215,7 @@ Future<dynamic> _main() async {
           key = data[i].join('_'),
           offset = Point<int>(data[i][1] * 100, data[i][2] * 100);
 
-      stage.setCollisionMap(
+      stage!.setCollisionMap(
           key, await newCollisionMap(stage, key, offset), offset);
     }
 

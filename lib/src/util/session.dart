@@ -806,7 +806,9 @@ class Session extends OnlineObject {
         ..['users'].remove(user);
 
       peerAccounts[user].sessions.forEach((session) {
-        session.internal..remove('channel')..remove('channel name');
+        session.internal
+          ..remove('channel')
+          ..remove('channel name');
         session.alert('You\'ve been kicked by $username.');
       });
 
@@ -876,7 +878,6 @@ class Session extends OnlineObject {
     // Successfully logs in.
 
     if (_users.add(sanitized))
-
       // Logs each player who has logged in since the server started.
 
       Logger.root.info('$sanitized logged in');
@@ -1572,7 +1573,7 @@ class Session extends OnlineObject {
             .where((item) => item.canUpgrade && item.equipment))
         .forEach((Item item) {
       if (map.containsKey(item.comparisonText))
-        map[item.comparisonText] += item.getAmount();
+        map[item.comparisonText] = map[item.comparisonText]! + item.getAmount();
       else {
         map[item.comparisonText] = item.getAmount();
         result.add(item);
@@ -1580,7 +1581,7 @@ class Session extends OnlineObject {
     });
 
     return List<Item>.from(result.where((item) =>
-        map[item.comparisonText] > big(_remainingAfterCleanup(item))));
+        map[item.comparisonText]! > big(_remainingAfterCleanup(item))));
   }
 
   bool _contactable(String user) {
