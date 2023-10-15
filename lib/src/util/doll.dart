@@ -510,7 +510,10 @@ class Doll extends OnlineObject {
 
       equipped?.values
           ?.where((item) => item.egos.contains(Ego.thieving))
-          ?.fold(0, (result, item) => result + item.bonus) ??
+          ?.fold(0, (result, item) {
+        int a = result ?? 0, b = item.bonus;
+        return a + b;
+      }) ??
       0;
 
   int get thisCanPass {
