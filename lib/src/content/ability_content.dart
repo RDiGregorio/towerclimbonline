@@ -73,7 +73,7 @@ void registerAbilities(Map<String?, Stage<Doll?>?> stages) {
       Ability(
           combat: false,
           use: (Doll source) {
-            if (source?.stage != null)
+            if (source.stage != null)
               source.jump(
                   source.stage, source.stage!.randomTraversableLocation(source));
 
@@ -89,7 +89,7 @@ void registerAbilities(Map<String?, Stage<Doll?>?> stages) {
       Ability(
           combat: false,
           use: (Doll source) {
-            if (source?.stage != null &&
+            if (source.stage != null &&
                 source.account!.sessions.isNotEmpty &&
                 source.account!.currentFloor < Session.maxFloor)
               source.account!.sessions.first
@@ -107,7 +107,7 @@ void registerAbilities(Map<String?, Stage<Doll?>?> stages) {
       Ability(
           combat: false,
           use: (Doll source) {
-            if (source?.stage != null &&
+            if (source.stage != null &&
                 source.account!.sessions.isNotEmpty &&
                 source.account!.currentFloor > 1)
               source.account!.sessions.first

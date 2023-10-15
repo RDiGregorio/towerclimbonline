@@ -201,7 +201,8 @@ Future<Map<Point<int>, int>> newCollisionMap(
       // Fixes portals from older stages.
 
       spawn = _fixPortals(spawn);
-      var doll = Doll(spawn, id, false, procedural! ? stageToFloor(name) : null);
+      var doll =
+          Doll(spawn, id, false, procedural! ? stageToFloor(name) : null);
 
       dolls++;
       if (spawn == 'chest') chests++;

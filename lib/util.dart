@@ -17,7 +17,6 @@ import 'package:quiver/async.dart';
 import 'package:quiver/collection.dart';
 import 'package:r_tree/r_tree.dart' hide Node;
 import 'package:towerclimbonline/config.dart';
-import 'package:collection/collection.dart' show IterableExtension;
 
 part 'src/util/ability.dart';
 
