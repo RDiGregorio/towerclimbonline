@@ -28,7 +28,7 @@ class Stat extends OnlineObject {
 
   int get level => _level * (ascensions + 1);
 
-  int? get levelAfterAscension {
+  int get levelAfterAscension {
     if (_cache != experience) {
       _cache = experience;
       var copy = Stat();
@@ -38,7 +38,7 @@ class Stat extends OnlineObject {
       _levelAfterAscension = copy.internalLevel;
     }
 
-    return _levelAfterAscension;
+    return _levelAfterAscension ?? 0;
   }
 
   BigInt get nextLevelExperience {

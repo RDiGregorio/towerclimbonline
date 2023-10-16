@@ -8,26 +8,26 @@ import 'package:towerclimbonline/util.dart';
     directives: [coreDirectives, formDirectives],
     templateUrl: 'exchange_modal.html')
 class ExchangeModal {
-  String? item = '', price = '', amount = '', mode = 'buy';
+  String item = '', price = '', amount = '', mode = 'buy';
   List<ExchangeOffer> exchangeBrowser = const [];
   List<Item>? _sortedItems;
   bool browsing = false;
 
-  Iterable<ExchangeOffer> get buyOffers =>
-      List<ExchangeOffer>.from(ClientGlobals.session!.exchangeBuyOffers!.values);
+  Iterable<ExchangeOffer> get buyOffers => List<ExchangeOffer>.from(
+      ClientGlobals.session!.exchangeBuyOffers!.values);
 
-  String? get exchangeMode => mode;
+  String get exchangeMode => mode;
 
   void set exchangeMode(String? mode) => setMode(mode);
 
   Map<String, Item> get items =>
       Map<String, Item>.from(ClientGlobals.session!.items?.items ?? const {});
 
-  Iterable<ExchangeOffer> get sellOffers =>
-      List<ExchangeOffer>.from(ClientGlobals.session!.exchangeSellOffers!.values);
+  Iterable<ExchangeOffer> get sellOffers => List<ExchangeOffer>.from(
+      ClientGlobals.session!.exchangeSellOffers!.values);
 
-  List<Item> get sortedItems =>
-      _sortedItems ??= List<Item>.from(items.values)..sort(compareItems as int Function(Item, Item)?);
+  List<Item> get sortedItems => _sortedItems ??= List<Item>.from(items.values)
+    ..sort(compareItems as int Function(Item, Item)?);
 
   void browseBuy() => _browse('buy');
 
@@ -114,13 +114,13 @@ class ExchangeModal {
 
   void setMode(String? value, [ExchangeOffer? offer, int? bonus]) {
     if (mode == value) return;
-    mode = value;
+    mode = value ?? '';
     _reset();
     if (offer == null) return;
     var key = offer.key;
     bonus ??= offer.bonus;
     if (bonus > 0) key = '+$bonus $key';
-    item = key;
+    item = key ?? '';
     var offerPrice = BigIntUtil.min(offer.price!, ClientGlobals.session!.gold!);
     price = '$offerPrice';
     amount = '1';

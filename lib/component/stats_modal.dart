@@ -13,22 +13,22 @@ class StatsModal {
   static late ExperienceRate tracker;
   int step = 1;
 
-  int get agilityBuffs => sheet!.agilityBuffs;
+  int get agilityBuffs => sheet.agilityBuffs;
 
-  int get dexterityBuffs => sheet!.dexterityBuffs;
+  int get dexterityBuffs => sheet.dexterityBuffs;
 
   String get experiencePerHour =>
       formatCurrency(max<int>(0, tracker.experiencePerHour), false);
 
   String get god => godName(ClientGlobals.session!.god) ?? 'none';
 
-  int get healthBuffs => sheet!.healthBuffs;
+  int get healthBuffs => sheet.healthBuffs;
 
-  int get intelligenceBuffs => sheet!.intelligenceBuffs;
+  int get intelligenceBuffs => sheet.intelligenceBuffs;
 
-  CharacterSheet? get sheet => ClientGlobals.session!.sheet;
+  CharacterSheet get sheet => ClientGlobals.session!.sheet!;
 
-  int get strengthBuffs => sheet!.strengthBuffs;
+  int get strengthBuffs => sheet.strengthBuffs;
 
   String get xpMode => ClientGlobals.session!.options!['xp mode'] ?? 'default';
 
@@ -63,7 +63,7 @@ class StatsModal {
   String formatStatBuff(int statBuff) => formatNumber(statBuff);
 
   void gainStat(String stat) {
-    if (sheet!.unspentPoints > 0 || step == -1)
+    if (sheet.unspentPoints > 0 || step == -1)
       ClientGlobals.session!.remote(#gainStat, [stat, step]);
   }
 

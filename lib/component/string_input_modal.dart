@@ -7,7 +7,7 @@ import 'package:towerclimbonline/client.dart';
     directives: [coreDirectives, formDirectives],
     templateUrl: 'string_input_modal.html')
 class StringInputModal {
-  String? input;
+  String input = '';
 
   StringInputModal() {
     ClientGlobals.inputModals.add(this);
