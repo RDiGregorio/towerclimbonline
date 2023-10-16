@@ -18,7 +18,7 @@ class ConsoleComponent {
       _accurateTimePattern = RegExp(r'\d+:\d+:\d+.\d+'),
       _datePattern = RegExp(r'\d+-\d+-\d+');
 
-  String? input;
+  String input = '';
   bool _scroll = false;
   int unreadPublic = 0, unreadChannel = 0, unreadAlerts = 0, _messageCap = 20;
   final Map<String?, int> _unreadPrivate = {};
@@ -326,13 +326,13 @@ class ConsoleComponent {
 
     if (input!.startsWith('/')) {
       ClientGlobals.session!.remote(#command, [input]);
-      input = null;
+      input = '';
       return false;
     }
 
     if (list[0] == 'alert') {
       ClientGlobals.session!.remote(#messagePublic, [input]);
-      input = null;
+      input = '';
       return false;
     }
 
@@ -354,7 +354,7 @@ class ConsoleComponent {
     else
       ClientGlobals.session!.remote(#messageChannel, [input]);
 
-    input = null;
+    input = '';
     return false;
   }
 
