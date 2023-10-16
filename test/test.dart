@@ -74,13 +74,15 @@ void main() {
   });
 
   test('attack', () async {
-    var stage = Stage<Doll?>(null, 100, 100),
+    var stage = Stage<Doll?>('', 100, 100),
         session = Session(
             () => Account(Doll(), DollInfo()), newMockResourceManager()),
         target = Doll();
 
     await session.login(null, 'test', 'test', true);
-    stage..addDoll(session.account!.doll)..addDoll(target);
+    stage
+      ..addDoll(session.account!.doll)
+      ..addDoll(target);
   });
 
   test('walk', () async {
@@ -90,7 +92,7 @@ void main() {
     expect(session.account!.id, equals('test'));
 
     expect(
-        (Stage(null, 100, 100)..addDoll(session.account!.doll))
+        (Stage('', 100, 100)..addDoll(session.account!.doll))
             .search(Rectangle(0, 0, 0, 0)),
         equals([session.account!.doll]));
 
@@ -165,7 +167,9 @@ void main() {
   test('search', () async {
     var dolls = [Doll(), Doll()];
     expect(dolls[0].search(0, 0), equals([dolls[0]]));
-    Stage(null, 100, 100)..addDoll(dolls[0])..addDoll(dolls[1]);
+    Stage('', 100, 100)
+      ..addDoll(dolls[0])
+      ..addDoll(dolls[1]);
     expect(dolls[0].search(0, 0), equals([dolls[0], dolls[1]]));
     expect(dolls[1].search(0, 0), equals([dolls[0], dolls[1]]));
   });
@@ -174,7 +178,7 @@ void main() {
     var dolls = [Doll(), Doll()];
     expect(nearbyDolls([dolls[0]], 0, 0), equals([dolls[0]]));
 
-    Stage(null, 100, 100)
+    Stage('', 100, 100)
       ..addDoll(dolls[0])
       ..addDoll(dolls[1], const Point(2, 3));
 
@@ -187,7 +191,7 @@ void main() {
     registerDollInfo('test', DollInfo(thisCanPass: Terrain.land));
     var doll = Doll('test');
 
-    Stage(null, 3, 3)
+    Stage('', 3, 3)
       ..setCollisionMap(null, {
         const Point(0, 0): Terrain.land,
         const Point(0, 1): Terrain.land,
@@ -248,7 +252,8 @@ void main() {
             newMockResourceManager(), newMockResourceManager(), stageManager);
 
     Stage? stage = await (stageManager.getResource(
-        () => Stage('test', 100, 100), 'test', user.onLogout) as FutureOr<Stage<Doll>?>);
+            () => Stage('test', 100, 100), 'test', user.onLogout)
+        as FutureOr<Stage<Doll>?>);
 
     await user.login(null, 'user', 'test', true);
 
@@ -272,7 +277,7 @@ void main() {
         user = Session(() => Account(Doll()), manager);
 
     await user.login(null, 'user', 'test', true);
-    Stage(null, 100, 100).addDoll(user.account!.doll);
+    Stage('', 100, 100).addDoll(user.account!.doll);
 
     user
       ..account!.doll!.internal.getEvents(type: 'public chat').listen((event) {
@@ -562,8 +567,8 @@ void main() {
       stat.setLevel(i);
       expect(stat.level, i);
 
-      expect(
-          (stat..setExperienceWithoutSplat(stat.experience!)).level, stat.level);
+      expect((stat..setExperienceWithoutSplat(stat.experience!)).level,
+          stat.level);
     }
 
     stat.setLevel(Stat.maxLevel + 1);
@@ -582,7 +587,8 @@ void main() {
         stat.setLevel(i);
         expect(stat.internalLevel, i);
 
-        expect((stat..setExperienceWithoutSplat(stat.experience!)).internalLevel,
+        expect(
+            (stat..setExperienceWithoutSplat(stat.experience!)).internalLevel,
             stat.internalLevel);
       }
 

@@ -3,9 +3,9 @@ import 'dart:html';
 import 'dart:js';
 import 'dart:math';
 
+import 'package:logging/logging.dart';
 import 'package:ngdart/angular.dart';
 import 'package:ngforms/angular_forms.dart';
-import 'package:logging/logging.dart';
 import 'package:towerclimbonline/client.dart';
 import 'package:towerclimbonline/config.dart';
 import 'package:towerclimbonline/util.dart';
@@ -22,7 +22,7 @@ class CameraComponent {
       foregroundTerrainStyles = {};
 
   final int tileSize = 16, marginTop = -57;
-  final Map<String?, String> rippleStyle = {};
+  final Map<String, String> rippleStyle = {};
   final Set<Missile> missiles = Set();
   final Queue<int> _fps = Queue();
   Set<Doll> _dolls = Set();
@@ -186,14 +186,18 @@ class CameraComponent {
                 ? doll.style['opacity'] = formatNumberWithPrecision(opacity)
                 : doll.style['display'] = 'none';
           } else {
-            doll..internal.remove('death time')..style.remove('display');
+            doll
+              ..internal.remove('death time')
+              ..style.remove('display');
 
             if (ClientGlobals.session!.hiddenDolls.containsKey(doll.id))
               doll.style
                 ..['opacity'] = doll.boss || doll.player ? '0.25' : '0'
                 ..['pointer-events'] = 'none';
             else
-              doll.style..remove('pointer-events')..remove('opacity');
+              doll.style
+                ..remove('pointer-events')
+                ..remove('opacity');
 
             if (ClientGlobals.session!.tappedItemSources.containsKey(doll.id))
               doll.style['pointer-events'] = 'none';
@@ -401,9 +405,9 @@ class CameraComponent {
     return result.join(', ');
   }
 
-  String? displayImage(Doll doll) =>
+  String displayImage(Doll doll) =>
       ClientGlobals.session!.tappedItemSources.containsKey(doll.id)
-          ? doll.tappedImage
+          ? doll.tappedImage!
           : doll.image;
 
   Map<String, String> displayNameStyle(Doll doll) =>
@@ -541,6 +545,10 @@ class CameraComponent {
     if (doll.infoName == 'spider demon') result['margin-top'] = '-5.5px';
     if (doll.infoName == 'giant death robot') result['margin-top'] = '-2.75px';
     return result;
+  }
+
+  Map<String, String> terrainStyle(String path) {
+    return terrainStyles[path] ?? {};
   }
 
   String _applyModifier(String value, String? modifier) =>

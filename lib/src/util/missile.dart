@@ -1,7 +1,7 @@
 part of util;
 
 class Missile {
-  final String? image;
+  final String image;
   final Doll source, target;
   final Map<String, String> outerStyle = {}, innerStyle = {};
   late Point<int> _location;

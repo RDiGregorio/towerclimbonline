@@ -5,7 +5,7 @@ part of util;
 /// on the stage name).
 
 class Stage<T extends Doll?> extends OnlineObject {
-  final String? id;
+  final String id;
   int? keepAlive = 0, _sectionWidth, _sectionHeight, _timestamp;
   Map<Point<int>, Map<Point<int>, int>> _sections = {};
   Space<T> _space = Space(), _userDollSpace = Space();

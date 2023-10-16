@@ -11,7 +11,7 @@
     <img class="terrain camera-centered"
          *ngIf="!brokenImage(path)"
          src="{{nocache(path)}}"
-         [ngStyle]="terrainStyles[path]">
+         [ngStyle]="terrainStyle(path)">
 </div>
 <div class="fixed">
     <div *ngFor="let doll of dolls"

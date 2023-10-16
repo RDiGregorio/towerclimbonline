@@ -30,8 +30,8 @@ class MiniMapComponent {
     return map['map size'] ?? 100;
   }
 
-  Map<String, String?> get style => {
-        'background-image': terrain,
+  Map<String, String> get style => {
+        'background-image': terrain ?? '',
         'width': '${width}px',
         'height': '${height}px'
       };

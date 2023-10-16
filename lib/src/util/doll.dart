@@ -15,7 +15,8 @@ class Doll extends OnlineObject {
   Account? account;
   Stage? _stage, spawnStage;
   Sprite? _sprite;
-  String? message, _ability;
+  String message = '';
+  String? _ability;
   DollCustomization? _customization;
   int _poisonCycle = 0;
 
@@ -226,8 +227,8 @@ class Doll extends OnlineObject {
     internal['difficulty'] = difficulty;
   }
 
-  String? get displayName {
-    if (overheadText != null) return overheadText;
+  String get displayName {
+    if (overheadText != null) return overheadText ?? '';
     if (playerPet) return '';
 
     var result = internal['display'] != null
