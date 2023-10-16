@@ -229,10 +229,6 @@ Future<Map<Point<int>, int>> newCollisionMap(
 }
 
 Future<ResourceManager> newPostgresResourceManager(String table) async {
-  // FIXME: I need to use a new database library. This is a temporary hack just
-  // to get the project running again locally.
-  return newMockResourceManager();
-
   await (await postgresConnection)
       .execute('CREATE SCHEMA IF NOT EXISTS tables');
 

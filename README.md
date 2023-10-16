@@ -1,8 +1,12 @@
-~~This project requires a PostgreSQL database.~~
-
-I need to update database drivers. The current code is using a mock database.
+This project uses AngularDart, which unfortunately has been abandoned by Google, so it is stuck using Dart 2.10.5 unless
+`package:ngDart`, the seemingly also abandoned fork of `package:angular`, is updated to be compatible a newer version of
+Webdev.
 
 **Setup**
+
+This project requires a PostgreSQL 9.5.25, which can be found at here:
+https://www.enterprisedb.com/downloads/postgres-postgresql-downloads.
+PostgreSQL 10+ depreciates MD5, so no newer version can be used until I'm able to upgrade to Dart.
 
 To get the correct version of Dart and Webdev (use an admin terminal):
 1. Run `choco install dart-sdk --version 2.10.5 --allow-downgrade --force`
@@ -13,7 +17,8 @@ To build and run the application:
 2. Run `webdev build` to build the project.
 3. Run `dart bin/main.dart` to start the server.
 
-Be sure to set the correct host in config.dart and secrets in secret/secret.yaml!
+Be sure to set the correct host in config.dart and secrets in secret/secret.yaml! For debug environments, the database
+username and password are stored in config.dart.
 
 **Debugging**
 
