@@ -11,7 +11,7 @@ import 'package:towerclimbonline/util.dart';
     directives: [coreDirectives, formDirectives],
     templateUrl: 'login_component.html')
 class LoginComponent {
-  String? username = '', password = '', captchaResponse = '';
+  String username = '', password = '', captchaResponse = '';
   bool showPassword = false, newAccount = false, loginDisabled = false;
   int? _players;
 
@@ -27,7 +27,7 @@ class LoginComponent {
           window.localStorage.remove(ClientGlobals.preventLoginCookie);
         else {
           username = list[1];
-          password = window.localStorage.remove(cookies[0]);
+          password = window.localStorage.remove(cookies[0]) ?? '';
         }
 
         until(() => ready).then((result) {

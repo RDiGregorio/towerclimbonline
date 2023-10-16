@@ -3,9 +3,6 @@ name: towerclimbonline
 environment:
   sdk: '^3.1.3'
 
-# ngdart and ngforms are no longer compatible with webdev
-# dart 3 migration might be impossible
-
 dependencies:
   ngdart: any
   ngforms: any
