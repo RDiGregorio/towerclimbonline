@@ -1,5 +1,8 @@
 **This project was originally written for Dart 1. I'm currently in the process of porting it to Dart 3.**
 
+Some components have been commented out to get this to compile. However, there are too many runtime type errors to
+reasonably port this. Just sticking with Dart 2 should be fine.
+
 ~~This project requires a PostgreSQL database.~~
 
 I need to update database drivers. The current code is using a mock database.

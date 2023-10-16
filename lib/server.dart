@@ -112,12 +112,15 @@ Stream<WebSocket> getWebSockets(int port) async* {
                 Logger.root.severe('$trace');
                 return null;
               })
-            : null) as FutureOr<WebSocket> Function(), onError: (error, trace) {
+            : null), onError: (error, trace) {
       Logger.root.severe('$error');
       Logger.root.severe('$trace');
     });
 
-    yield socket;
+    // FIXME: this is a temp crutch
+    // don't go to production with this null check!
+
+    yield socket!;
   }
 
   if (!ServerGlobals.shuttingDown)
@@ -318,7 +321,7 @@ void _host(WebSocket socket, Wrapper<ObservableMap> function(WebSocket socket),
     });
 
     Future(() async {
-      await for (String value in socket as Stream<String>)
+      await for (String value in socket)
         runZoned(() async {
           var list = json.decode(value);
 
