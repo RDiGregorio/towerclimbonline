@@ -24,5 +24,9 @@ dependencies:
 
 dev_dependencies:
   test: any
-  build_runner: any
-  build_web_compilers: any
+  build_runner: ^2.4.2
+  build_web_compilers: ^4.0.3
+  build_daemon: ^4.0.0
+
+dependency_overrides:
+  build_modules: ^5.0.0

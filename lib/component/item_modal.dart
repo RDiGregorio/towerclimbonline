@@ -12,7 +12,7 @@ import 'package:towerclimbonline/util.dart';
     selector: 'item-modal',
     directives: [coreDirectives, formDirectives],
     templateUrl: 'item_modal.html',
-    changeDetection: ChangeDetectionStrategy.OnPush)
+    changeDetection: ChangeDetectionStrategy.onPush)
 class ItemModal implements OnDestroy {
   // The modals with search inputs are: action, item, crafting, and trade.
 

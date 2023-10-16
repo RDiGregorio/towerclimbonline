@@ -7,7 +7,7 @@ import 'package:towerclimbonline/util.dart';
     selector: 'action-modal',
     directives: [coreDirectives, formDirectives],
     templateUrl: 'action_modal.html',
-    changeDetection: ChangeDetectionStrategy.OnPush)
+    changeDetection: ChangeDetectionStrategy.onPush)
 class ActionModal {
   List<Item> _sortedItems = [];
 

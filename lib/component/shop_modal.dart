@@ -10,7 +10,7 @@ import 'package:towerclimbonline/util.dart';
     selector: 'shop-modal',
     directives: [coreDirectives, formDirectives],
     templateUrl: 'shop_modal.html',
-    changeDetection: ChangeDetectionStrategy.OnPush)
+    changeDetection: ChangeDetectionStrategy.onPush)
 class ShopModal implements OnDestroy {
   List<Item> sortedItems = [];
   String? filter, searchInput = '';

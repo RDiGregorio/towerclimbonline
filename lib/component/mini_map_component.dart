@@ -9,7 +9,7 @@ import 'package:towerclimbonline/util.dart';
     selector: 'mini-map-component',
     directives: [coreDirectives, formDirectives],
     templateUrl: 'mini_map_component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush)
+    changeDetection: ChangeDetectionStrategy.onPush)
 class MiniMapComponent {
   final ChangeDetectorRef _changeDetectorRef;
 

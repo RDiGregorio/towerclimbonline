@@ -12,7 +12,7 @@ import 'package:towerclimbonline/util.dart';
     selector: 'console-component',
     directives: [coreDirectives, formDirectives],
     templateUrl: 'console_component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush)
+    changeDetection: ChangeDetectionStrategy.onPush)
 class ConsoleComponent {
   RegExp _timePattern = RegExp(r'\d+:\d+:\d+'),
       _accurateTimePattern = RegExp(r'\d+:\d+:\d+.\d+'),

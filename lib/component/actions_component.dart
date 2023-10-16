@@ -12,7 +12,7 @@ import 'package:towerclimbonline/util.dart';
     selector: 'actions-component',
     directives: [coreDirectives, formDirectives, MiniMapComponent],
     templateUrl: 'actions_component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush)
+    changeDetection: ChangeDetectionStrategy.onPush)
 class ActionsComponent {
   bool showMenu = false;
   final Map<String, String> eraserStyle = {};

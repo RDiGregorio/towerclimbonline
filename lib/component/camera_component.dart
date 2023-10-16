@@ -14,7 +14,7 @@ import 'package:towerclimbonline/util.dart';
     selector: 'camera-component',
     directives: [coreDirectives, formDirectives],
     templateUrl: 'camera_component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush)
+    changeDetection: ChangeDetectionStrategy.onPush)
 class CameraComponent {
   final Set<String> terrain = Set();
 
