@@ -28,9 +28,9 @@ class CustomizeModal {
     }
   }
 
-  Doll? get doll => ClientGlobals.session!.doll;
+  Doll get doll => ClientGlobals.session!.doll!;
 
-  bool get female => doll!.customization!.gender == 'female';
+  bool get female => doll.customization!.gender == 'female';
 
-  bool get male => doll!.customization!.gender == 'male';
+  bool get male => doll.customization!.gender == 'male';
 }

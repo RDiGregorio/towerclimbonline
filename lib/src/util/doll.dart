@@ -169,13 +169,13 @@ class Doll extends OnlineObject {
         : stage!.moveDoll(this, point);
   }
 
-  DollCustomization? get customization {
+  DollCustomization get customization {
     if (['human', 'newbie shop', 'random shop'].contains(infoName)) {
       if (_customization == null)
         _customization =
             json.decode(randomHumanJson(id), reviver: mapWrapperDecoder);
 
-      return _customization;
+      return _customization!;
     }
 
     if (infoName == 'stacy') {
@@ -184,7 +184,7 @@ class Doll extends OnlineObject {
             '{"_t":"DollCustomization","id":"30ee-173e3ea286b-92360956","_override":"DollCustomization","hair":{"_t":"CustomizationLayer","id":"30ef-173e3ea286b-84d3519d","_override":"CustomizationLayer","type":"1","h":69,"s":360,"l":360,"c":98},"gender":"female","base":{"_t":"CustomizationLayer","id":"30f0-173e3ea286b-882a9256","_override":"CustomizationLayer","type":"0","h":0,"s":100,"l":100,"c":100},"back":{"_t":"CustomizationLayer","id":"30f1-173e3ea286b-cb3becae","_override":"CustomizationLayer","type":"1","h":69,"s":360,"l":360,"c":98},"bottom":{"_t":"CustomizationLayer","id":"30f2-173e3ea286b-a4bd5841","_override":"CustomizationLayer","type":"0","h":200,"s":100,"l":0,"c":100},"eyes":{"_t":"CustomizationLayer","id":"30f3-173e3ea286b-1be09971","_override":"CustomizationLayer","type":"0","h":200,"s":100,"l":100,"c":100},"face":{"_t":"CustomizationLayer","id":"30f4-173e3ea286b-de109ddd","_override":"CustomizationLayer","type":"1","h":0,"s":100,"l":100,"c":100},"shoes":{"_t":"CustomizationLayer","id":"30f5-173e3ea286b-c8bd9815","_override":"CustomizationLayer","type":"2","h":132,"s":0,"l":360,"c":360},"top":{"_t":"CustomizationLayer","id":"30f6-173e3ea286b-c953ff2f","_override":"CustomizationLayer","type":"2","h":320,"s":143,"l":112,"c":100}}',
             reviver: mapWrapperDecoder);
 
-      return _customization;
+      return _customization!;
     }
 
     if (infoName == 'chad' || infoName == 'giga chad') {
@@ -193,7 +193,7 @@ class Doll extends OnlineObject {
             '{"_t":"DollCustomization","id":"1a88-173da0fcf52-5476f491","_override":"DollCustomization","hair":{"_t":"CustomizationLayer","id":"1a89-173da0fcf53-bb244086","_override":"CustomizationLayer","type":"0","h":37,"s":68,"l":115,"c":100},"top":{"_t":"CustomizationLayer","id":"1a90-173da0fcf54-39ea616f","_override":"CustomizationLayer","type":"3","h":282,"s":78,"l":170,"c":122},"gender":"male","base":{"_t":"CustomizationLayer","id":"1a8a-173da0fcf53-db9f76ed","_override":"CustomizationLayer","type":"0","h":0,"s":100,"l":100,"c":100},"back":{"_t":"CustomizationLayer","id":"1a8b-173da0fcf53-46e906d2","_override":"CustomizationLayer","type":"0","h":37,"s":68,"l":115,"c":100},"bottom":{"_t":"CustomizationLayer","id":"1a8c-173da0fcf53-22e7c039","_override":"CustomizationLayer","type":"2","h":245,"s":10,"l":360,"c":282},"eyes":{"_t":"CustomizationLayer","id":"1a8d-173da0fcf53-1a305c00","_override":"CustomizationLayer","type":"0","h":119,"s":98,"l":100,"c":100},"face":{"_t":"CustomizationLayer","id":"1a8e-173da0fcf53-e1929718","_override":"CustomizationLayer","type":"0","h":0,"s":100,"l":100,"c":100},"shoes":{"_t":"CustomizationLayer","id":"1a8f-173da0fcf54-d04e083e","_override":"CustomizationLayer","type":"0","h":0,"s":100,"l":100,"c":100}}',
             reviver: mapWrapperDecoder);
 
-      return _customization;
+      return _customization!;
     }
 
     if (infoName == 'elyvilon') {
@@ -202,7 +202,7 @@ class Doll extends OnlineObject {
             '{"_t":"DollCustomization","id":"14049-1719c7a87ed-858f36e5","_override":"DollCustomization","hair":{"_t":"CustomizationLayer","id":"1404c-1719c7a87ed-eb4d9d82","_override":"CustomizationLayer","type":"1","h":190,"s":0,"l":360,"c":300},"gender":"female","base":{"_t":"CustomizationLayer","id":"1404a-1719c7a87ed-9b637c0a","_override":"CustomizationLayer","type":"0","h":0,"s":76,"l":79,"c":190},"back":{"_t":"CustomizationLayer","id":"1404b-1719c7a87ed-a1d7a70e","_override":"CustomizationLayer","type":"1","h":190,"s":0,"l":360,"c":300},"bottom":{"_t":"CustomizationLayer","id":"1404d-1719c7a87ed-44def187","_override":"CustomizationLayer","type":"0","h":200,"s":0,"l":0,"c":100},"eyes":{"_t":"CustomizationLayer","id":"1404e-1719c7a87ed-ebecf515","_override":"CustomizationLayer","type":"0","h":200,"s":100,"l":100,"c":100},"face":{"_t":"CustomizationLayer","id":"1404f-1719c7a87ed-7d46a65d","_override":"CustomizationLayer","type":"1","h":0,"s":100,"l":100,"c":100},"shoes":{"_t":"CustomizationLayer","id":"14050-1719c7a87ed-e7000da6","_override":"CustomizationLayer","type":"0","h":0,"s":0,"l":100,"c":100},"top":{"_t":"CustomizationLayer","id":"14051-1719c7a87ed-2451bda","_override":"CustomizationLayer","type":"1","h":183,"s":0,"l":177,"c":100}}',
             reviver: mapWrapperDecoder);
 
-      return _customization;
+      return _customization!;
     }
 
     return internal['cust'];
