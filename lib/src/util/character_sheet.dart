@@ -18,7 +18,7 @@ class CharacterSheet extends OnlineObject {
     resetAttributes(10);
   }
 
-  int? get agility => internal['agi'];
+  int get agility => internal['agi'] ?? 0;
 
   int get agilityBuffs => max<int>(0, internal['agi buff'] ?? 0);
 
@@ -29,15 +29,15 @@ class CharacterSheet extends OnlineObject {
   Iterable<int?> get attributes =>
       [agility, strength, dexterity, intelligence, vitality];
 
-  Stat? get combat => internal['combat'];
+  Stat get combat => internal['combat'];
 
-  Stat? get cooking => internal['cooking'];
+  Stat get cooking => internal['cooking'];
 
-  Stat? get crafting => internal['crafting'];
+  Stat get crafting => internal['crafting'];
 
-  Stat? get crime => internal['crime'];
+  Stat get crime => internal['crime'];
 
-  int? get dexterity => internal['dex'];
+  int get dexterity => internal['dex'];
 
   int get dexterityBuffs => max<int>(0, internal['dex buff'] ?? 0);
 
@@ -45,7 +45,7 @@ class CharacterSheet extends OnlineObject {
     internal['dex buff'] = value;
   }
 
-  Stat? get fishing => internal['fishing'];
+  Stat get fishing => internal['fishing'];
 
   int get healthBuffs => max<int>(0, internal['hp buff'] ?? 0);
 
@@ -61,11 +61,11 @@ class CharacterSheet extends OnlineObject {
     internal['int buff'] = value;
   }
 
-  Stat? get metalworking => internal['metalworking'];
+  Stat get metalworking => internal['metalworking'];
 
-  Stat? get mining => internal['mining'];
+  Stat get mining => internal['mining'];
 
-  Stat? get slaying => internal['slay'];
+  Stat get slaying => internal['slay'];
 
   int get spentPoints =>
       attributes.fold(0, (result, attribute) => result + attribute!);
@@ -88,15 +88,16 @@ class CharacterSheet extends OnlineObject {
 
   String get totalExperienceText => formatBigInt(totalExperience);
 
-  int get totalLevel => stats.fold(0, (result, stat) => result + stat.level as int);
+  int get totalLevel =>
+      stats.fold(0, (result, stat) => result + stat.level as int);
 
-  int get totalPoints => 50 + triangleNumber(combat!.level);
+  int get totalPoints => 50 + triangleNumber(combat.level);
 
   int get unspentPoints => max(0, totalPoints - spentPoints);
 
-  int? get vitality => internal['vit'];
+  int get vitality => internal['vit'];
 
-  Stat? get woodcutting => internal['woodcutting'];
+  Stat get woodcutting => internal['woodcutting'];
 
   void gainStat(String stat, [int amount = 1]) {
     amount = min(amount, unspentPoints);
