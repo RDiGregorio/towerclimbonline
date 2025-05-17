@@ -4,9 +4,7 @@ Webdev.
 
 **Setup**
 
-This project requires a PostgreSQL 9.5.25, which can be found at here:
-https://www.enterprisedb.com/downloads/postgres-postgresql-downloads.
-PostgreSQL 10+ depreciates MD5, so no newer version can be used until I'm able to upgrade to Dart.
+This project requires a PostgreSQL 9.5.25 (https://get.enterprisedb.com/postgresql/postgresql-9.5.25-1-windows-x64.exe). PostgreSQL 10+ depreciates MD5, so no newer version can be used until I'm able to upgrade to Dart.
 
 To get the correct version of Dart and Webdev (use an admin terminal):
 1. Run `choco install dart-sdk --version 2.10.5 --allow-downgrade --force`
